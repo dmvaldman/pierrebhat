@@ -1,0 +1,782 @@
+digraph G {
+    ranksep=1;
+    nodesep=0.5;
+    subgraph cluster___/Auto-GPT/data_ingestion_py {
+        label="../Auto-GPT/data_ingestion.py";
+        "../Auto-GPT/data_ingestion.py" [shape=box, color=black];
+        "../Auto-GPT/data_ingestion.py" -> "autogpt.commands.file_operations.ingest_file" [style=dotted];
+        "../Auto-GPT/data_ingestion.py" -> "autogpt.commands.file_operations.search_files" [style=dotted];
+        "../Auto-GPT/data_ingestion.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/data_ingestion.py" -> "autogpt.memory.get_memory" [style=dotted];
+        "../Auto-GPT/data_ingestion.py" -> "configure_logging" [label="function", color=green];
+        "../Auto-GPT/data_ingestion.py" -> "ingest_directory" [label="function", color=green];
+        "../Auto-GPT/data_ingestion.py" -> "main" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/tests_py {
+        label="../Auto-GPT/tests.py";
+        "../Auto-GPT/tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests.py" -> "coverage" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/main_py {
+        label="../Auto-GPT/main.py";
+        "../Auto-GPT/main.py" [shape=box, color=black];
+        "../Auto-GPT/main.py" -> "autogpt.main" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/benchmark/__init___py {
+        label="../Auto-GPT/benchmark/__init__.py";
+        "../Auto-GPT/benchmark/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/benchmark/benchmark_entrepeneur_gpt_with_difficult_user_py {
+        label="../Auto-GPT/benchmark/benchmark_entrepeneur_gpt_with_difficult_user.py";
+        "../Auto-GPT/benchmark/benchmark_entrepeneur_gpt_with_difficult_user.py" [shape=box, color=black];
+        "../Auto-GPT/benchmark/benchmark_entrepeneur_gpt_with_difficult_user.py" -> "benchmark_entrepeneur_gpt_with_difficult_user" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/tests/test_token_counter_py {
+        label="../Auto-GPT/tests/test_token_counter.py";
+        "../Auto-GPT/tests/test_token_counter.py" [shape=box, color=black];
+        "../Auto-GPT/tests/test_token_counter.py" -> "tests.context" [style=dotted];
+        "../Auto-GPT/tests/test_token_counter.py" -> "autogpt.token_counter.count_message_tokens" [style=dotted];
+        "../Auto-GPT/tests/test_token_counter.py" -> "autogpt.token_counter.count_string_tokens" [style=dotted];
+        "../Auto-GPT/tests/test_token_counter.py" -> "TestTokenCounter" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/smoke_test_py {
+        label="../Auto-GPT/tests/smoke_test.py";
+        "../Auto-GPT/tests/smoke_test.py" [shape=box, color=black];
+        "../Auto-GPT/tests/smoke_test.py" -> "pytest" [style=dotted];
+        "../Auto-GPT/tests/smoke_test.py" -> "autogpt.commands.file_operations.delete_file" [style=dotted];
+        "../Auto-GPT/tests/smoke_test.py" -> "autogpt.commands.file_operations.read_file" [style=dotted];
+        "../Auto-GPT/tests/smoke_test.py" -> "test_write_file" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/tests/local_cache_test_py {
+        label="../Auto-GPT/tests/local_cache_test.py";
+        "../Auto-GPT/tests/local_cache_test.py" [shape=box, color=black];
+        "../Auto-GPT/tests/local_cache_test.py" -> "pytest" [style=dotted];
+        "../Auto-GPT/tests/local_cache_test.py" -> "autogpt.memory.local.LocalCache" [style=dotted];
+        "../Auto-GPT/tests/local_cache_test.py" -> "TestLocalCache" [label="class", color=blue];
+        "../Auto-GPT/tests/local_cache_test.py" -> "mock_config" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/tests/__init___py {
+        label="../Auto-GPT/tests/__init__.py";
+        "../Auto-GPT/tests/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/tests/browse_tests_py {
+        label="../Auto-GPT/tests/browse_tests.py";
+        "../Auto-GPT/tests/browse_tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests/browse_tests.py" -> "bs4.BeautifulSoup" [style=dotted];
+        "../Auto-GPT/tests/browse_tests.py" -> "browse.extract_hyperlinks" [style=dotted];
+        "../Auto-GPT/tests/browse_tests.py" -> "TestBrowseLinks" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/test_prompt_generator_py {
+        label="../Auto-GPT/tests/test_prompt_generator.py";
+        "../Auto-GPT/tests/test_prompt_generator.py" [shape=box, color=black];
+        "../Auto-GPT/tests/test_prompt_generator.py" -> "autogpt.promptgenerator.PromptGenerator" [style=dotted];
+        "../Auto-GPT/tests/test_prompt_generator.py" -> "TestPromptGenerator" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/context_py {
+        label="../Auto-GPT/tests/context.py";
+        "../Auto-GPT/tests/context.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/tests/test_config_py {
+        label="../Auto-GPT/tests/test_config.py";
+        "../Auto-GPT/tests/test_config.py" [shape=box, color=black];
+        "../Auto-GPT/tests/test_config.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/tests/test_config.py" -> "TestConfig" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/test_json_parser_py {
+        label="../Auto-GPT/tests/test_json_parser.py";
+        "../Auto-GPT/tests/test_json_parser.py" [shape=box, color=black];
+        "../Auto-GPT/tests/test_json_parser.py" -> "tests.context" [style=dotted];
+        "../Auto-GPT/tests/test_json_parser.py" -> "autogpt.json_fixes.parsing.fix_and_parse_json" [style=dotted];
+        "../Auto-GPT/tests/test_json_parser.py" -> "TestParseJson" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/milvus_memory_test_py {
+        label="../Auto-GPT/tests/milvus_memory_test.py";
+        "../Auto-GPT/tests/milvus_memory_test.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/tests/unit/test_browse_scrape_text_py {
+        label="../Auto-GPT/tests/unit/test_browse_scrape_text.py";
+        "../Auto-GPT/tests/unit/test_browse_scrape_text.py" [shape=box, color=black];
+        "../Auto-GPT/tests/unit/test_browse_scrape_text.py" -> "autogpt.commands.web_requests.scrape_text" [style=dotted];
+        "../Auto-GPT/tests/unit/test_browse_scrape_text.py" -> "TestScrapeText" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/unit/test_browse_scrape_links_py {
+        label="../Auto-GPT/tests/unit/test_browse_scrape_links.py";
+        "../Auto-GPT/tests/unit/test_browse_scrape_links.py" [shape=box, color=black];
+        "../Auto-GPT/tests/unit/test_browse_scrape_links.py" -> "pytest" [style=dotted];
+        "../Auto-GPT/tests/unit/test_browse_scrape_links.py" -> "autogpt.commands.web_requests.scrape_links" [style=dotted];
+        "../Auto-GPT/tests/unit/test_browse_scrape_links.py" -> "TestScrapeLinks" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/unit/json_tests_py {
+        label="../Auto-GPT/tests/unit/json_tests.py";
+        "../Auto-GPT/tests/unit/json_tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests/unit/json_tests.py" -> "autogpt.json_parser.fix_and_parse_json" [style=dotted];
+        "../Auto-GPT/tests/unit/json_tests.py" -> "TestParseJson" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/unit/test_chat_py {
+        label="../Auto-GPT/tests/unit/test_chat.py";
+        "../Auto-GPT/tests/unit/test_chat.py" [shape=box, color=black];
+        "../Auto-GPT/tests/unit/test_chat.py" -> "autogpt.chat.create_chat_message" [style=dotted];
+        "../Auto-GPT/tests/unit/test_chat.py" -> "autogpt.chat.generate_context" [style=dotted];
+        "../Auto-GPT/tests/unit/test_chat.py" -> "TestChat" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/unit/test_commands_py {
+        label="../Auto-GPT/tests/unit/test_commands.py";
+        "../Auto-GPT/tests/unit/test_commands.py" [shape=box, color=black];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "pytest" [style=dotted];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "autogpt.agent.agent_manager" [style=dotted];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "autogpt.app.execute_command" [style=dotted];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "autogpt.app.list_agents" [style=dotted];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "autogpt.app.start_agent" [style=dotted];
+        "../Auto-GPT/tests/unit/test_commands.py" -> "test_make_agent" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/tests/integration/milvus_memory_tests_py {
+        label="../Auto-GPT/tests/integration/milvus_memory_tests.py";
+        "../Auto-GPT/tests/integration/milvus_memory_tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests/integration/milvus_memory_tests.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/tests/integration/milvus_memory_tests.py" -> "autogpt.memory.milvus.MilvusMemory" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/tests/integration/memory_tests_py {
+        label="../Auto-GPT/tests/integration/memory_tests.py";
+        "../Auto-GPT/tests/integration/memory_tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests/integration/memory_tests.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/tests/integration/memory_tests.py" -> "autogpt.memory.local.LocalCache" [style=dotted];
+        "../Auto-GPT/tests/integration/memory_tests.py" -> "TestLocalCache" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/tests/integration/weaviate_memory_tests_py {
+        label="../Auto-GPT/tests/integration/weaviate_memory_tests.py";
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" [shape=box, color=black];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "weaviate.Client" [style=dotted];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "weaviate.util.get_valid_uuid" [style=dotted];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "autogpt.memory.base.get_ada_embedding" [style=dotted];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "autogpt.memory.weaviate.WeaviateMemory" [style=dotted];
+        "../Auto-GPT/tests/integration/weaviate_memory_tests.py" -> "TestWeaviateMemory" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/token_counter_py {
+        label="../Auto-GPT/autogpt/token_counter.py";
+        "../Auto-GPT/autogpt/token_counter.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/token_counter.py" -> "tiktoken" [style=dotted];
+        "../Auto-GPT/autogpt/token_counter.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/token_counter.py" -> "count_message_tokens" [label="function", color=green];
+        "../Auto-GPT/autogpt/token_counter.py" -> "count_string_tokens" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/__init___py {
+        label="../Auto-GPT/autogpt/__init__.py";
+        "../Auto-GPT/autogpt/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/setup_py {
+        label="../Auto-GPT/autogpt/setup.py";
+        "../Auto-GPT/autogpt/setup.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/setup.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/setup.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/setup.py" -> "autogpt.utils" [style=dotted];
+        "../Auto-GPT/autogpt/setup.py" -> "autogpt.config.ai_config.AIConfig" [style=dotted];
+        "../Auto-GPT/autogpt/setup.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/setup.py" -> "prompt_user" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/chat_py {
+        label="../Auto-GPT/autogpt/chat.py";
+        "../Auto-GPT/autogpt/chat.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/chat.py" -> "openai.error.RateLimitError" [style=dotted];
+        "../Auto-GPT/autogpt/chat.py" -> "autogpt.token_counter" [style=dotted];
+        "../Auto-GPT/autogpt/chat.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/chat.py" -> "autogpt.llm_utils.create_chat_completion" [style=dotted];
+        "../Auto-GPT/autogpt/chat.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/chat.py" -> "create_chat_message" [label="function", color=green];
+        "../Auto-GPT/autogpt/chat.py" -> "generate_context" [label="function", color=green];
+        "../Auto-GPT/autogpt/chat.py" -> "chat_with_ai" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/cli_py {
+        label="../Auto-GPT/autogpt/cli.py";
+        "../Auto-GPT/autogpt/cli.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/cli.py" -> "click" [style=dotted];
+        "../Auto-GPT/autogpt/cli.py" -> "main" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/llm_utils_py {
+        label="../Auto-GPT/autogpt/llm_utils.py";
+        "../Auto-GPT/autogpt/llm_utils.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "openai" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "openai.error.APIError" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "openai.error.RateLimitError" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "call_ai_function" [label="function", color=green];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "create_chat_completion" [label="function", color=green];
+        "../Auto-GPT/autogpt/llm_utils.py" -> "create_embedding_with_ada" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/utils_py {
+        label="../Auto-GPT/autogpt/utils.py";
+        "../Auto-GPT/autogpt/utils.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/utils.py" -> "yaml" [style=dotted];
+        "../Auto-GPT/autogpt/utils.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/utils.py" -> "clean_input" [label="function", color=green];
+        "../Auto-GPT/autogpt/utils.py" -> "validate_yaml_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/utils.py" -> "readable_file_size" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/logs_py {
+        label="../Auto-GPT/autogpt/logs.py";
+        "../Auto-GPT/autogpt/logs.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/logs.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/logs.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/logs.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/logs.py" -> "autogpt.config.Singleton" [style=dotted];
+        "../Auto-GPT/autogpt/logs.py" -> "autogpt.speech.say_text" [style=dotted];
+        "../Auto-GPT/autogpt/logs.py" -> "Logger" [label="class", color=blue];
+        "../Auto-GPT/autogpt/logs.py" -> "TypingConsoleHandler" [label="class", color=blue];
+        "../Auto-GPT/autogpt/logs.py" -> "ConsoleHandler" [label="class", color=blue];
+        "../Auto-GPT/autogpt/logs.py" -> "AutoGptFormatter" [label="class", color=blue];
+        "../Auto-GPT/autogpt/logs.py" -> "remove_color_codes" [label="function", color=green];
+        "../Auto-GPT/autogpt/logs.py" -> "print_assistant_thoughts" [label="function", color=green];
+        "../Auto-GPT/autogpt/logs.py" -> "print_assistant_thoughts" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/app_py {
+        label="../Auto-GPT/autogpt/app.py";
+        "../Auto-GPT/autogpt/app.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.agent.agent_manager.AgentManager" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.audio_text.read_audio_from_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.evaluate_code.evaluate_code" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.execute_code.execute_python_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.execute_code.execute_shell" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.execute_code.execute_shell_popen" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.append_to_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.delete_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.download_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.read_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.search_files" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.file_operations.write_to_file" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.git_operations.clone_repository" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.google_search.google_official_search" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.google_search.google_search" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.image_gen.generate_image" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.improve_code.improve_code" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.twitter.send_tweet" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.web_requests.scrape_links" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.web_requests.scrape_text" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.web_selenium.browse_website" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.commands.write_tests.write_tests" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.json_fixes.parsing.fix_and_parse_json" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.memory.get_memory" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.processing.text.summarize_text" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "autogpt.speech.say_text" [style=dotted];
+        "../Auto-GPT/autogpt/app.py" -> "is_valid_int" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "get_command" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "map_command_synonyms" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "execute_command" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "get_text_summary" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "get_hyperlinks" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "shutdown" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "start_agent" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "message_agent" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "list_agents" [label="function", color=green];
+        "../Auto-GPT/autogpt/app.py" -> "delete_agent" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/prompt_py {
+        label="../Auto-GPT/autogpt/prompt.py";
+        "../Auto-GPT/autogpt/prompt.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/prompt.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.config.ai_config.AIConfig" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.config.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.promptgenerator.PromptGenerator" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.setup.prompt_user" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "autogpt.utils.clean_input" [style=dotted];
+        "../Auto-GPT/autogpt/prompt.py" -> "get_prompt" [label="function", color=green];
+        "../Auto-GPT/autogpt/prompt.py" -> "construct_prompt" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/workspace_py {
+        label="../Auto-GPT/autogpt/workspace.py";
+        "../Auto-GPT/autogpt/workspace.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/workspace.py" -> "path_in_workspace" [label="function", color=green];
+        "../Auto-GPT/autogpt/workspace.py" -> "safe_path_join" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/configurator_py {
+        label="../Auto-GPT/autogpt/configurator.py";
+        "../Auto-GPT/autogpt/configurator.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/configurator.py" -> "click" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "colorama.Back" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "autogpt.utils" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "autogpt.memory.get_supported_memory_backends" [style=dotted];
+        "../Auto-GPT/autogpt/configurator.py" -> "create_config" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/spinner_py {
+        label="../Auto-GPT/autogpt/spinner.py";
+        "../Auto-GPT/autogpt/spinner.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/spinner.py" -> "Spinner" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/promptgenerator_py {
+        label="../Auto-GPT/autogpt/promptgenerator.py";
+        "../Auto-GPT/autogpt/promptgenerator.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/promptgenerator.py" -> "PromptGenerator" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/__main___py {
+        label="../Auto-GPT/autogpt/__main__.py";
+        "../Auto-GPT/autogpt/__main__.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/__main__.py" -> "autogpt.cli" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_validation/validate_json_py {
+        label="../Auto-GPT/autogpt/json_validation/validate_json.py";
+        "../Auto-GPT/autogpt/json_validation/validate_json.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_validation/validate_json.py" -> "jsonschema.Draft7Validator" [style=dotted];
+        "../Auto-GPT/autogpt/json_validation/validate_json.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_validation/validate_json.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/json_validation/validate_json.py" -> "validate_json" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/milvus_py {
+        label="../Auto-GPT/autogpt/memory/milvus.py";
+        "../Auto-GPT/autogpt/memory/milvus.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "pymilvus.Collection" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "pymilvus.CollectionSchema" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "pymilvus.DataType" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "pymilvus.FieldSchema" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "pymilvus.connections" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "autogpt.memory.base.get_ada_embedding" [style=dotted];
+        "../Auto-GPT/autogpt/memory/milvus.py" -> "MilvusMemory" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/pinecone_py {
+        label="../Auto-GPT/autogpt/memory/pinecone.py";
+        "../Auto-GPT/autogpt/memory/pinecone.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "pinecone" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "autogpt.llm_utils.create_embedding_with_ada" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/pinecone.py" -> "PineconeMemory" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/local_py {
+        label="../Auto-GPT/autogpt/memory/local.py";
+        "../Auto-GPT/autogpt/memory/local.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/local.py" -> "numpy" [style=dotted];
+        "../Auto-GPT/autogpt/memory/local.py" -> "orjson" [style=dotted];
+        "../Auto-GPT/autogpt/memory/local.py" -> "autogpt.llm_utils.create_embedding_with_ada" [style=dotted];
+        "../Auto-GPT/autogpt/memory/local.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/local.py" -> "CacheContent" [label="class", color=blue];
+        "../Auto-GPT/autogpt/memory/local.py" -> "LocalCache" [label="class", color=blue];
+        "../Auto-GPT/autogpt/memory/local.py" -> "create_default_embeddings" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/__init___py {
+        label="../Auto-GPT/autogpt/memory/__init__.py";
+        "../Auto-GPT/autogpt/memory/__init__.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/__init__.py" -> "autogpt.memory.local.LocalCache" [style=dotted];
+        "../Auto-GPT/autogpt/memory/__init__.py" -> "autogpt.memory.no_memory.NoMemory" [style=dotted];
+        "../Auto-GPT/autogpt/memory/__init__.py" -> "get_memory" [label="function", color=green];
+        "../Auto-GPT/autogpt/memory/__init__.py" -> "get_supported_memory_backends" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/redismem_py {
+        label="../Auto-GPT/autogpt/memory/redismem.py";
+        "../Auto-GPT/autogpt/memory/redismem.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "numpy" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis.commands.search.field.TextField" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis.commands.search.field.VectorField" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis.commands.search.indexDefinition.IndexDefinition" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis.commands.search.indexDefinition.IndexType" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "redis.commands.search.query.Query" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "autogpt.llm_utils.create_embedding_with_ada" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/redismem.py" -> "RedisMemory" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/weaviate_py {
+        label="../Auto-GPT/autogpt/memory/weaviate.py";
+        "../Auto-GPT/autogpt/memory/weaviate.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "weaviate" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "weaviate.Client" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "weaviate.embedded.EmbeddedOptions" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "weaviate.util.generate_uuid5" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "autogpt.memory.base.get_ada_embedding" [style=dotted];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "WeaviateMemory" [label="class", color=blue];
+        "../Auto-GPT/autogpt/memory/weaviate.py" -> "default_schema" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/no_memory_py {
+        label="../Auto-GPT/autogpt/memory/no_memory.py";
+        "../Auto-GPT/autogpt/memory/no_memory.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/no_memory.py" -> "autogpt.memory.base.MemoryProviderSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/no_memory.py" -> "NoMemory" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/memory/base_py {
+        label="../Auto-GPT/autogpt/memory/base.py";
+        "../Auto-GPT/autogpt/memory/base.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/memory/base.py" -> "openai" [style=dotted];
+        "../Auto-GPT/autogpt/memory/base.py" -> "autogpt.config.AbstractSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/memory/base.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/memory/base.py" -> "MemoryProviderSingleton" [label="class", color=blue];
+        "../Auto-GPT/autogpt/memory/base.py" -> "get_ada_embedding" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/config/config_py {
+        label="../Auto-GPT/autogpt/config/config.py";
+        "../Auto-GPT/autogpt/config/config.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/config/config.py" -> "openai" [style=dotted];
+        "../Auto-GPT/autogpt/config/config.py" -> "yaml" [style=dotted];
+        "../Auto-GPT/autogpt/config/config.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/config/config.py" -> "dotenv.load_dotenv" [style=dotted];
+        "../Auto-GPT/autogpt/config/config.py" -> "autogpt.config.singleton.Singleton" [style=dotted];
+        "../Auto-GPT/autogpt/config/config.py" -> "Config" [label="class", color=blue];
+        "../Auto-GPT/autogpt/config/config.py" -> "check_openai_api_key" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/config/__init___py {
+        label="../Auto-GPT/autogpt/config/__init__.py";
+        "../Auto-GPT/autogpt/config/__init__.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/config/__init__.py" -> "autogpt.config.ai_config.AIConfig" [style=dotted];
+        "../Auto-GPT/autogpt/config/__init__.py" -> "autogpt.config.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/config/__init__.py" -> "autogpt.config.config.check_openai_api_key" [style=dotted];
+        "../Auto-GPT/autogpt/config/__init__.py" -> "autogpt.config.singleton.AbstractSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/config/__init__.py" -> "autogpt.config.singleton.Singleton" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/config/ai_config_py {
+        label="../Auto-GPT/autogpt/config/ai_config.py";
+        "../Auto-GPT/autogpt/config/ai_config.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/config/ai_config.py" -> "yaml" [style=dotted];
+        "../Auto-GPT/autogpt/config/ai_config.py" -> "AIConfig" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/config/singleton_py {
+        label="../Auto-GPT/autogpt/config/singleton.py";
+        "../Auto-GPT/autogpt/config/singleton.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/config/singleton.py" -> "Singleton" [label="class", color=blue];
+        "../Auto-GPT/autogpt/config/singleton.py" -> "AbstractSingleton" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/processing/html_py {
+        label="../Auto-GPT/autogpt/processing/html.py";
+        "../Auto-GPT/autogpt/processing/html.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/processing/html.py" -> "bs4.BeautifulSoup" [style=dotted];
+        "../Auto-GPT/autogpt/processing/html.py" -> "extract_hyperlinks" [label="function", color=green];
+        "../Auto-GPT/autogpt/processing/html.py" -> "format_hyperlinks" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/processing/__init___py {
+        label="../Auto-GPT/autogpt/processing/__init__.py";
+        "../Auto-GPT/autogpt/processing/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/processing/text_py {
+        label="../Auto-GPT/autogpt/processing/text.py";
+        "../Auto-GPT/autogpt/processing/text.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/processing/text.py" -> "selenium.webdriver.remote.webdriver.WebDriver" [style=dotted];
+        "../Auto-GPT/autogpt/processing/text.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/processing/text.py" -> "autogpt.llm_utils.create_chat_completion" [style=dotted];
+        "../Auto-GPT/autogpt/processing/text.py" -> "autogpt.memory.get_memory" [style=dotted];
+        "../Auto-GPT/autogpt/processing/text.py" -> "split_text" [label="function", color=green];
+        "../Auto-GPT/autogpt/processing/text.py" -> "summarize_text" [label="function", color=green];
+        "../Auto-GPT/autogpt/processing/text.py" -> "scroll_to_percentage" [label="function", color=green];
+        "../Auto-GPT/autogpt/processing/text.py" -> "create_message" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/agent/__init___py {
+        label="../Auto-GPT/autogpt/agent/__init__.py";
+        "../Auto-GPT/autogpt/agent/__init__.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/agent/__init__.py" -> "autogpt.agent.agent.Agent" [style=dotted];
+        "../Auto-GPT/autogpt/agent/__init__.py" -> "autogpt.agent.agent_manager.AgentManager" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/agent/agent_manager_py {
+        label="../Auto-GPT/autogpt/agent/agent_manager.py";
+        "../Auto-GPT/autogpt/agent/agent_manager.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/agent/agent_manager.py" -> "autogpt.config.config.Singleton" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent_manager.py" -> "autogpt.llm_utils.create_chat_completion" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent_manager.py" -> "AgentManager" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/agent/agent_py {
+        label="../Auto-GPT/autogpt/agent/agent.py";
+        "../Auto-GPT/autogpt/agent/agent.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "colorama.Style" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.app.execute_command" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.app.get_command" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.chat.chat_with_ai" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.chat.create_chat_message" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.json_fixes.master_json_fix_method.fix_json_using_multiple_techniques" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.json_validation.validate_json.validate_json" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.logs.print_assistant_thoughts" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.speech.say_text" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.spinner.Spinner" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "autogpt.utils.clean_input" [style=dotted];
+        "../Auto-GPT/autogpt/agent/agent.py" -> "Agent" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/escaping_py {
+        label="../Auto-GPT/autogpt/json_fixes/escaping.py";
+        "../Auto-GPT/autogpt/json_fixes/escaping.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/escaping.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/escaping.py" -> "autogpt.json_fixes.utilities.extract_char_position" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/escaping.py" -> "fix_invalid_escape" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/parsing_py {
+        label="../Auto-GPT/autogpt/json_fixes/parsing.py";
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "regex.regex" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.json_fixes.auto_fix.fix_json" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.json_fixes.bracket_termination.balance_braces" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.json_fixes.escaping.fix_invalid_escape" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.json_fixes.missing_quotes.add_quotes_to_property_names" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "autogpt.speech.say_text" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "correct_json" [label="function", color=green];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "fix_and_parse_json" [label="function", color=green];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "try_ai_fix" [label="function", color=green];
+        "../Auto-GPT/autogpt/json_fixes/parsing.py" -> "attempt_to_fix_json_by_finding_outermost_brackets" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/auto_fix_py {
+        label="../Auto-GPT/autogpt/json_fixes/auto_fix.py";
+        "../Auto-GPT/autogpt/json_fixes/auto_fix.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/auto_fix.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/auto_fix.py" -> "autogpt.llm_utils.call_ai_function" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/auto_fix.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/auto_fix.py" -> "fix_json" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/missing_quotes_py {
+        label="../Auto-GPT/autogpt/json_fixes/missing_quotes.py";
+        "../Auto-GPT/autogpt/json_fixes/missing_quotes.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/missing_quotes.py" -> "add_quotes_to_property_names" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/__init___py {
+        label="../Auto-GPT/autogpt/json_fixes/__init__.py";
+        "../Auto-GPT/autogpt/json_fixes/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/bracket_termination_py {
+        label="../Auto-GPT/autogpt/json_fixes/bracket_termination.py";
+        "../Auto-GPT/autogpt/json_fixes/bracket_termination.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/bracket_termination.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/bracket_termination.py" -> "balance_braces" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/master_json_fix_method_py {
+        label="../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py";
+        "../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py" -> "autogpt.logs.logger" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py" -> "autogpt.speech.say_text" [style=dotted];
+        "../Auto-GPT/autogpt/json_fixes/master_json_fix_method.py" -> "fix_json_using_multiple_techniques" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/json_fixes/utilities_py {
+        label="../Auto-GPT/autogpt/json_fixes/utilities.py";
+        "../Auto-GPT/autogpt/json_fixes/utilities.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/json_fixes/utilities.py" -> "extract_char_position" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/macos_tts_py {
+        label="../Auto-GPT/autogpt/speech/macos_tts.py";
+        "../Auto-GPT/autogpt/speech/macos_tts.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/macos_tts.py" -> "autogpt.speech.base.VoiceBase" [style=dotted];
+        "../Auto-GPT/autogpt/speech/macos_tts.py" -> "MacOSTTS" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/say_py {
+        label="../Auto-GPT/autogpt/speech/say.py";
+        "../Auto-GPT/autogpt/speech/say.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/say.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/speech/say.py" -> "autogpt.speech.brian.BrianSpeech" [style=dotted];
+        "../Auto-GPT/autogpt/speech/say.py" -> "autogpt.speech.eleven_labs.ElevenLabsSpeech" [style=dotted];
+        "../Auto-GPT/autogpt/speech/say.py" -> "autogpt.speech.gtts.GTTSVoice" [style=dotted];
+        "../Auto-GPT/autogpt/speech/say.py" -> "autogpt.speech.macos_tts.MacOSTTS" [style=dotted];
+        "../Auto-GPT/autogpt/speech/say.py" -> "say_text" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/__init___py {
+        label="../Auto-GPT/autogpt/speech/__init__.py";
+        "../Auto-GPT/autogpt/speech/__init__.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/__init__.py" -> "autogpt.speech.say.say_text" [style=dotted];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/brian_py {
+        label="../Auto-GPT/autogpt/speech/brian.py";
+        "../Auto-GPT/autogpt/speech/brian.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/brian.py" -> "playsound.playsound" [style=dotted];
+        "../Auto-GPT/autogpt/speech/brian.py" -> "autogpt.speech.base.VoiceBase" [style=dotted];
+        "../Auto-GPT/autogpt/speech/brian.py" -> "BrianSpeech" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/base_py {
+        label="../Auto-GPT/autogpt/speech/base.py";
+        "../Auto-GPT/autogpt/speech/base.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/base.py" -> "autogpt.config.AbstractSingleton" [style=dotted];
+        "../Auto-GPT/autogpt/speech/base.py" -> "VoiceBase" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/eleven_labs_py {
+        label="../Auto-GPT/autogpt/speech/eleven_labs.py";
+        "../Auto-GPT/autogpt/speech/eleven_labs.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/eleven_labs.py" -> "playsound.playsound" [style=dotted];
+        "../Auto-GPT/autogpt/speech/eleven_labs.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/speech/eleven_labs.py" -> "autogpt.speech.base.VoiceBase" [style=dotted];
+        "../Auto-GPT/autogpt/speech/eleven_labs.py" -> "ElevenLabsSpeech" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/speech/gtts_py {
+        label="../Auto-GPT/autogpt/speech/gtts.py";
+        "../Auto-GPT/autogpt/speech/gtts.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/speech/gtts.py" -> "gtts" [style=dotted];
+        "../Auto-GPT/autogpt/speech/gtts.py" -> "playsound.playsound" [style=dotted];
+        "../Auto-GPT/autogpt/speech/gtts.py" -> "autogpt.speech.base.VoiceBase" [style=dotted];
+        "../Auto-GPT/autogpt/speech/gtts.py" -> "GTTSVoice" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/web_selenium_py {
+        label="../Auto-GPT/autogpt/commands/web_selenium.py";
+        "../Auto-GPT/autogpt/commands/web_selenium.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "bs4.BeautifulSoup" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.chrome.options.Options" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.common.by.By" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.firefox.options.Options" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.remote.webdriver.WebDriver" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.safari.options.Options" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.support.expected_conditions" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "selenium.webdriver.support.wait.WebDriverWait" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "webdriver_manager.chrome.ChromeDriverManager" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "webdriver_manager.firefox.GeckoDriverManager" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "autogpt.processing.text" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "autogpt.processing.html.extract_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "autogpt.processing.html.format_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "browse_website" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "scrape_text_with_selenium" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "scrape_links_with_selenium" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "close_browser" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_selenium.py" -> "add_header" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/improve_code_py {
+        label="../Auto-GPT/autogpt/commands/improve_code.py";
+        "../Auto-GPT/autogpt/commands/improve_code.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/improve_code.py" -> "autogpt.llm_utils.call_ai_function" [style=dotted];
+        "../Auto-GPT/autogpt/commands/improve_code.py" -> "improve_code" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/evaluate_code_py {
+        label="../Auto-GPT/autogpt/commands/evaluate_code.py";
+        "../Auto-GPT/autogpt/commands/evaluate_code.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/evaluate_code.py" -> "autogpt.llm_utils.call_ai_function" [style=dotted];
+        "../Auto-GPT/autogpt/commands/evaluate_code.py" -> "evaluate_code" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/audio_text_py {
+        label="../Auto-GPT/autogpt/commands/audio_text.py";
+        "../Auto-GPT/autogpt/commands/audio_text.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/audio_text.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/audio_text.py" -> "autogpt.workspace.path_in_workspace" [style=dotted];
+        "../Auto-GPT/autogpt/commands/audio_text.py" -> "read_audio_from_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/audio_text.py" -> "read_audio" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/__init___py {
+        label="../Auto-GPT/autogpt/commands/__init__.py";
+        "../Auto-GPT/autogpt/commands/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/write_tests_py {
+        label="../Auto-GPT/autogpt/commands/write_tests.py";
+        "../Auto-GPT/autogpt/commands/write_tests.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/write_tests.py" -> "autogpt.llm_utils.call_ai_function" [style=dotted];
+        "../Auto-GPT/autogpt/commands/write_tests.py" -> "write_tests" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/image_gen_py {
+        label="../Auto-GPT/autogpt/commands/image_gen.py";
+        "../Auto-GPT/autogpt/commands/image_gen.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "os.path" [style=dotted];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "openai" [style=dotted];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "PIL.Image" [style=dotted];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "autogpt.workspace.path_in_workspace" [style=dotted];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "generate_image" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "generate_image_with_hf" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/image_gen.py" -> "generate_image_with_dalle" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/times_py {
+        label="../Auto-GPT/autogpt/commands/times.py";
+        "../Auto-GPT/autogpt/commands/times.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/times.py" -> "get_datetime" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/google_search_py {
+        label="../Auto-GPT/autogpt/commands/google_search.py";
+        "../Auto-GPT/autogpt/commands/google_search.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/google_search.py" -> "duckduckgo_search.ddg" [style=dotted];
+        "../Auto-GPT/autogpt/commands/google_search.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/google_search.py" -> "google_search" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/google_search.py" -> "google_official_search" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/web_playwright_py {
+        label="../Auto-GPT/autogpt/commands/web_playwright.py";
+        "../Auto-GPT/autogpt/commands/web_playwright.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/web_playwright.py" -> "bs4.BeautifulSoup" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_playwright.py" -> "autogpt.processing.html.extract_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_playwright.py" -> "autogpt.processing.html.format_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_playwright.py" -> "scrape_text" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_playwright.py" -> "scrape_links" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/twitter_py {
+        label="../Auto-GPT/autogpt/commands/twitter.py";
+        "../Auto-GPT/autogpt/commands/twitter.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/twitter.py" -> "tweepy" [style=dotted];
+        "../Auto-GPT/autogpt/commands/twitter.py" -> "dotenv.load_dotenv" [style=dotted];
+        "../Auto-GPT/autogpt/commands/twitter.py" -> "send_tweet" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/git_operations_py {
+        label="../Auto-GPT/autogpt/commands/git_operations.py";
+        "../Auto-GPT/autogpt/commands/git_operations.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/git_operations.py" -> "git" [style=dotted];
+        "../Auto-GPT/autogpt/commands/git_operations.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/git_operations.py" -> "autogpt.workspace.path_in_workspace" [style=dotted];
+        "../Auto-GPT/autogpt/commands/git_operations.py" -> "clone_repository" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/web_requests_py {
+        label="../Auto-GPT/autogpt/commands/web_requests.py";
+        "../Auto-GPT/autogpt/commands/web_requests.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "bs4.BeautifulSoup" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "autogpt.config.Config" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "autogpt.memory.get_memory" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "autogpt.processing.html.extract_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "autogpt.processing.html.format_hyperlinks" [style=dotted];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "is_valid_url" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "sanitize_url" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "check_local_file_access" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "get_response" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "scrape_text" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "scrape_links" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/web_requests.py" -> "create_message" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/file_operations_py {
+        label="../Auto-GPT/autogpt/commands/file_operations.py";
+        "../Auto-GPT/autogpt/commands/file_operations.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "os.path" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "colorama.Back" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "colorama.Fore" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "autogpt.spinner.Spinner" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "autogpt.utils.readable_file_size" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "autogpt.workspace.WORKSPACE_PATH" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "autogpt.workspace.path_in_workspace" [style=dotted];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "check_duplicate_operation" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "log_operation" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "split_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "read_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "ingest_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "write_to_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "append_to_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "delete_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "search_files" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/file_operations.py" -> "download_file" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/commands/execute_code_py {
+        label="../Auto-GPT/autogpt/commands/execute_code.py";
+        "../Auto-GPT/autogpt/commands/execute_code.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "docker" [style=dotted];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "docker.errors.ImageNotFound" [style=dotted];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "autogpt.workspace.WORKSPACE_PATH" [style=dotted];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "autogpt.workspace.path_in_workspace" [style=dotted];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "execute_python_file" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "execute_shell" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "execute_shell_popen" [label="function", color=green];
+        "../Auto-GPT/autogpt/commands/execute_code.py" -> "we_are_running_in_a_docker_container" [label="function", color=green];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/permanent_memory/sqlite3_store_py {
+        label="../Auto-GPT/autogpt/permanent_memory/sqlite3_store.py";
+        "../Auto-GPT/autogpt/permanent_memory/sqlite3_store.py" [shape=box, color=black];
+        "../Auto-GPT/autogpt/permanent_memory/sqlite3_store.py" -> "MemoryDB" [label="class", color=blue];
+    }
+    subgraph cluster___/Auto-GPT/autogpt/permanent_memory/__init___py {
+        label="../Auto-GPT/autogpt/permanent_memory/__init__.py";
+        "../Auto-GPT/autogpt/permanent_memory/__init__.py" [shape=box, color=black];
+    }
+    subgraph cluster___/Auto-GPT/scripts/check_requirements_py {
+        label="../Auto-GPT/scripts/check_requirements.py";
+        "../Auto-GPT/scripts/check_requirements.py" [shape=box, color=black];
+        "../Auto-GPT/scripts/check_requirements.py" -> "main" [label="function", color=green];
+    }
+}

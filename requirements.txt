@@ -1,9 +1,15 @@
 beautifulsoup4==4.11.1
 faiss_cpu==1.7.2
-GitPython==3.1.30
 numpy==1.22.4
 openai==0.25.0
 PyGithub==1.57
 requests==2.28.1
 requests_html==0.10.0
 scikit-learn
+slimit
+dotenv
+matplotlib
+tenacity
+plotly
+pandas
+esprima

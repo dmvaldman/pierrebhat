@@ -1,13 +1,9 @@
-from github import Github, ContentFile
+from github import Github
 from openai_helpers.helpers import compare_embeddings, compare_text, embed, complete, complete_code
 from multiprocessing import Pool
 from functools import reduce
 import os
-from dotenv import load_dotenv
-load_dotenv()
-
-from dotenv import load_dotenv
-load_dotenv()
+from utils.utils import clean_code_block
 
 from repo import Repo, Issue, PR
 
@@ -40,56 +36,69 @@ class PRBot:
     extensions = ('.js', '.jsx', '.py', '.md', '.json', '.html', '.css', '.yml', '.yaml', '.ts', '.tsx', '.ipynb', '.c', '.cc', '.cpp', '.go', '.h', '.hpp', '.java', '.sol', '.sh', '.txt')
     directory_blacklist = ('build', 'dist', '.github')
 
-    def __init__(self, org, name):
-        self.token = os.getenv('PIERRE_BOT_TOKEN')
-        self.github = Github(self.token)
-        self.user = self.github.get_user()
-        self.upstream_repo = self.github.get_repo(f'{org}/{name}')
-        self.fork_repo(self.upstream_repo)
-        self.repo = self.user.get_repo(name)
-
-    def create_pr(self, pr: SubmittedPR):
-        self.apply_changes(pr.changes)
-        self.upstream_repo.create_pull(pr.title, pr.body, base=self.upstream_repo.default_branch, head="pierrebhat:master")
+    def __init__(self, repo_name):
+        github = Github(os.getenv('PIERRE_BOT_TOKEN'))
+        self.user = github.get_user()
+        self.upstream_repo = github.get_repo(repo_name)
+        self.forked_repo = self.fork_repo(self.upstream_repo)
 
     def fork_repo(self, repo):
         if repo.name not in [r.name for r in self.user.get_repos()]:
-            self.user.create_fork(repo)
+            return self.user.create_fork(repo)
+        else:
+            return self.user.get_repo(repo.name)
+
+    def create_pr(self, pr: SubmittedPR):
+        self.apply_changes(pr.changes)
+        # self.upstream_repo.create_pull(pr.title, pr.body, base=self.upstream_repo.default_branch, head="pierrebhat:master")
 
     def apply_changes(self, changes):
-        print(repo.org)
-        print(repo.name)
         for change in changes:
             file_path = str(change["file_name"]).replace('repos/nanoGPT/', '')
             new = change["new_content"]
-            file = self.repo.get_contents(file_path)
-            self.repo.update_file(file_path, f'Updated {file.path}', new, file.sha)
+            file = self.forked_repo.get_contents(file_path)
+            self.forked_repo.update_file(file_path, f'Updated {file.path}', new, file.sha)
 
-    def get_all_content(self):
-        contents = self.repo.get_contents("")
-        output = {}
-        for item in contents:
-            if item.type == 'dir' and not str(item.path).startswith(self.directory_blacklist):
-                contents.extend(self.repo.get_contents(item.path))
+    def generate_patches(self, files, issue):
+        patches = []
+        for file in files:
+            print(file)
+            prompt = f'Below is an issue on for the {self.upstream_repo} codebase.\n Issue:{issue.title} - {issue.body}\n\n Here is a potential file that may need to be updated to fix the issue:\n'
+
+            prompt += file + '```\n'
+            with open(file, 'r') as f:
+                file_content = f.read()
+                prompt += file_content
+            prompt += '```\n'
+
+            action_prompt1 = 'Does this file need to be changed to resolve the issue? Respond with only `Yes` or `No`.'
+            needs_patch = complete(prompt + action_prompt1)
+            needs_patch = 'Yes'
+
+            if needs_patch == 'No':
+                continue
             else:
-                if not str(item.name).endswith(self.extensions):
+                action_prompt2 = "Identify which code block needs to be changed (mark it up with \"Before:\") and output the change (mark it up with \"After:\"). Make your change match the coding style of the original file."
+                change = complete(prompt + action_prompt2)
+                if "Before:" not in change or "After:" not in change:
+                    print("Warning: incorrect output format")
                     continue
-                decoded = item.decoded_content.decode('utf-8')
-                output[item.path] = decoded
-        return output
+                before_and_after = change.split("Before:", 1)[1]
+                before, after = before_and_after.split("After:", 1)
+                before = clean_code_block(before)
+                after = clean_code_block(after)
+                if before in file_content:
+                    new_file_content = file_content.replace(before, after)
+                    # Create a patch
+                    patch = {
+                        "file_name": file,
+                        "content": file_content,
+                        "new_content": new_file_content
+                    }
+                    patches.append(patch)
+                else:
+                    print("Warning: cannot locate `Before` block")
 
-if __name__ == "__main__":
-    # PR Bot
-    repo_org = 'karpathy'
-    repo_name = 'nanoGPT'
-    issue_num = 50
-    num_hits = 5
+        print(f"Sending {len(patches)} files in the patch")
 
-    bot = PRBot(repo_org, repo_name)
-    repo = Repo(repo_org, repo_name)
-
-    issues_all = repo.get_issue_list()
-    issue = [issue for issue in issues_all if issue.num == issue_num][0]
-    changes = repo.get_issue_patches(issue, num_hits=num_hits)
-    pr = SubmittedPR(issue, changes)
-    bot.create_pr(pr)
+        return patches

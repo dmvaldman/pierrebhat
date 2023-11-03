@@ -2,3 +2,5 @@ repos
 embeddings
 __pycache__
 .env
+.vscode
+.cache

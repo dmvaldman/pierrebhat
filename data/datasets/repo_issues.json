@@ -1,0 +1,1292 @@
+{
+  "wncc/UniTrain": [
+    {
+      "title": "classification: Adding support for weights and biases logging",
+      "body": null,
+      "num": 24,
+      "state": "closed",
+      "repo_name": "wncc/UniTrain",
+      "pr": {
+        "num": 67,
+        "merge_commit_sha": "e20b255dfd3f1c98e590c8a445804e4a04422d81",
+        "base_sha": "621fdd5b733a5d40cdc1a4dd2ea44fbf27f9b574",
+        "changed_files": [
+          {
+            "filename": "UniTrain/utils/DCGAN.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/classification.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/segmentation.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "segmentation: Add a support for V-net in the segmentation models",
+      "body": null,
+      "num": 11,
+      "state": "closed",
+      "repo_name": "wncc/UniTrain",
+      "pr": {
+        "num": 72,
+        "merge_commit_sha": "223cd1aad424739945b757156442144d5271ddd1",
+        "base_sha": "cf38469c33d821b4cb2a9be08fe60617c0baff00",
+        "changed_files": [
+          {
+            "filename": "UniTrain/models/classification.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/models/segmentation.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/DCGAN.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/StyleTransfer.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/StyleTransferVGG.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/__init__.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/classification.py",
+            "status": "modified"
+          },
+          {
+            "filename": "UniTrain/utils/segmentation.py",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ],
+  "espin086/GPT-Jobhunter": [
+    {
+      "title": "Unit Test: dataTransformer.py",
+      "body": "Need to unit test this key script that transforms the data coming from the the API\r\n![Screenshot 2023-10-23 at 12 21 46\u202fPM](https://github.com/espin086/GPT-Jobhunter/assets/4843736/48bf4c3b-ee84-4588-854d-7c950f9700ab)\r\n",
+      "num": 124,
+      "state": "closed",
+      "repo_name": "espin086/GPT-Jobhunter",
+      "pr": {
+        "num": 125,
+        "merge_commit_sha": "ca66678583b207838f1b43a40254a25155792781",
+        "base_sha": "419eb52884da38d56120eced1c2117e556f40493",
+        "changed_files": [
+          {
+            "filename": "jobhunter/dataTransformer.py",
+            "status": "modified"
+          },
+          {
+            "filename": "tests/dataTransformer_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Improve User Experience by Combining Pipeline Execution and SQLite Query Results in a Single Button Click",
+      "body": "\r\n\r\nCurrently, our application requires users to perform two separate actions to execute a pipeline and view the results. This two-step process can be time-consuming and negatively impacts the user experience. To enhance usability, we propose modifying the front-end streamlit code in the main.py function to consolidate these actions into a single button click.\r\n\r\nObjective:\r\nThe objective of this issue is to streamline the user experience by implementing a single button that triggers both the pipeline execution and the display of SQLite query results.\r\n\r\nProposed Solution:\r\n1. Update the front-end streamlit code in the main.py function to include a single button labeled \"Run Pipeline and Show Results\".\r\n2. When the user clicks on this button, the application should initiate the pipeline execution process.\r\n3. Once the pipeline execution is complete, the application should automatically retrieve the results of the SQLite query.\r\n4. The retrieved results should be displayed to the user in a clear and intuitive manner.\r\n\r\nExpected Outcome:\r\nBy implementing this change, users will no longer need to perform two separate actions, resulting in a more efficient and seamless user experience. The consolidated button will simplify the process and reduce the time required to execute the pipeline and view the query results.\r\n\r\nAdditional Information:\r\n- The application is built using streamlit and utilizes SQLite for querying data.\r\n\r\nPlease view the CONTRIBUTING.md for instructions on how to contribute and take on this issue. \r\n\r\nThank you!",
+      "num": 112,
+      "state": "closed",
+      "repo_name": "espin086/GPT-Jobhunter",
+      "pr": {
+        "num": 114,
+        "merge_commit_sha": "5f0b2603190ba07b77652e210251bfa6ffd81fa0",
+        "base_sha": "3d31b3a789d63f10392779b37fce82dfda6abdc2",
+        "changed_files": [
+          {
+            "filename": "jobhunter/dataTransformer.py",
+            "status": "added"
+          },
+          {
+            "filename": "jobhunter/main.py",
+            "status": "modified"
+          },
+          {
+            "filename": "jobhunter/transform.py",
+            "status": "removed"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Raise Exception if Resume not found",
+      "body": "This file handler needs to raise an exception NOT just log a warning of resume.txt is no found:\n\n\nhttps://github.com/espin086/GPT-Jobhunter/blob/main/jobhunter/FileHandler.py",
+      "num": 103,
+      "state": "closed",
+      "repo_name": "espin086/GPT-Jobhunter",
+      "pr": {
+        "num": 105,
+        "merge_commit_sha": "30ce872232d00c4349fb7b9257ae391ac5f316a3",
+        "base_sha": "01e37c09d4ef0ee78da918cd6ee3df5563438d1e",
+        "changed_files": [
+          {
+            "filename": "jobhunter/FileHandler.py",
+            "status": "modified"
+          },
+          {
+            "filename": "temp/resumes/resume.txt",
+            "status": "removed"
+          },
+          {
+            "filename": "tests/FileHandler_test.py",
+            "status": "modified"
+          },
+          {
+            "filename": "tests/resume_exists_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Harden Code: Unit Tests and Functional Tests",
+      "body": "The code needs to be hardened further here are some critical tests that need to be added to the test suite: \r\n\r\n1. What happens if the database is deleted? And the code is rerun- will it error out gracefully?\r\n\r\n2. What happens if there is no resume saved locally? Will the testing suite produce an error? Are there asset statements when reading in resume data to ensure all resume.txt data is there? \r\n\r\n3. If the job search is run and there have not been any new jobs for a given title in 3 months, does the front-end streamlit application warn the user that recent jobs weren't uploaded?\r\n\r\nThe answer to the questions above is NO, so these tests as well as other key tests need to be added to the code base",
+      "num": 100,
+      "state": "closed",
+      "repo_name": "espin086/GPT-Jobhunter",
+      "pr": {
+        "num": 101,
+        "merge_commit_sha": "e2480a558878cc267434b2472ee373ca85e658bd",
+        "base_sha": "35a4ab31c2a5282ea0e9d38d3066a7aef088ee06",
+        "changed_files": [
+          {
+            "filename": "jobhunter/all_jobs.db",
+            "status": "modified"
+          },
+          {
+            "filename": "jobhunter/load.py",
+            "status": "modified"
+          },
+          {
+            "filename": "temp/resumes/resume.txt",
+            "status": "modified"
+          },
+          {
+            "filename": "tests/check_resume_exists_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Make CLI that opens streamlit app",
+      "body": "Update setup.py to run streamlit app by simply typing \"jobhunter\" into the terminal\n\nhttps://github.com/espin086/GPT-Jobhunter/blob/main/setup.py",
+      "num": 96,
+      "state": "closed",
+      "repo_name": "espin086/GPT-Jobhunter",
+      "pr": {
+        "num": 97,
+        "merge_commit_sha": "679a5ec195e9c2899ce4503f2295bc64780da152",
+        "base_sha": "09dba99b75c1a11550473a0e66f78fe00feede2f",
+        "changed_files": [
+          {
+            "filename": "jobhunter/cli.py",
+            "status": "added"
+          },
+          {
+            "filename": "setup.py",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ],
+  "Clueless-Community/scrape-up": [
+    {
+      "title": "Add test file for HealthGrades module",
+      "body": "**Note**\r\n- Test all the methods of the `healthgrades` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 822,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 836,
+        "merge_commit_sha": "dc2cd8f1f14c9bf2620cef09ea039d62be926d1e",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/test/healthgrades_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test file for Flyrobu module",
+      "body": "**Note**\r\n- Test all the methods of the `flyrobu` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 821,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 835,
+        "merge_commit_sha": "1e01e018ad2087b6aa5af42e3ca8a57b53935428",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/test/flyrobu_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test file for Flipkart module",
+      "body": "**Note**\r\n- Test all the methods of the `flipkart` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 820,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 833,
+        "merge_commit_sha": "29046f76f395c951a32c5f4c4877368b1b266688",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/scrape_up/flipkart/flipkart_file.py",
+            "status": "modified"
+          },
+          {
+            "filename": "src/test/flipkart_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test file for EazyDiner module",
+      "body": "**Note**\r\n- Test all the methods of the `eazydiner` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 818,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 831,
+        "merge_commit_sha": "a802245c5e6512de1b472d44864d3e5c51682f88",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/test/eazydiner_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for CovidInfo module",
+      "body": "**Note**\r\n- Test all the methods of the `covidinfo` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 815,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 848,
+        "merge_commit_sha": "d71464a23b968840ef7fc2a77042325082465202",
+        "base_sha": "cf4415a20209fd0deb2e1f08360b0d50fb945bb5",
+        "changed_files": [
+          {
+            "filename": "src/test/covidinfo_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test file for AskUbuntu module",
+      "body": "**Note**\r\n- Test all the methods of the `askubuntu` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 812,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 843,
+        "merge_commit_sha": "d9315f328e16b2227b9f1ca94c34377ffb1006a7",
+        "base_sha": "d1fcbdd58d659512fc907d110efeae04d57e3589",
+        "changed_files": [
+          {
+            "filename": "src/test/askubuntu_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for Academia module",
+      "body": "**Note**\r\n- Test all the methods of the `academia` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 811,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 830,
+        "merge_commit_sha": "842096421c6d838d362b2facafcd5f90b456832d",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/scrape_up/imdb/imdb.py",
+            "status": "modified"
+          },
+          {
+            "filename": "src/test/academia_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for ICC modules.",
+      "body": "**Note**\r\n- Test all the methods of the `icc` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 810,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 834,
+        "merge_commit_sha": "41035b35428705acaff698ebfcbd78e17aa2ce3c",
+        "base_sha": "bc50642077727b2d88dc0918ce4ae1a7f22a2bdb",
+        "changed_files": [
+          {
+            "filename": "src/scrape_up/icc/icc_rankings.py",
+            "status": "modified"
+          },
+          {
+            "filename": "src/test/icc_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for HackerRank module.",
+      "body": "**Note**\r\n- Test all the methods of the `hackerrank` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 808,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 838,
+        "merge_commit_sha": "775bcb71e290c09ac0e4252e107f4445bbbdfbf9",
+        "base_sha": "29046f76f395c951a32c5f4c4877368b1b266688",
+        "changed_files": [
+          {
+            "filename": "src/test/hackerrank_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for HackerEarth module.",
+      "body": "**Note**\r\n- Test all the methods of the `hackerearth` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 807,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 840,
+        "merge_commit_sha": "24b16419cb8dc2442bcd79b57957ee694c12c098",
+        "base_sha": "29046f76f395c951a32c5f4c4877368b1b266688",
+        "changed_files": [
+          {
+            "filename": "src/test/hackerearth_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add test files for GitHub Education module.",
+      "body": "**Note**\r\n- Test all the methods of the `github_education` module and add a test file for the same.\r\n- Add test file in directory `src/test`.\r\n- Check the `codechef_test.py` file as a reference to get an idea about structuring the code.\r\n- Use `unittest` only.",
+      "num": 805,
+      "state": "closed",
+      "repo_name": "Clueless-Community/scrape-up",
+      "pr": {
+        "num": 839,
+        "merge_commit_sha": "7a3e4f11f807448f9f70d6df897e9a2f1a76c375",
+        "base_sha": "29046f76f395c951a32c5f4c4877368b1b266688",
+        "changed_files": [
+          {
+            "filename": "src/test/github_education_test.py",
+            "status": "added"
+          }
+        ]
+      }
+    }
+  ],
+  "Ebazhanov/linkedin-skill-assessments-quizzes": [
+    {
+      "title": "Update SketchUp",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n<img width=\"813\" alt=\"Screenshot 2023-10-19 at 4 17 20\u202fPM\" src=\"https://github.com/Ebazhanov/linkedin-skill-assessments-quizzes/assets/119059108/1e426033-6404-47a3-94ab-fccebb8e6bc8\">\r\n<img width=\"704\" alt=\"Screenshot 2023-10-19 at 4 17 27\u202fPM\" src=\"https://github.com/Ebazhanov/linkedin-skill-assessments-quizzes/assets/119059108/72f9e1b6-07cd-46e3-bdb5-8ba2bb2b638f\">\r\n",
+      "num": 6570,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6571,
+        "merge_commit_sha": "e34281cf0fbfa648ab9e960892f92bf1ae555686",
+        "base_sha": "66a4e4f3c8850770159f9df4ff282b6af1748c0e",
+        "changed_files": [
+          {
+            "filename": "sketchup/sketchup-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "New Questions: Revit",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n<img width=\"1090\" alt=\"Screenshot 2023-10-15 at 12 41 14\u202fPM\" src=\"https://github.com/Ebazhanov/linkedin-skill-assessments-quizzes/assets/119059108/0d664a5c-7dcb-4b68-a289-613f4a4f3fea\">\r\n<img width=\"1102\" alt=\"Screenshot 2023-10-15 at 12 41 29\u202fPM\" src=\"https://github.com/Ebazhanov/linkedin-skill-assessments-quizzes/assets/119059108/52562ca9-c719-4e45-948e-f849755232d5\">\r\n\r\n",
+      "num": 6458,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6459,
+        "merge_commit_sha": "3778895d3b88b63c18cc0b9bf3450c168b66c705",
+        "base_sha": "41268168aa1592d530754349cd27a1480ba66f67",
+        "changed_files": [
+          {
+            "filename": "revit/revit-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "New Linux Question",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n\r\n#### Q111. Which of the following types is not a default type of input/output in Linux?\r\n- [ ] standard error\r\n- [ ] standard input\r\n- [ ] standard output\r\n- [x] standard file\r\n[Reference](https://linuxhandbook.com/redirection-linux/)\r\n#### Q112. In a shell script, _____ means OR.\r\n- [x] ||\r\n- [ ] &\r\n- [ ] |\r\n- [ ] &&\r\n      \r\n[Reference](https://www.geeksforgeeks.org/basic-operators-in-shell-scripting/)\r\n#### Q113. On a Linux or Unix system using X Window, the GVim * register _____.\r\n- [x] contains text that is highlighted or selected with the mouse\r\n- [ ] is the same thing as the + register\r\n- [ ] is unused\r\n- [ ] contains all yank, delete, change, and put operations\r\n[Reference](https://github.com/hieuvp/learning-linux/blob/master/vim-masterclass/vim-graphical-user-interfaces-gvim-and-macvim/README.md)\r\n#### Q114. What system mode does Linux runlevel 0 indicate?\r\n- [x] system halt\r\n- [ ] multi user\r\n- [ ] single user mode\r\n- [ ] system reboot\r\n[Reference](http://www.tldp.org/LDP/sag/html/major-services.html)\r\n#### Q115. Which of the following choices is not a mode in Vi?\r\n- [ ] insert\r\n- [ ] line\r\n- [x] edit\r\n- [ ] command\r\n[Reference](https://github.com/hieuvp/learning-linux/blob/master/vim-masterclass/vim-graphical-user-interfaces-gvim-and-macvim/README.md)\r\n",
+      "num": 6303,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6304,
+        "merge_commit_sha": "0409bff87935c682a22eb166449438bbd609d9b2",
+        "base_sha": "47c6604ff085df916fb0843ef0115573d6b3b78f",
+        "changed_files": [
+          {
+            "filename": "linux/linux-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "New GCP Question",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n\r\n#### Q75. When setting the condition for a rule in Google Cloud Armor, _____ mode allows you to filter only by IP address or CIDR range.\r\n\r\n- [ ] IP/CIDR\r\n- [ ] Advanced\r\n- [ ] Custom\r\n- [x] Basic\r\n\r\n[Reference](https://cloud.google.com/armor/docs/configure-security-policies)\r\n\r\n#### Q76. Which Google Cloud service provides an overview dashboard that shows you active threats and vulnerabilities, ordered by severity?\r\n\r\n- [ ] Cloud Armor\r\n- [x] Security Command Center\r\n- [ ] Cloud Logging\r\n- [ ] Cloud Deployment Manager\r\n\r\n[Reference](https://cloud.google.com/security-command-center)\r\n\r\n#### Q77. Which field of a Google Cloud Armor rule determines when the rule will be evaluated?\r\n\r\n- [ ] ID\r\n- [ ] severity\r\n- [ ] sequence\r\n- [x] priority\r\n\r\n[Reference](https://cloud.google.com/armor/docs/cloud-armor-overview#rules_language)\r\n\r\n#### Q78. What is an ACL?\r\n\r\n- [ ] Access Container Log\r\n- [ ] Authorized Container List\r\n- [x] Access Control List\r\n- [ ] App Cloud Launch\r\n\r\n[Reference](https://cloud.google.com/storage/docs/access-control/create-manage-lists)\r\n\r\n#### Q79. In Google Cloud Platform, the _____ role grants read-only access to the Access Transparency logs and to Data Access audit logs, in addition to the access granted by the Logs Viewer role.\r\n\r\n- [x] Private Logs Viewer\r\n- [ ] Project Writer\r\n- [ ] Logs Writer\r\n- [ ] Project Owner\r\n\r\n[Reference](https://cloud.google.com/logging/docs/access-control)",
+      "num": 6301,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6302,
+        "merge_commit_sha": "8f09df42217b1ca6bf1b538568a253436c09b48e",
+        "base_sha": "47c6604ff085df916fb0843ef0115573d6b3b78f",
+        "changed_files": [
+          {
+            "filename": "google-cloud-platform/google-cloud-platform-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "New Azure Question",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n\r\n#### Q72. In the Azure Service Bus, what is the purpose of the dead letter queue?\r\n\r\n- [ ] It is used to ensure that the Azure Bus Service queue can deliver messages in a First-In-First-Out manner.\r\n- [ ] It can be used for load balancing queues.\r\n- [ ] It is a duplicate queue used as a backup queue.\r\n- [x] It is used to store messages which could not be delivered.\r\n\r\n[Ref](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues)\r\n\r\n#### Q73. You have a WCF application on-premises behind a firewall, and you need to expose it to an Azure web role. Which of the following services would be the best solution?\r\n\r\n- [ ] Azure Data Management Gateway\r\n- [ ] Service Bus Topics\r\n- [ ] Azure On-Premises Data Gateway\r\n- [x] WCF Relay\r\n\r\n[Ref](https://docs.microsoft.com/en-us/azure/service-bus-relay/relay-hybrid-connections-dotnet-get-started)\r\n\r\n#### Q74. When using Azure Service Bus, a single message sent to a topic can be received by multiple subscriptions. Is this true?\r\n\r\n- [x] Yes\r\n- [ ] Yes, if the message metadata allows it\r\n- [ ] No\r\n- [ ] No, the first subscription to process it gets it\r\n\r\n[Ref](https://azure.microsoft.com/en-us/documentation/articles/service-bus-fundamentals-hybrid-solutions/#topics)\r\n\r\n#### Q75. You're designing a solution that needs to be low cost and to expose a WCF application that lives on-premises to a Web API that lives in Azure. Which of the following will be added to your design?\r\n\r\n- [ ] A point-to-site VPN\r\n- [ ] A site-to-site VPN\r\n- [x] WCF Relay\r\n- [ ] Self-Hosted Integration Runtime\r\n\r\n[Ref](https://docs.microsoft.com/en-us/azure/azure-relay/service-bus-dotnet-hybrid-app-using-service-bus-relay)\r\n\r\n#### Q76. What are the core messaging entities in Azure Service Bus?\r\n\r\n- [ ] Queues, transactions, and messages\r\n- [x] Queues, topics, and subscriptions\r\n- [ ] Topics, subscriptions, and message sessions\r\n- [ ] Queues, message locks, and transactions\r\n\r\n[Ref](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview)",
+      "num": 6298,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6299,
+        "merge_commit_sha": "ff8f674dc9629f5162c5def5deef76e751baa014",
+        "base_sha": "47c6604ff085df916fb0843ef0115573d6b3b78f",
+        "changed_files": [
+          {
+            "filename": "microsoft-azure/microsoft-azure-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "New AWS Question",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\n- [x] New question{'s} <!-- please attach screenshot or quiz text -->\r\n\r\n#### Q115. If a user requires programmatic access to your AWS resources, what is required to authenticate? \r\n\r\n- [x] Access Keys\r\n- [ ] Key pair\r\n- [ ] MFA activated on the user account\r\n- [ ] A role association\r\n\r\n[Reference](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys)\r\n\r\n#### Q116. ___________ are predefined, out-of-the-box policies that grant permissions for common use cases to eliminate the need to determine what permissions are needed.\r\n\r\n- [ ] Resource policies\r\n- [x] AWS managed policies\r\n- [ ] Customer managed policies\r\n- [ ] Inline policies\r\n\r\n[Reference](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys)\r\n\r\n#### Q117. Within an IAM policy, the ______ ___ ______ are top-level policy elements whereas the rest of them are statement-level elements.\r\n\r\n- [ ] ID and Principal\r\n- [ ] Version and ID\r\n- [ ] ID and Statement\r\n- [x] Version and Statement\r\n\r\n[Reference](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html)\r\n\r\n#### Q118. Return traffic to all EC2 instances in a VPC's new public subnet is somehow blocked. You would like to ensure that return traffic from all potential clients is received moving forward. Which port range should you allow to ensure that return traffic from all potential clients is received?\r\n\r\n- [ ] 1-1024\r\n- [x] 1024-65535\r\n- [ ] 1024-50000\r\n- [ ] 1-65535\r\n\r\n[Reference](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#VPC_ACLs_Ephemeral_Ports)\r\n\r\n#### Q119. You manage AWS credentials for a company that is onboarding two new employees: one is an HR administrator, and the other is a developer. The Dev team is large and has an IAM group within the company's AWS accounts, but Human Resources currently has a single employee with no plans to expand the department. It is company policy to provide long-term credentials to AWS employees in a manner that allows simple reassignment in the case of any promotions or resignations. How can you provide appropriate AWS access to the new developer and follow company policy? (Choose 2 answers)\r\n\r\n- [ ] Attach appropriate IAM policies to the new developer's IAM user.\r\n- [x] Add the new developer to the Developer IAM Group.\r\n- [ ] Attach a new IAM role to the new developer's IAM user.\r\n- [x] Create a new IAM user for the developer.\r\n\r\n[Reference](https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html)\r\n",
+      "num": 6297,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6299,
+        "merge_commit_sha": "ff8f674dc9629f5162c5def5deef76e751baa014",
+        "base_sha": "47c6604ff085df916fb0843ef0115573d6b3b78f",
+        "changed_files": [
+          {
+            "filename": "microsoft-azure/microsoft-azure-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Java Q 161 ",
+      "body": "I'm submitting an ISSUE: please check one with \"x\"\r\n\r\nQ161 of java, the options are inappropriate... and the correct answer also\r\n\r\nCurrent file is\r\n- [ ] O(N*N)\r\n- [ ] O(1)\r\n- [x] O(AB)\r\n- [ ] O(A*B)\r\n\r\nbut it shoud look like \r\n- [ ] O(N*N)\r\n- [ ] O(1)\r\n- [ ] O(A+B)\r\n- [x] O(A*B)\r\n\r\n---------------------------------------------------------------\r\n- [ ] New question{'s} <!-- please attach screenshot or quiz text -->\r\n- [ ] New assessment <!-- please double-check the repository for similar -->\r\n- [x] Missed questions/answers <!-- Please check the repository for a similar issue or PR before submitting -->\r\n- [ ] Request for new quiz/answers/...\r\n- [ ] Documentation issue or request for ...\r\n- [ ] ...\r\n",
+      "num": 6290,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6300,
+        "merge_commit_sha": "5bc82bb2ef1e5b80a80d65206789f72ad828ef56",
+        "base_sha": "e7e29864ad44348fb4aec394f41946520e5889b1",
+        "changed_files": [
+          {
+            "filename": "java/java-quiz.md",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "IMovie",
+      "body": "I found a new Skill Assessment  IMovie \r\n\r\nI want to add into this repo ;\r\n\r\ncan you please assign this to me , I am interested to contribute myself in hacktoberfest_23 : );",
+      "num": 6157,
+      "state": "closed",
+      "repo_name": "Ebazhanov/linkedin-skill-assessments-quizzes",
+      "pr": {
+        "num": 6390,
+        "merge_commit_sha": "39e47cd8f5389ffeb9c0b9c65ae7c5aa4e9a47d6",
+        "base_sha": "2b35a00ac0444f87e00bfd5259d9fdcadaecfe08",
+        "changed_files": [
+          {
+            "filename": "iMovie/iMovie-quiz.md",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q14.png",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q17.png",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q18.png",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q19.png",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q20.png",
+            "status": "added"
+          },
+          {
+            "filename": "iMovie/img/iMovie-Q8.png",
+            "status": "added"
+          }
+        ]
+      }
+    }
+  ],
+  "roboflow/supervision": [
+    {
+      "title": "Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame",
+      "body": "### Description\r\n\r\nCurrently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.\r\n\r\nInformation about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.\r\n",
+      "num": 464,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 482,
+        "merge_commit_sha": "034c2bd9a8244491513de5d92d8aa5563f02beb8",
+        "base_sha": "9ded70c8daae214e53cb7b33559c50817af14e68",
+        "changed_files": [
+          {
+            "filename": "supervision/detection/line_counter.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create `draw_image` to enable watermarking images and videos  ",
+      "body": "### Description\r\n\r\nCreate `draw_image` to enable watermarking images and videos. The utility should be located in [`supervision/draw/utils.py`](https://github.com/roboflow/supervision/blob/develop/supervision/draw/utils.py) and allow:\r\n- loading watermark image from the path or as `np.ndarray`\r\n- scaling watermark image\r\n- drawing watermark image on the frame with selected opacity\r\n\r\n### Pseudocode\r\n\r\n```python\r\ndef draw_image(\r\n    scene: np.ndarray, \r\n    image: Union[str, np.ndarray],\r\n    opacity: float,\r\n    rect: Rect\r\n) -> np.ndarray:\r\n    \"\"\"\r\n    Draws an image onto a given scene with specified opacity and dimensions.\r\n    \r\n    Args:\r\n        scene (np.ndarray): The background image onto which the image will be drawn.\r\n        image (Union[str, np.ndarray]): The image to be drawn. Can be either a file path or a NumPy array.\r\n        opacity (float): The opacity level of the image to be drawn, ranging from 0.0 to 1.0.\r\n        rect (Rect): A Rect object specifying the dimensions and position where the image will be drawn.\r\n        \r\n    Returns:\r\n        np.ndarray: The scene with the image drawn onto it.\r\n        \r\n    Example:\r\n        >>> scene = np.zeros((400, 400, 3), dtype=np.uint8)\r\n        >>> image_path = \"path/to/image.jpg\"\r\n        >>> opacity = 0.5\r\n        >>> rect = Rect(x=50, y=50, width=200, height=200)\r\n        >>> new_scene = draw_image(scene, image_path, opacity, rect)\r\n    \"\"\"\r\n    pass\r\n```\r\n\r\n### Documentation\r\n\r\nUpenij that the new annotator is well documented. Read more in our [contributor guidelines](https://github.com/roboflow/supervision/blob/develop/CONTRIBUTING.md).",
+      "num": 439,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 449,
+        "merge_commit_sha": "78a4e73f25e9ce90befa00737f04aabe1d912f41",
+        "base_sha": "9fff77a6e3e999b20c154d1dd1b0c9512bb7ebbc",
+        "changed_files": [
+          {
+            "filename": "supervision/draw/utils.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Fix `sv.ByteTrack.tracker_id` return value when `sv.Detections` is empty",
+      "body": "### Bug\r\n\r\nWhen `sv.Detections` is empty (`len(detections) == 0`) `sv.ByteTrack` returns `tracker_id` equal `None`. Correct that behavior, make it more consistent, and return `np.array([], dtype=int)`.\r\n\r\n### Fix\r\n\r\nAdd `else` statement here: https://github.com/roboflow/supervision/blob/89c1b63979d43f8ed651a9701ca8333034d0bc07/supervision/tracker/byte_tracker/core.py#L239",
+      "num": 429,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 430,
+        "merge_commit_sha": "c5c37e4a6c29129e4b2e078ec0369ef06e0a2fe6",
+        "base_sha": "68a761349da61fac6d761993d3af008c2ce11e9c",
+        "changed_files": [
+          {
+            "filename": "supervision/tracker/byte_tracker/core.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create `sv.BoxMaskAnnotator`",
+      "body": "### Description\r\n\r\nSupervision is expanding its range of [annotators](https://supervision.roboflow.com/annotators/). Following the example of [BoundingBoxAnnotator](https://supervision.roboflow.com/annotators/#boundingboxannotator), [MaskAnnotator](https://supervision.roboflow.com/annotators/#maskannotator), or [EllipseAnnotator](https://supervision.roboflow.com/annotators/#ellipseannotator), create `BoxMaskAnnotator` - whose task is to mark objects related to [`sv.Detections`](https://supervision.roboflow.com/detection/core/#detections) with filled semitransparent boxes.\r\n\r\nLike other annotators, it should allow you to choose a color palette and a color mapping strategy - `index`, `class`, `track`.\r\n\r\n### Pseudocode\r\n\r\n```python\r\nclass BoxMaskAnnotator(BaseAnnotator):\r\n\r\n    def __init__(\r\n        self,\r\n        color: Union[Color, ColorPalette] = ColorPalette.default(),\r\n        color_map: str = \"class\",\r\n    ):\r\n        pass\r\n\r\n    def annotate(\r\n        self,\r\n        scene: np.ndarray,\r\n        detections: Detections,\r\n    ) -> np.ndarray:\r\n        pass\r\n```\r\n",
+      "num": 421,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 422,
+        "merge_commit_sha": "d30d80717c8b8f4440a891d6ba1c387bf15a9476",
+        "base_sha": "77c126e421c05786d65e6959de6c343ad69ba2bf",
+        "changed_files": [
+          {
+            "filename": "docs/annotators.md",
+            "status": "modified"
+          },
+          {
+            "filename": "supervision/__init__.py",
+            "status": "modified"
+          },
+          {
+            "filename": "supervision/annotators/core.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create `sv.DotMarkerAnnotator`",
+      "body": "### Description\r\n\r\nSupervision is expanding its range of [annotators](https://supervision.roboflow.com/annotators/). Following the example of [BoundingBoxAnnotator](https://supervision.roboflow.com/annotators/#boundingboxannotator), [MaskAnnotator](https://supervision.roboflow.com/annotators/#maskannotator), or [EllipseAnnotator](https://supervision.roboflow.com/annotators/#ellipseannotator), create `DotMarkerAnnotator` - whose task is to mark objects related to [`sv.Detections`](https://supervision.roboflow.com/detection/core/#detections) with dots.\r\n\r\nLike other annotators, it should allow you to choose a color palette and a color mapping strategy - `index`, `class`, `track`. It should also allow you to control the position of the dot in relation to the box using [`sv.Position`](https://supervision.roboflow.com/geometry/core/#position).\r\n\r\n### Pseudocode\r\n\r\n```python\r\nclass DotMarkerAnnotator(BaseAnnotator):\r\n\r\n    def __init__(\r\n        self,\r\n        color: Union[Color, ColorPalette] = ColorPalette.default(),\r\n        radious: int = 4,\r\n        position: Position = Position.CENTER,\r\n        color_map: str = \"class\",\r\n    ):\r\n        pass\r\n\r\n    def annotate(\r\n        self,\r\n        scene: np.ndarray,\r\n        detections: Detections,\r\n    ) -> np.ndarray:\r\n        pass\r\n```\r\n\r\n### Documentation\r\n\r\nUpenij that the new annotator is well documented. Read more in our [contributor guidelines](https://github.com/roboflow/supervision/blob/develop/CONTRIBUTING.md).",
+      "num": 396,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 492,
+        "merge_commit_sha": "6815814aec653e735a81979cbe58c44c7958f7cc",
+        "base_sha": "034c2bd9a8244491513de5d92d8aa5563f02beb8",
+        "changed_files": [
+          {
+            "filename": "supervision/__init__.py",
+            "status": "modified"
+          },
+          {
+            "filename": "supervision/annotators/core.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Update `sv.Detections.from_roboflow` and remove `class_list` requirement",
+      "body": "### Description\r\n\r\nAfter the recent [roboflow/inference](https://github.com/roboflow/inference) update, `class_id` is returned as part of the response. \r\n\r\n```python\r\nresult = {\r\n    \"predictions\": [\r\n        {\r\n            \"x\": 0.5,\r\n            \"y\": 0.5,\r\n            \"width\": 0.2,\r\n            \"height\": 0.3,\r\n            \"class\": \"person\",\r\n            \"class_id\": 0,\r\n            \"confidence\": 0.9\r\n        },\r\n        # ... more predictions ...\r\n    ]\r\n}\r\n```\r\n\r\nAs a result, we no longer need to ask users to provide `class_list` to map `class` value to `class_id`. We can retrieve this value directly from the response. We can simplify the [sv.Detections.from_roboflow](https://supervision.roboflow.com/detection/core/#supervision.detection.core.Detections.from_roboflow) API and remove extra argument.\r\n\r\n",
+      "num": 394,
+      "state": "closed",
+      "repo_name": "roboflow/supervision",
+      "pr": {
+        "num": 399,
+        "merge_commit_sha": "67fa66c7e72f6ecac3ed1c09da801138cf56baed",
+        "base_sha": "6f30c87612ee953592ca4a6fb5474e489dc7d109",
+        "changed_files": [
+          {
+            "filename": "supervision/detection/core.py",
+            "status": "modified"
+          },
+          {
+            "filename": "supervision/detection/utils.py",
+            "status": "modified"
+          },
+          {
+            "filename": "test/detection/test_utils.py",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ],
+  "theadeyemiolayinka/python-scripts": [
+    {
+      "title": "Hacktoberfest Python Scripts Contributions. ",
+      "body": "You can add any of your hacktoberfest python projects following the\u00a0[contributing guidelines](https://github.com/theadeyemiolayinka/python-scripts/blob/main/contributing.md).",
+      "num": 133,
+      "state": "closed",
+      "repo_name": "theadeyemiolayinka/python-scripts",
+      "pr": {
+        "num": 161,
+        "merge_commit_sha": "6ab74ce3e50297c4bdb092b9592ebd72b021a80d",
+        "base_sha": "947d0d89a5c2285a252a461f5257031612d508d9",
+        "changed_files": [
+          {
+            "filename": "src/gh-adithya/Kanye Quotes GUI/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Kanye Quotes GUI/background.png",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Kanye Quotes GUI/kanye.png",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Kanye Quotes GUI/main.py",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Kanye Quotes GUI/requirements.txt",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Mail Merge Project/Input/Letters/starting_letter.txt",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Mail Merge Project/Input/Names/invited_names.txt",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Mail Merge Project/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Mail Merge Project/main.py",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Mail Merge Project/requirements.txt",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Pomodoro Timer/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Pomodoro Timer/main.py",
+            "status": "added"
+          },
+          {
+            "filename": "src/gh-adithya/Pomodoro Timer/tomato.png",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Python Script to setup a MySql DataBase",
+      "body": null,
+      "num": 130,
+      "state": "closed",
+      "repo_name": "theadeyemiolayinka/python-scripts",
+      "pr": {
+        "num": 131,
+        "merge_commit_sha": "d463f0f9c2caf9c05f3de029351bf7970110009a",
+        "base_sha": "1763aaf909c1331b63756d1b61efeb0b5bc10193",
+        "changed_files": [
+          {
+            "filename": "src/arhantbararia/mysql_dbSetup/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "src/arhantbararia/mysql_dbSetup/mysql_db_setup.py",
+            "status": "added"
+          },
+          {
+            "filename": "src/arhantbararia/mysql_dbSetup/requirements.txt",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Tic Tac Toe Game in Python",
+      "body": null,
+      "num": 118,
+      "state": "closed",
+      "repo_name": "theadeyemiolayinka/python-scripts",
+      "pr": {
+        "num": 119,
+        "merge_commit_sha": "56506fe9f1bc248cf0de3f1e93633e02292be5b1",
+        "base_sha": "281bccb4db352b0f72c3e42f5510efe1963ce851",
+        "changed_files": [
+          {
+            "filename": "src/asryan11/Tic_Tac_Toe/Readme.md",
+            "status": "added"
+          },
+          {
+            "filename": "src/asryan11/Tic_Tac_Toe/main.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Hacktoberfest Python Scripts Contribution.",
+      "body": "You can add any of your hacktoberfest python projects following the [contributing guidelines](https://github.com/theadeyemiolayinka/python-scripts/blob/main/contributing.md).",
+      "num": 116,
+      "state": "closed",
+      "repo_name": "theadeyemiolayinka/python-scripts",
+      "pr": {
+        "num": 117,
+        "merge_commit_sha": "281bccb4db352b0f72c3e42f5510efe1963ce851",
+        "base_sha": "73fee7cdd338dd8b71cba59ba51032a55f488a1f",
+        "changed_files": [
+          {
+            "filename": "src/akadeepesh/BounceBall/BounceBall.py",
+            "status": "added"
+          },
+          {
+            "filename": "src/akadeepesh/BounceBall/Readme.md",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Hacktoberfest Python Scripts Contribution.",
+      "body": "You can add any of your hacktoberfest python projects following the [contributing guidelines](https://github.com/theadeyemiolayinka/python-scripts/blob/main/contributing.md).",
+      "num": 108,
+      "state": "closed",
+      "repo_name": "theadeyemiolayinka/python-scripts",
+      "pr": {
+        "num": 111,
+        "merge_commit_sha": "8ad95100e7f733d51e745a1265f8372303b26229",
+        "base_sha": "697d428df090fbe297f58074bfddd14e12fe3dcd",
+        "changed_files": [
+          {
+            "filename": "src/Jagannath15/Check_Armstrong/main.py",
+            "status": "added"
+          }
+        ]
+      }
+    }
+  ],
+  "crowdin/crowdin-api-client-python": [
+    {
+      "title": "Strings translations APIs: add new parameters support",
+      "body": "Several String Translation API endpoints have been enhanced with new parameters support: `labelIds`, `excludeLabelIds`. These parameters should be added to this API client.\n\n**References:**\n\n- [List Translation Approvals](https://developer.crowdin.com/enterprise/api/v2/#operation/api.projects.approvals.getMany)\n- [List Translation Votes](https://developer.crowdin.com/enterprise/api/v2/#operation/api.projects.votes.getMany)",
+      "num": 135,
+      "state": "closed",
+      "repo_name": "crowdin/crowdin-api-client-python",
+      "pr": {
+        "num": 136,
+        "merge_commit_sha": "9aea930af8c8ab2c140249d17c75bc3b2e688bae",
+        "base_sha": "05ff99b5c8629fd28b0a64303d9cd63fcee3813f",
+        "changed_files": [
+          {
+            "filename": "crowdin_api/api_resources/string_translations/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/string_translations/tests/test_string_translations_resources.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Report Settings Template: add the `isPublic` property support",
+      "body": "The Report Settings Template API now supports the ability to create public templates. We need to add support for the `isPublic` property to this Crowdin API client.\n\n**References:**\n\n- [Add Report Settings Template](https://developer.crowdin.com/api/v2/#operation/api.projects.reports.settings-templates.post)\n- [Get Report Settings Template](https://developer.crowdin.com/api/v2/#operation/api.projects.reports.settings-templates.get) (response)",
+      "num": 131,
+      "state": "closed",
+      "repo_name": "crowdin/crowdin-api-client-python",
+      "pr": {
+        "num": 137,
+        "merge_commit_sha": "bd7dbd3f5ec623c2c100fbb27cad8bd0eee34e7a",
+        "base_sha": "9aea930af8c8ab2c140249d17c75bc3b2e688bae",
+        "changed_files": [
+          {
+            "filename": "crowdin_api/api_resources/reports/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/reports/tests/test_reports_resources.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Fix Unit tests for Python 3.12",
+      "body": "I added version 3.12 to the CI/CD pipeline in #126 and some tests failed.\r\n\r\nhttps://github.com/crowdin/crowdin-api-client-python/actions/runs/6453647001/job/17517596970\r\n\r\nWe need to fix these tests to run successfully on 3.12.",
+      "num": 127,
+      "state": "closed",
+      "repo_name": "crowdin/crowdin-api-client-python",
+      "pr": {
+        "num": 128,
+        "merge_commit_sha": "9695800d112284445d354f3d43fcaaed3d854b27",
+        "base_sha": "00d0ff24122a15a683fc8517b318a1839779d94a",
+        "changed_files": [
+          {
+            "filename": "crowdin_api/api_resources/reports/tests/test_reports_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/tests/test_exceptions.py",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Add project_id property to client to set it once and skip this parameter in functions",
+      "body": "### Discussed in https://github.com/crowdin/crowdin-api-client-python/discussions/71\r\n\r\n<div type='discussions-op-text'>\r\n\r\n<sup>Originally posted by **xabk** March  1, 2023</sup>\r\nHello!\r\n\r\nI feel like most of the time, the client is used to work with one project but it still requires you to pass `project_id` into every single project-related function.\r\n\r\nIt would be great if the client itself had a `project_id` property that could be set and used by the functions under the hood.\r\n\r\nWhat do you guys think?</div>",
+      "num": 123,
+      "state": "closed",
+      "repo_name": "crowdin/crowdin-api-client-python",
+      "pr": {
+        "num": 129,
+        "merge_commit_sha": "05ff99b5c8629fd28b0a64303d9cd63fcee3813f",
+        "base_sha": "256c60a1811685759e2d08f1a33b2de024af93d7",
+        "changed_files": [
+          {
+            "filename": "README.md",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/abstract/resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/abstract/tests/test_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/bundles/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/bundles/tests/test_bundles_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/dictionaries/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/dictionaries/tests/test_dictionaries_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/distributions/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/distributions/tests/test_distributions_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/glossaries/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/glossaries/tests/test_glossaries_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/labels/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/labels/tests/test_labels_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/notifications/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/notifications/tests/test_notification_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/projects/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/projects/tests/test_projects_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/reports/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/reports/tests/test_reports_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/screenshots/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/screenshots/tests/test_screenshots_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/source_files/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/source_files/tests/test_source_files_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/source_strings/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/source_strings/tests/test_source_strings_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/string_comments/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/string_comments/tests/test_string_comments_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/string_translations/resource.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/string_translations/tests/test_string_translations_resources.py",
+            "status": "modified"
+          },
+          {
+            "filename": "crowdin_api/api_resources/tasks/resource.py",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ],
+  "Punit-Choudhary/Python-beginner-scripts": [
+    {
+      "title": "Symbol Pattern 12",
+      "body": "- **File/Project Name:** Symbol Pattern 12\r\n- **What I want to work upon:**  [Pattern 12](https://github.com/Punit-Choudhary/Python-beginner-scripts/blob/main/Patterns/Symbol_Patterns/img/12.PNG)\r\n\r\n## Instructions\r\n\r\n- Use comments and docstrings\r\n- Make folder if project contains more than one file\r\n- Lint your code using flake8\r\n\r\n**I want to:** (Please add/remove options as per requirement)\r\n\r\n- [x] Add my script/project\r\n- [x] **Category:**  Symbol(eg: Math, Patterns, Projects)\r\n- [x] There is no existing issue about this script/project\r\n- [x] There is no such script/project in the repo\r\n\r\n:star2: Star it :fork_and_knife:Fork it :handshake: Contribute to it!\r\n\r\nDiscord server  - http://pragmaticprogrammer.in/discord\r\n\r\nHappy Coding :purple_heart:",
+      "num": 268,
+      "state": "closed",
+      "repo_name": "Punit-Choudhary/Python-beginner-scripts",
+      "pr": {
+        "num": 269,
+        "merge_commit_sha": "556ebfcaee0759ac0c0852c5a0eaa4fe7436103c",
+        "base_sha": "a8659d291ef8ba6282ad1c25a8b9ac4a4485a1df",
+        "changed_files": [
+          {
+            "filename": "Patterns/Symbol_Patterns/code/Symbol_Pattern_12/README.MD",
+            "status": "added"
+          },
+          {
+            "filename": "Patterns/Symbol_Patterns/code/Symbol_Pattern_12/symbol_pattern12.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Pyramid Pattern 3",
+      "body": "- **File/Project Name:** Pyramid Pattern 3\r\n- **What I want to work upon:** Patterns/Pyramid_Patterns/img/pyramidpattern3.PNG\r\n\r\n## Instructions\r\n\r\n- Use comments and docstrings\r\n- Make folder if project contains more than one file\r\n- Lint your code using flake8\r\n\r\n**I want to:** (Please add/remove options as per requirement)\r\n\r\n- [x] Add my script/project\r\n- [x] **Category:** (Pattern)\r\n- [x] There is no existing issue about this script/project\r\n- [x] There is no such script/project in the repo\r\n\r\n:star2: Star it :fork_and_knife:Fork it :handshake: Contribute to it!\r\n\r\nDiscord server  - http://pragmaticprogrammer.in/discord\r\n\r\nHappy Coding :purple_heart:",
+      "num": 266,
+      "state": "closed",
+      "repo_name": "Punit-Choudhary/Python-beginner-scripts",
+      "pr": {
+        "num": 270,
+        "merge_commit_sha": "3a1225b12ab40fe0dd817caafade99d98c457e7b",
+        "base_sha": "b8ae59cf49f2659d4cca1aa769871d515321b227",
+        "changed_files": [
+          {
+            "filename": "Patterns/Pyramid_Patterns/Code/Pyramid_Pattern_3/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "Patterns/Pyramid_Patterns/Code/Pyramid_Pattern_3/pyramid_pattern_3.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Numeric Pattern 5",
+      "body": "- **File/Project Name:** Numeric Pattern 5\r\n- **What I want to work upon:** Add code to draw numeric pattern 5\r\n\r\n## Instructions\r\n\r\n- Use comments and docstrings\r\n- Make folder if project contains more than one file\r\n- Lint your code using flake8\r\n\r\n**I want to:** (Please add/remove options as per requirement)\r\n\r\n- [x] Add my script/project\r\n- [x] **Category:** (Patterns)\r\n- [x] There is no existing issue about this script/project\r\n- [x] There is no such script/project in the repo\r\n\r\n:star2: Star it :fork_and_knife:Fork it :handshake: Contribute to it!\r\n\r\nDiscord server  - http://pragmaticprogrammer.in/discord\r\n\r\nHappy Coding :purple_heart:",
+      "num": 263,
+      "state": "closed",
+      "repo_name": "Punit-Choudhary/Python-beginner-scripts",
+      "pr": {
+        "num": 265,
+        "merge_commit_sha": "a8659d291ef8ba6282ad1c25a8b9ac4a4485a1df",
+        "base_sha": "9064cc273d9b04f5eb275e2a2e645e3ce93b8bcb",
+        "changed_files": [
+          {
+            "filename": "Patterns/Numeric_Patterns/Code/Numeric_Pattern_5/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "Patterns/Numeric_Patterns/Code/Numeric_Pattern_5/numeric_pattern_5.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Alphabetic Pattern 2",
+      "body": "- **File/Project Name: Alphabetic Pattern 2**\r\n- **What I want to work upon: Add code to draw alphabetic pattern 2**\r\n\r\n## Instructions\r\n\r\n- Use comments and docstrings\r\n- Make folder if project contains more than one file\r\n- Lint your code using flake8\r\n\r\n**I want to:** (Please add/remove options as per requirement)\r\n\r\n- [x] Add my script/project\r\n- [x] **Category:** (Patterns)\r\n- [x] There is no existing issue about this script/project\r\n- [x] There is no such script/project in the repo\r\n\r\n:star2: Star it :fork_and_knife:Fork it :handshake: Contribute to it!\r\n\r\nDiscord server  - http://pragmaticprogrammer.in/discord\r\n\r\nHappy Coding :purple_heart:",
+      "num": 259,
+      "state": "closed",
+      "repo_name": "Punit-Choudhary/Python-beginner-scripts",
+      "pr": {
+        "num": 262,
+        "merge_commit_sha": "2ef84f3360dfd22f2a8901f9610cb528549eda8c",
+        "base_sha": "fdcbb780ae451e402aa59052308fff8f60951c10",
+        "changed_files": [
+          {
+            "filename": "Patterns/Alphabetic_Patterns/Code/alphabetic_pattern_2/README.md",
+            "status": "added"
+          },
+          {
+            "filename": "Patterns/Alphabetic_Patterns/Code/alphabetic_pattern_2/pattern2.py",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Area of Triangle using sides",
+      "body": "- **File/Project Name:** Area of Triangles using sides\r\n- **What I want to work up on:** Maths functions and calculations\r\n      I have made a Python script for the user to calculate the area of triangles using the side measurements, through `Heron's Formula`\r\n\r\n## Instructions\r\n\r\n- Use comments and docstrings\r\n- Make a folder if the project contains more than one file\r\n- Lint your code using flake8\r\n\r\n**I want to:** (Please add/remove options as per requirement)\r\n\r\n- [x] Add my script/project\r\n- [x] **Category:** Math\r\n- [x] There is no existing issue about this script/project\r\n- [x] There is no such script/project in the repo\r\n\r\n:star2: Star it :fork_and_knife: Fork it :handshake: Contribute to it!\r\n\r\nDiscord server  - http://pragmaticprogrammer.in/discord\r\n\r\nHappy Coding :purple_heart:\r\n\r\n@Punit-Choudhary, I would like you to review my contribution and approve it to create a pull request for your repo.",
+      "num": 257,
+      "state": "closed",
+      "repo_name": "Punit-Choudhary/Python-beginner-scripts",
+      "pr": {
+        "num": 258,
+        "merge_commit_sha": "fdcbb780ae451e402aa59052308fff8f60951c10",
+        "base_sha": "ffcd458c2a9907e2ca357e324c5f9be1046b57ae",
+        "changed_files": [
+          {
+            "filename": "Math/Area_of_triangles_sides.py",
+            "status": "added"
+          }
+        ]
+      }
+    }
+  ],
+  "BerriAI/litellm": [
+    {
+      "title": "[Feature]: When an exception is raised tell user they can debug via 'litellm.set_verbose=True'",
+      "body": "### The Feature\n\nWhen an exception is raised tell user they can debug via 'litellm.set_verbose=True'\n\n### Motivation, pitch\n\nmake it easy for people to figure out how to debug an error. \n\n### Twitter / LinkedIn details\n\n_No response_",
+      "num": 529,
+      "state": "closed",
+      "repo_name": "BerriAI/litellm",
+      "pr": {
+        "num": 530,
+        "merge_commit_sha": "24c12d6b9b4b7de76c50eb5319151fbddb1dce54",
+        "base_sha": "a0641ab430eaacc75713c0d7f5714a405fbb45c9",
+        "changed_files": [
+          {
+            "filename": "litellm/utils.py",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ],
+  "arc53/DocsGPT": [
+    {
+      "title": "\ud83d\udc1b Bug Report: Fix features on hero",
+      "body": "### \ud83d\udcdc Description\n\nLooks good on firefox, but on safari and chrome \r\n<img width=\"943\" alt=\"Screenshot 2023-10-12 at 11 18 46\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/0730a852-8e25-4574-b3a8-b10f7f0a4f98\">\r\n\r\nAlso when viewport is shrunk it starts to breaks\r\n<img width=\"704\" alt=\"Screenshot 2023-10-12 at 11 20 05\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/d83346ca-8fdb-4475-992f-869f85c93556\">\r\n\r\n<img width=\"476\" alt=\"Screenshot 2023-10-12 at 11 19 03\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/d4dc1333-46e8-4906-aaa1-3ab3e85c6895\">\r\n\n\n### \ud83d\udc5f Reproduction steps\n\nLaunch\r\nopen main page\r\nShrik browser or open in chrome/safari\n\n### \ud83d\udc4d Expected behavior\n\nShould look like this \r\n<img width=\"963\" alt=\"Screenshot 2023-10-12 at 11 28 33\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/2f97ac12-0c5d-4a31-8898-cdcb827f1951\">\r\n\r\nor \r\n<img width=\"365\" alt=\"Screenshot 2023-10-12 at 11 29 06\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/52b43088-1880-4bf8-a390-e0dd8b36b693\">\r\n\n\n### \ud83d\udc4e Actual Behavior with Screenshots\n\n<img width=\"704\" alt=\"Screenshot 2023-10-12 at 11 20 05\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/b95abe27-cd51-4943-8cd8-d8d8f3c47da3\">\r\n\r\n<img width=\"476\" alt=\"Screenshot 2023-10-12 at 11 19 03\" src=\"https://github.com/arc53/DocsGPT/assets/15183589/4869ca8d-9edd-4bef-9c37-b40d9b1231e9\">\r\n\n\n### \ud83d\udcbb Operating system\n\nMacOS\n\n### What browsers are you seeing the problem on?\n\nChrome, Safari\n\n### \ud83e\udd16 What development environment are you experiencing this bug on?\n\nDocker\n\n### \ud83d\udd12 Did you set the correct environment variables in the right path? List the environment variable names (not values please!)\n\n_No response_\n\n### \ud83d\udcc3 Provide any additional context for the Bug.\n\n_No response_\n\n### \ud83d\udcd6 Relevant log output\n\n_No response_\n\n### \ud83d\udc40 Have you spent some time to check if this bug has been raised before?\n\n- [X] I checked and didn't find similar issue\n\n### \ud83d\udd17 Are you willing to submit PR?\n\nNo\n\n### \ud83e\uddd1\u200d\u2696\ufe0f Code of Conduct\n\n- [X] I agree to follow this project's Code of Conduct",
+      "num": 581,
+      "state": "closed",
+      "repo_name": "arc53/DocsGPT",
+      "pr": {
+        "num": 679,
+        "merge_commit_sha": "46817c7664743d163cb324e1486d87421d721135",
+        "base_sha": "2df32cd9a733fcb3154a6746fb546c629fb3dd05",
+        "changed_files": [
+          {
+            "filename": "frontend/src/Hero.tsx",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create a railway deployments guide",
+      "body": "Just a guide on how to deploy docsgpt with railway",
+      "num": 461,
+      "state": "closed",
+      "repo_name": "arc53/DocsGPT",
+      "pr": {
+        "num": 670,
+        "merge_commit_sha": "9119030959d9a75cfe6642a35230a9672bfcfbc6",
+        "base_sha": "5dbd240017bd47a9a2e518e5152bc904b4dad9e4",
+        "changed_files": [
+          {
+            "filename": "docs/pages/Deploying/Railway-Deploying.md",
+            "status": "added"
+          },
+          {
+            "filename": "docs/pages/Deploying/image.png",
+            "status": "added"
+          }
+        ]
+      }
+    },
+    {
+      "title": "\ud83d\udc1b Bug Report: ",
+      "body": "### \ud83d\udcdc Description\n\nAdd placeholder text \"Type your message here...\" to the input field\n\n### \ud83d\udc5f Reproduction steps\n\n1. Go to https://docsgpt.arc53.com/\r\n2. Look at the input field which doesn't have a placeholder\r\n3. Compare to [figma](https://www.figma.com/file/OXLtrl1EAy885to6S69554/DocsGPT?type=design&node-id=1%3A677&mode=design&t=tMBoGNoGdeHF8dmI-1) design which has a placeholder\n\n### \ud83d\udc4d Expected behavior\n\nShould contain a placeholder: \"Type your message here...\"\r\n![image](https://github.com/arc53/DocsGPT/assets/17906039/d2af4d1b-59cc-4904-804a-fef2584aebc7)\r\n\n\n### \ud83d\udc4e Actual Behavior with Screenshots\n\nNo visible placeholder\r\n\r\n![image](https://github.com/arc53/DocsGPT/assets/17906039/be82dd33-8e24-4bc5-b229-a61da79fc31a)\r\n\n\n### \ud83d\udcbb Operating system\n\nWindows\n\n### What browsers are you seeing the problem on?\n\n_No response_\n\n### \ud83e\udd16 What development environment are you experiencing this bug on?\n\nDocker\n\n### \ud83d\udd12 Did you set the correct environment variables in the right path? List the environment variable names (not values please!)\n\n_No response_\n\n### \ud83d\udcc3 Provide any additional context for the Bug.\n\n_No response_\n\n### \ud83d\udcd6 Relevant log output\n\n_No response_\n\n### \ud83d\udc40 Have you spent some time to check if this bug has been raised before?\n\n- [X] I checked and didn't find similar issue\n\n### \ud83d\udd17 Are you willing to submit PR?\n\nNone\n\n### \ud83e\uddd1\u200d\u2696\ufe0f Code of Conduct\n\n- [X] I agree to follow this project's Code of Conduct",
+      "num": 422,
+      "state": "closed",
+      "repo_name": "arc53/DocsGPT",
+      "pr": {
+        "num": 434,
+        "merge_commit_sha": "30299a9f042df27fba4bcd162d0b6156e38bb6ce",
+        "base_sha": "b50c0522220b0bc4fbbdd10196d5fbce6cca0913",
+        "changed_files": [
+          {
+            "filename": "frontend/src/conversation/Conversation.tsx",
+            "status": "modified"
+          },
+          {
+            "filename": "frontend/src/index.css",
+            "status": "modified"
+          }
+        ]
+      }
+    },
+    {
+      "title": "\ud83d\udc1b Bug Report: Frontend: Chat Scrolling issue",
+      "body": "### \ud83d\udcdc Description\r\n\r\nThe content of chat looks incorrectly when scrolling appears\r\n\r\n### \ud83d\udc5f Reproduction steps\r\n\r\n1. Go to https://docsgpt.arc53.com/\r\n2. Enter enough messages in the input field and send them to enable scrolling of the screen\r\n\r\n### \ud83d\udc4d Expected behavior\r\n\r\nDissapear behind a white rectangle right above the input field. And the dynamic action button should float above it on the fixed distance from the input field \r\n\r\n![image](https://github.com/arc53/DocsGPT/assets/17906039/98cbdd82-ff4b-4500-80f7-6ef852f7c536)\r\n\r\n\r\n### \ud83d\udc4e Actual Behavior with Screenshots\r\n\r\n![image](https://github.com/arc53/DocsGPT/assets/17906039/993eba55-150e-459c-92d6-7cff5c923da1)\r\n\r\n\r\n### \ud83d\udcbb Operating system\r\n\r\nWindows\r\n\r\n### What browsers are you seeing the problem on?\r\n\r\n_No response_\r\n\r\n### \ud83e\udd16 What development environment are you experiencing this bug on?\r\n\r\nDocker\r\n\r\n### \ud83d\udd12 Did you set the correct environment variables in the right path? List the environment variable names (not values please!)\r\n\r\n_No response_\r\n\r\n### \ud83d\udcc3 Provide any additional context for the Bug.\r\n\r\n_No response_\r\n\r\n### \ud83d\udcd6 Relevant log output\r\n\r\n_No response_\r\n\r\n### \ud83d\udc40 Have you spent some time to check if this bug has been raised before?\r\n\r\n- [X] I checked and didn't find similar issue\r\n\r\n### \ud83d\udd17 Are you willing to submit PR?\r\n\r\nNone\r\n\r\n### \ud83e\uddd1\u200d\u2696\ufe0f Code of Conduct\r\n\r\n- [X] I agree to follow this project's Code of Conduct",
+      "num": 418,
+      "state": "closed",
+      "repo_name": "arc53/DocsGPT",
+      "pr": {
+        "num": 477,
+        "merge_commit_sha": "6d0cc49ecd4b039e3c7ce82c104da81d716daf01",
+        "base_sha": "151fdb9bad6839ea4838d793ee9af93d4ca9b1ae",
+        "changed_files": [
+          {
+            "filename": "frontend/src/Hero.tsx",
+            "status": "modified"
+          },
+          {
+            "filename": "frontend/src/conversation/Conversation.tsx",
+            "status": "modified"
+          }
+        ]
+      }
+    }
+  ]
+}
