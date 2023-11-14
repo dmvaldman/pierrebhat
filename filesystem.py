@@ -97,6 +97,8 @@ class Filesystem():
         self.meta = meta
 
     def find_folder(self, path):
+        if not path.startswith(self.current_folder.name):
+            raise Exception(f'Could not find directory {path} in {self.current_folder.name}. Did you mean to start the path with {self.current_folder.name}?')
         return self.current_folder.find_folder(path)
 
     def open(self, directory=None):
@@ -129,6 +131,9 @@ class Filesystem():
             return file.get_content()
 
     def get_summary(self, filename):
+        if not filename.startswith(self.current_folder.name):
+            raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean to start the path with {self.current_folder.name}?')
+
         file = self.current_folder.find_file(filename)
         if file is None:
             raise Exception(f'Could not find file {filename} in {self.current_folder.name}')
@@ -138,6 +143,8 @@ class Filesystem():
     def get_summaries(self, filenames):
         summaries_str = ''
         for filename in filenames:
+            if not filename.startswith(self.current_folder.name):
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean to start the path with {self.current_folder.name}?')
             file = self.current_folder.find_file(filename)
             if file is None:
                 raise Exception(f'Could not find file {filename} in {self.current_folder.name}')
@@ -186,9 +193,6 @@ class Folder:
             folder = folder.find_folder(name)
             if folder is not None:
                 return folder
-            else:
-                return None
-                # raise Exception(f'Could not find folder {name} in {self.name}')
 
         return None
 
@@ -279,7 +283,15 @@ class File:
     def get_summary(self):
         return f'Summary for {self.name}\n{self.meta}'
 
-function_spec = [
+function_specs = [
+    {
+        "name": "list_files",
+        "description": "Returns a prettified list of all files in the codebase",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    },
     {
         "name": "get_summaries",
         "description": "Returns high-level summaries (description, dependencies, classnames) for a given list of filenames",
@@ -314,7 +326,7 @@ function_spec = [
     },
     {
         "name": "get_filename_for_object",
-        "description": "Returns the filename for where a given class, method or function is defined",
+        "description": "Returns the filename for where a given class, method or function is defined.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -386,7 +398,7 @@ function_spec = [
             }
         },
         "required": ["patches"]
-    }
+    },
 ]
 
 if __name__ == '__main__':

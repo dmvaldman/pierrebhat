@@ -1,16 +1,15 @@
-from autogen import AssistantAgent, ConversableAgent, config_list_from_json
-from filesystem import Filesystem, function_spec
-from summarizer import Summarizer
+from autogen import ConversableAgent
+from filesystem import Filesystem, function_specs
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
 
-
-config_list = [{'model': 'gpt-4'}]
+# model = "gpt-4-0613"
+model = "gpt-4-1106-preview"
 llm_config={
     "request_timeout": 600,
     "seed": 42,
-    "model": "gpt-4-0613",  # make sure the endpoint you use supports the model
+    "model": model,  # make sure the endpoint you use supports the model
     "temperature": 0,
-    "functions": function_spec
+    "functions": function_specs
 }
 
 class Issue():
@@ -47,6 +46,7 @@ class ChatFindFiles():
             "get_summaries": filesystem.get_summaries,
             "get_content": filesystem.get_content,
             "get_filename_for_object": filesystem.get_filename_for_object,
+            "list_files": filesystem.tree,
             'submit_files': onSubmit
         }
 
@@ -62,8 +62,8 @@ class ChatFindFiles():
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
         prompt = f"{str(issue)}\n\nHere is the directory structure.\n\n{fs.tree()}\nWhat files need to be changed to fix this issue? Navigate/read the codebase using the filesystem API to determine a list of files (in mardown format) that need modifying."
-        if len(prompt) > MAX_CONTENT_LENGTH - 200:
-            prompt = prompt[:MAX_CONTENT_LENGTH - 200] + '...'
+        if len(prompt) > MAX_CONTENT_LENGTH:
+            prompt = prompt[:MAX_CONTENT_LENGTH] + '...'
         return prompt
 
     def create_chatbots(self):

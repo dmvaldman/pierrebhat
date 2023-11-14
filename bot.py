@@ -1,5 +1,5 @@
 from github import Github
-from openai_helpers.helpers import compare_embeddings, compare_text, embed, complete, complete_code
+from openai_helpers.helpers import compare_embeddings, compare_text, embed, complete
 from multiprocessing import Pool
 from functools import reduce
 import os

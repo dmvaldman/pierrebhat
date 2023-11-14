@@ -2,10 +2,8 @@ from github import Github
 import requests
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
-import re
 import os
-import json
-from openai_helpers.helpers import compare_embeddings, compare_text, embed, complete, complete_code, EMBED_DIMS
+from openai_helpers.helpers import embed, EMBED_DIMS
 import subprocess
 
 session = HTMLSession()

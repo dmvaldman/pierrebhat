@@ -1,0 +1,53 @@
+[
+  {
+    "repo_name": "roboflow/supervision",
+    "issue_num": 464,
+    "actual_filenames": [
+      "supervision/detection/line_counter.py"
+    ],
+    "proposed_filenames": [
+      "supervision/detection/line_counter.py",
+      "supervision/detection/tools/polygon_zone.py"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "supervision/supervision/detection/line_counter.py",
+        "searchString": "def trigger(self, detections: Detections):",
+        "replaceString": "def trigger(self, detections: Detections) -> np.ndarray:"
+      },
+      {
+        "filename": "supervision/supervision/detection/line_counter.py",
+        "searchString": "for xyxy, _, confidence, class_id, tracker_id in detections:",
+        "replaceString": "crossed = np.zeros(len(detections), dtype=bool)\n        for i, (xyxy, _, confidence, class_id, tracker_id) in enumerate(detections):"
+      },
+      {
+        "filename": "supervision/supervision/detection/line_counter.py",
+        "searchString": "self.out_count += 1",
+        "replaceString": "self.out_count += 1\n        crossed[i] = True\n    return crossed"
+      }
+    ],
+    "correct": false
+  },
+  {
+    "repo_name": "roboflow/supervision",
+    "issue_num": 439,
+    "actual_filenames": [
+      "supervision/draw/utils.py"
+    ],
+    "proposed_filenames": [
+      "supervision/draw/utils.py",
+      "supervision/__init__.py",
+      "CONTRIBUTING.md"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "supervision/supervision/draw/utils.py",
+        "searchString": "def draw_text(",
+        "replaceString": "def draw_image(\n    scene: np.ndarray, \n    image: Union[str, np.ndarray],\n    opacity: float,\n    rect: Rect\n) -> np.ndarray:\n    \"\"\"\n    Draws an image onto a given scene with specified opacity and dimensions.\n    \n    Args:\n        scene (np.ndarray): The background image onto which the image will be drawn.\n        image (Union[str, np.ndarray]): The image to be drawn. Can be either a file path or a NumPy array.\n        opacity (float): The opacity level of the image to be drawn, ranging from 0.0 to 1.0.\n        rect (Rect): A Rect object specifying the dimensions and position where the image will be drawn.\n        \n    Returns:\n        np.ndarray: The scene with the image drawn onto it.\n        \n    Example:\n        >>> scene = np.zeros((400, 400, 3), dtype=np.uint8)\n        >>> image_path = \"path/to/image.jpg\"\n        >>> opacity = 0.5\n        >>> rect = Rect(x=50, y=50, width=200, height=200)\n        >>> new_scene = draw_image(scene, image_path, opacity, rect)\n    \"\"\"\n    pass\n\n"
+      }
+    ],
+    "correct": false
+  }
+]
