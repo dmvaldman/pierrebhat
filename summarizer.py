@@ -16,6 +16,8 @@ def add_overview_to_reverse_lookup(overview, file_path, reverse_lookup):
         reverse_lookup[cls] = file_path
     for func in overview["functions"]:
         reverse_lookup[func] = file_path
+    for method in overview["methods"]:
+        reverse_lookup[method] = file_path
     return reverse_lookup
 
 class Summary():
@@ -48,20 +50,26 @@ class Summarizer():
         classes = []
         functions = []
         dependencies = []
+        methods = []
 
         for n in node.body:
             if isinstance(n, py_ast.ClassDef):
-                classes.append(n.name)
+                class_name = n.name
+                classes.append(class_name)
+                for item in n.body:
+                    if isinstance(item, py_ast.FunctionDef):
+                        method_name = item.name
+                        # Concatenate the class name with the method name
+                        qualified_name = f"{class_name}.{method_name}"
+                        methods.append(qualified_name)
             elif isinstance(n, py_ast.FunctionDef):
                 functions.append(n.name)
             elif isinstance(n, py_ast.Import):
                 for name in n.names:
-                    # Check against both standard and external libraries
                     if name.name not in standard_lib and name.name not in installed_packages:
                         dependencies.append(name.name)
             elif isinstance(n, py_ast.ImportFrom):
                 module = n.module
-                # Check against both standard and external libraries
                 if module not in standard_lib and module.split('.')[0] not in installed_packages:
                     for name in n.names:
                         dependencies.append(f"{module}.{name.name}")
@@ -69,7 +77,8 @@ class Summarizer():
         return {
             "classes": classes,
             "functions": functions,
-            "dependencies": dependencies
+            "dependencies": dependencies,
+            "methods": methods
         }
 
     def parse_js_file(self, file_path):

@@ -1,9 +1,32 @@
+import concurrent.futures
 from autogen import ConversableAgent
 from filesystem import Filesystem, function_specs
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
+import requests
 
 # model = "gpt-4-0613"
 model = "gpt-4-1106-preview"
+
+onFindFilesDef = {
+    "name": "submit_files",
+    "description": "Submits a list of files to be changed in a PR",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "filenames": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "A filename"
+                },
+                "description": "An array of filenames to submit"
+            }
+        }
+    }
+}
+
+function_specs.append(onFindFilesDef)
+
 llm_config={
     "request_timeout": 600,
     "seed": 42,
@@ -11,6 +34,7 @@ llm_config={
     "temperature": 0,
     "functions": function_specs
 }
+
 
 class Issue():
     def __init__(self, title, body, repo_name, num=None, pr=None):
@@ -28,36 +52,92 @@ class Issue():
     def __str__(self):
         return f"Repo: {self.repo_name}\nIssue Title: {self.title}\nIssue Body: {self.body}\n"
 
+    def filtered_changed_files(self):
+        changed_files = self.changed_files
+        actual_filenames = [file['filename'] for file in changed_files if file['status'] == 'modified']
+
+        #filter filenames to match extensions in Filesystem.extensions
+        actual_filenames = [filename for filename in actual_filenames if filename.endswith(Filesystem.extensions)]
+
+        # filter filenames to remove any directories in Filesystem.directory_blacklist
+        actual_filenames = [filename for filename in actual_filenames if not any(directory in filename for directory in Filesystem.directory_blacklist)]
+
+        return actual_filenames
+
+    def get_changed_file_contents(self):
+        actual_files = {}
+        changed_filenames = self.filtered_changed_files()
+        repo_name = self.repo_name
+        sha = self.pr['merge_commit_sha']
+        for filename in changed_filenames:
+            url = f'https://raw.githubusercontent.com/{repo_name}/{sha}/{filename}'
+            response = requests.get(url)
+            if response.status_code == 200:
+                actual_files[filename] = response.text
+            else:
+                raise Exception("Error getting file from GitHub")
+        return actual_files
+
 class ChatFindFiles():
     system_message_filesystem = """
     You are in control of a filesystem API with access to the codebase of a GitHub repository. This API allows you to read summaries of files
     and their contents. You are being asked by an engineer who is working on solving a GitHub issue for this repository. You must satisfy all their requests
     for information about the codebase.
     """
-    user_system_message = """
+    system_message_user = """
     You are a software engineer working on a GitHub repository. You are professional and terse. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify to resolve the issue, which you can do by conversing with the filesystem API.
-    Provide these files to the filesystem using `submit_files`. Once you have done so respond TERMINATE to end the chat.
+    Provide these files by calling `submit_files` with the filenames as arguments. Once you have done so respond TERMINATE to end the chat.
     """
-    def __init__(self, filesystem, issue, onSubmit):
+    def __init__(self, filesystem, issue):
         self.fs = filesystem
         self.issue = issue
         self.function_map = {
             "get_summaries": filesystem.get_summaries,
             "get_content": filesystem.get_content,
             "get_filename_for_object": filesystem.get_filename_for_object,
-            "list_files": filesystem.tree,
-            'submit_files': onSubmit
+            "list_files": filesystem.tree
         }
 
-        self.user_prompt = self.generate_user_prompt(issue, filesystem)
+        self.results = []
+        self.filenames = concurrent.futures.Future()
         self.create_chatbots()
+        self.done_callback(onFindFilesDef)
 
     @staticmethod
     def is_terminal(message):
         if message['content'] is None:
             return False
         return 'TERMINATE' in message['content']
+
+    def done_callback(self, method_def):
+        def onFindFiles(filenames):
+            # strip repo name from filenames
+            issue = self.issue
+            repo_name = issue.repo_name.split('/')[1]
+            filenames = [filename.replace(repo_name + '/', '', 1) for filename in filenames]
+            actual_filenames = issue.filtered_changed_files()
+            test_result = set(actual_filenames) <= set(filenames)
+
+            result = {
+                'repo_name': issue.repo_name,
+                'issue_num': issue.num,
+                'actual_filenames': actual_filenames,
+                'proposed_filenames': filenames,
+                'correct_files': test_result
+            }
+
+            self.results.append(result)
+
+            filenames = [repo_name + '/' + filename for filename in filenames]
+            self.filenames.set_result(filenames)
+
+        method_name = method_def['name']
+        self.function_map[method_name] = onFindFiles
+        llm_config["functions"].append(method_def)
+
+        self.filesystem_bot.llm_config.update(llm_config)
+        self.user_bot.register_function(self.function_map)
 
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
@@ -77,14 +157,16 @@ class ChatFindFiles():
         )
 
         self.user_bot = ConversableAgent("user",
-            system_message = ChatFindFiles.user_system_message,
+            system_message = ChatFindFiles.system_message_user,
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
+            code_execution_config=False,
             max_consecutive_auto_reply=10,
             human_input_mode="NEVER")
 
     def initiate_chat(self, **kwargs):
-        self.user_bot.initiate_chat(self.filesystem_bot, message=self.user_prompt, **kwargs)
+        prompt = self.generate_user_prompt(self.issue, self.fs)
+        self.user_bot.initiate_chat(self.filesystem_bot, message=prompt, **kwargs)
 
 if __name__ == "__main__":
     repo_name = "Auto-GPT"
