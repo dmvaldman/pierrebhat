@@ -13,41 +13,16 @@
     "correct_patches": [
       {
         "filename": "supervision/supervision/detection/line_counter.py",
-        "searchString": "def trigger(self, detections: Detections):",
-        "replaceString": "def trigger(self, detections: Detections) -> np.ndarray:"
-      },
-      {
-        "filename": "supervision/supervision/detection/line_counter.py",
         "searchString": "for xyxy, _, confidence, class_id, tracker_id in detections:",
         "replaceString": "crossed = np.zeros(len(detections), dtype=bool)\n        for i, (xyxy, _, confidence, class_id, tracker_id) in enumerate(detections):"
       },
       {
         "filename": "supervision/supervision/detection/line_counter.py",
-        "searchString": "self.out_count += 1",
-        "replaceString": "self.out_count += 1\n        crossed[i] = True\n    return crossed"
+        "searchString": "else:\n                self.out_count += 1",
+        "replaceString": "else:\n                self.out_count += 1\n            crossed[i] = True\n        return crossed"
       }
     ],
-    "correct": false
-  },
-  {
-    "repo_name": "roboflow/supervision",
-    "issue_num": 439,
-    "actual_filenames": [
-      "supervision/draw/utils.py"
-    ],
-    "proposed_filenames": [
-      "supervision/draw/utils.py",
-      "supervision/__init__.py",
-      "CONTRIBUTING.md"
-    ],
-    "correct_files": true,
-    "correct_patches": [
-      {
-        "filename": "supervision/supervision/draw/utils.py",
-        "searchString": "def draw_text(",
-        "replaceString": "def draw_image(\n    scene: np.ndarray, \n    image: Union[str, np.ndarray],\n    opacity: float,\n    rect: Rect\n) -> np.ndarray:\n    \"\"\"\n    Draws an image onto a given scene with specified opacity and dimensions.\n    \n    Args:\n        scene (np.ndarray): The background image onto which the image will be drawn.\n        image (Union[str, np.ndarray]): The image to be drawn. Can be either a file path or a NumPy array.\n        opacity (float): The opacity level of the image to be drawn, ranging from 0.0 to 1.0.\n        rect (Rect): A Rect object specifying the dimensions and position where the image will be drawn.\n        \n    Returns:\n        np.ndarray: The scene with the image drawn onto it.\n        \n    Example:\n        >>> scene = np.zeros((400, 400, 3), dtype=np.uint8)\n        >>> image_path = \"path/to/image.jpg\"\n        >>> opacity = 0.5\n        >>> rect = Rect(x=50, y=50, width=200, height=200)\n        >>> new_scene = draw_image(scene, image_path, opacity, rect)\n    \"\"\"\n    pass\n\n"
-      }
-    ],
-    "correct": false
+    "correct_pr": false,
+    "correct_pr_reason": "To determine if the two solutions are equivalent with respect to resolving the issue, we need to compare the changes made to the `LineZone.trigger` method, as this is the core of the issue described. The issue is that the `trigger` method should return a boolean `np.ndarray` indicating which detections have crossed the line in the current frame.\n\nLet's compare the relevant parts of the `trigger` method in both solutions:\n\nSolution 1:\n```python\ncrossed = np.zeros(len(detections), dtype=bool)\n...\ncrossed[i] = True\n...\nreturn crossed\n```\n\nSolution 2:\n```python\ncrossed = np.full(len(detections), False)\n...\ncrossed[i] = True\n...\nreturn crossed\n```\n\nBoth solutions initialize an array to keep track of which detections have crossed the line. Solution 1 uses `np.zeros` to create an array of `False` values, while Solution 2 uses `np.full` with `False` explicitly stated. This difference is purely stylistic and does not affect the functionality.\n\nBoth solutions iterate over the detections, perform the same checks, and update the `crossed` array in the same way by setting `crossed[i] = True` when a detection crosses the line.\n\nBoth solutions return the `crossed` array, which fulfills the requirement of the issue to return a boolean `np.ndarray` indicating which detections have crossed the line.\n\nThe rest of the code in both solutions is identical and pertains to the initialization of the `LineZone` class and the `LineZoneAnnotator` class, which are not directly related to the issue at hand.\n\nIn conclusion, both solutions are essentially equivalent with respect to resolving the issue. They both modify the `trigger` method to return the required boolean `np.ndarray` indicating which detections have crossed the line, which is the core requirement described in the issue. Any other differences are irrelevant to the resolution of the issue.\n\nTERMINATE"
   }
 ]

@@ -2,7 +2,7 @@ import json
 from repo import Repo
 from filesystem import Filesystem
 from chat_find_files import Issue, ChatFindFiles, onFindFilesDef
-from chat_write_code import ChatWriteCode, onWriteCodeDef
+from chat_write_code import ChatWriteCode, onCheckCodeDef
 from chat_compare_code import ChatCompareCode
 
 with open('data/datasets/repo_issues.json') as json_file:
@@ -27,6 +27,10 @@ for repo_name, issues in issues_dataset.items():
     repo = Repo(repo_name)
     repo.download()
     fs = Filesystem(repo.name, create_meta=True)
+    # snippet_type = 'diff'
+    snippet_type = 'snippet'
+
+    results = []
 
     for issue in issues:
         sha = issue['pr']['base_sha']
@@ -43,7 +47,7 @@ for repo_name, issues in issues_dataset.items():
         chat_find_files.initiate_chat(silent=False)
         filenames = chat_find_files.filenames.result()
 
-        chat_write_code = ChatWriteCode(issue, filenames, fs)
+        chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
         chat_write_code.initiate_chat(silent=False)
 
         new_files = chat_write_code.new_files.result()
@@ -54,4 +58,20 @@ for repo_name, issues in issues_dataset.items():
         chat_compare_code.initiate_chat(silent=False)
         answer = chat_compare_code.user_bot.last_message()['content']
 
-        onAssessPR(issue, answer, patches, chat_find_files.results)
+        # save results to file
+        for result in chat_find_files.results:
+            if result['repo_name'] == issue.repo_name and result['issue_num'] == issue.num:
+                result['correct_patches'] = patches
+                if answer == 'YES':
+                    result['correct_pr'] = True
+                    result['correct_pr_reason'] = ''
+                else:
+                    result['correct_pr'] = False
+                    result['correct_pr_reason'] = chat_compare_code.user_bot.last_message()['content']
+                break
+
+        results += chat_find_files.results
+
+        # save results to file
+        with open('data/test_results.json', 'w') as f:
+            json.dump(results, f, indent=2)

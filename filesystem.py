@@ -337,68 +337,7 @@ function_specs = [
             }
         },
         "required": ["name"]
-    },
-    {
-        "name": "submit_files",
-        "description": "Submits a list of files to be changed in a PR",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "filenames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "description": "A filename"
-                    },
-                    "description": "An array of filenames to submit"
-                }
-            }
-        }
-    },
-    {
-        "name": "submit_PR",
-        "description": "Submits a PR by applying patched to files. Optionally, a test file can be provided to be added to the PR.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "patches": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "filename": {
-                                "type": "string",
-                                "description": "The filename to be patched"
-                            },
-                            "searchString": {
-                                "type": "string",
-                                "description": "A string in the file to replace with replaceString"
-                            },
-                            "replaceString": {
-                                "type": "string",
-                                "description": "The string to replace the searchString with"
-                            }
-                        }
-                    },
-                    "description": "An array of patches to be applied to the codebase"
-                },
-                "tests": {
-                    "type": "object",
-                    "properties": {
-                        "filename": {
-                            "type": "string",
-                            "description": "The filename of the test file"
-                        },
-                        "code": {
-                            "type": "string",
-                            "description": "The code of the test file"
-                        }
-                    }
-                }
-            }
-        },
-        "required": ["patches"]
-    },
+    }
 ]
 
 if __name__ == '__main__':

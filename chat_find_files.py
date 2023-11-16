@@ -82,12 +82,13 @@ class ChatFindFiles():
     system_message_filesystem = """
     You are in control of a filesystem API with access to the codebase of a GitHub repository. This API allows you to read summaries of files
     and their contents. You are being asked by an engineer who is working on solving a GitHub issue for this repository. You must satisfy all their requests
-    for information about the codebase.
+    for information about the codebase. Upon given a list of files for a PR, call `submit_files`.
     """
     system_message_user = """
     You are a software engineer working on a GitHub repository. You are professional and terse. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify to resolve the issue, which you can do by conversing with the filesystem API.
-    Provide these files by calling `submit_files` with the filenames as arguments. Once you have done so respond TERMINATE to end the chat.
+    Provide these files by calling `submit_files` with the filenames as arguments. Once you have done so respond TERMINATE to end the chat, but
+    not before you've called `submit_files`!.
     """
     def __init__(self, filesystem, issue):
         self.fs = filesystem

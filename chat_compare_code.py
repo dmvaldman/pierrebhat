@@ -10,8 +10,14 @@ llm_config={
 }
 
 class ChatCompareCode():
-    user_system_message = "You are a programmer collaborating on a GitHub issue. Your task is to decide whether two solutions to the issue are essentially equivalent. If the solutions are roughly equivalent respond YES, otherwise respond NO."
-    comparitor_system_message = "You are a proficient programmer. Your task is to decide whether two solutions to the issue are essentially equivalent. First gather relavant information and explain your reasoning."
+    user_system_message = """You are a programmer collaborating on a GitHub issue.
+    Your task is to decide whether two solutions to the issue are essentially equivalent.
+    If the solutions are roughly equivalent respond YES, otherwise respond NO. To end the conversation, write TERMINATE.
+    """
+    comparitor_system_message = """You are a proficient programmer.
+    Your task is to decide whether two solutions to the issue are essentially equivalent.
+    First gather relavant information and explain your reasoning. To end the conversation, write TERMINATE.
+    """
     def __init__(self, issue, new_files, actual_files):
         self.issue = issue
 
@@ -24,12 +30,16 @@ class ChatCompareCode():
     def is_terminal(message):
         if message['content'] is None:
             return False
-        return 'YES' in message['content'] or 'NO' in message['content']
+        content = message['content']
+        return 'TERMINATE' in content or 'YES' in content or 'NO' in content
 
     def generate_user_prompt(self, issue, new_files, actual_files):
         new_str = '\n\n'.join([f'Filename: {filename}\n\n{contents}' for filename, contents in new_files.items()])
         actual_str = '\n\n'.join([f'Filename: {filename}\n\n{contents}' for filename, contents in actual_files.items()])
-        prompt = f"Here are two solutions written by two different people to fix this issue {issue}. They may differ on the surface, but are they essentially equivalent?\n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n. Do you think they are roughly equivalent?"
+        prompt = f"""Here are two solutions written by two different people to fix this issue: {issue}.
+        The solutions may differ on the surface, but we are only here to judge whether they resolve the issue, any other differences are irrelevant.
+        \n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n Do you think they are roughly equivalent with respect to resolving the issue?
+        """
         return prompt
 
     def create_chatbots(self):
@@ -45,6 +55,7 @@ class ChatCompareCode():
         self.user_bot = ConversableAgent("user",
             system_message = ChatCompareCode.user_system_message,
             is_termination_msg = ChatCompareCode.is_terminal,
+            code_execution_config=False,
             max_consecutive_auto_reply=10,
             human_input_mode="NEVER")
 
