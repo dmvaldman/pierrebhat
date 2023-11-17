@@ -3,6 +3,7 @@ from repo import Repo
 from filesystem import Filesystem
 from chat_find_files import Issue, ChatFindFiles, onFindFilesDef
 from chat_write_code import ChatWriteCode, onCheckCodeDef
+from gpt_write_code import GPTWriteCode
 from chat_compare_code import ChatCompareCode
 
 with open('data/datasets/repo_issues.json') as json_file:
@@ -47,7 +48,9 @@ for repo_name, issues in issues_dataset.items():
         chat_find_files.initiate_chat(silent=False)
         filenames = chat_find_files.filenames.result()
 
-        chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
+        # chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
+        chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type)
+
         chat_write_code.initiate_chat(silent=False)
 
         new_files = chat_write_code.new_files.result()
