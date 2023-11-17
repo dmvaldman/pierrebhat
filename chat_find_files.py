@@ -28,7 +28,7 @@ onFindFilesDef = {
 function_specs.append(onFindFilesDef)
 
 llm_config={
-    "request_timeout": 600,
+    "timeout": 600,
     "seed": 42,
     "model": model,  # make sure the endpoint you use supports the model
     "temperature": 0,
@@ -117,8 +117,13 @@ class ChatFindFiles():
             issue = self.issue
             repo_name = issue.repo_name.split('/')[1]
             filenames = [filename.replace(repo_name + '/', '', 1) for filename in filenames]
-            actual_filenames = issue.filtered_changed_files()
-            test_result = set(actual_filenames) <= set(filenames)
+
+            if issue.changed_files:
+                actual_filenames = issue.filtered_changed_files()
+                test_result = set(actual_filenames) <= set(filenames)
+            else:
+                actual_filenames = None
+                test_result = None
 
             result = {
                 'repo_name': issue.repo_name,
@@ -170,8 +175,11 @@ class ChatFindFiles():
         self.user_bot.initiate_chat(self.filesystem_bot, message=prompt, **kwargs)
 
 if __name__ == "__main__":
-    repo_name = "Auto-GPT"
-    fs = Filesystem(repo_name, create_meta=True)
+    owner = "Significant-Gravitas"
+    name = "Auto-GPT"
+    repo_name = f"{owner}/{name}"
+
+    fs = Filesystem(name, create_meta=True)
 
     issue_title = "The model: gpt-4 does not exist / fixing defaults in llm_utils.py"
     issue_body = """
