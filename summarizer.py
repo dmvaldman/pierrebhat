@@ -18,6 +18,10 @@ def add_overview_to_reverse_lookup(overview, file_path, reverse_lookup):
         reverse_lookup[func] = file_path
     for method in overview["methods"]:
         reverse_lookup[method] = file_path
+    for dependency in overview["dependencies"]:
+        reverse_lookup[dependency] = file_path
+    for attribute in overview["attributes"]:
+        reverse_lookup[attribute] = file_path
     return reverse_lookup
 
 class Summary():
@@ -44,6 +48,7 @@ class Summarizer():
         self.overviews, self.reverse_lookup = self.generate_overview_for_directory(repo_name)
 
     def parse_python_file(self, file_path):
+        # TODO: return array of filenames when there are collisions, and don't namespace by classname
         with open(root_dir + file_path, 'r') as f:
             node = py_ast.parse(f.read())
 
@@ -51,6 +56,7 @@ class Summarizer():
         functions = []
         dependencies = []
         methods = []
+        attributes = []
 
         for n in node.body:
             if isinstance(n, py_ast.ClassDef):
@@ -62,6 +68,26 @@ class Summarizer():
                         # Concatenate the class name with the method name
                         qualified_name = f"{class_name}.{method_name}"
                         methods.append(qualified_name)
+
+                        # Analyze the method body for attribute access patterns
+                        for stmt in item.body:
+                            if isinstance(stmt, py_ast.Expr) and isinstance(stmt.value, py_ast.Attribute):
+                                if isinstance(stmt.value.value, py_ast.Name) and stmt.value.value.id == 'self':
+                                    attribute_name = stmt.value.attr
+                                    attributes.append(f"{class_name}.{attribute_name}")
+                            elif isinstance(stmt, py_ast.Assign):
+                                for target in stmt.targets:
+                                    if isinstance(target, py_ast.Attribute):
+                                        if isinstance(target.value, py_ast.Name) and target.value.id == 'self':
+                                            attribute_name = target.attr
+                                            attributes.append(f"{class_name}.{attribute_name}")
+                    elif isinstance(item, py_ast.Assign):
+                        # Check for assignments inside the class body
+                        for target in item.targets:
+                            if isinstance(target, py_ast.Name):
+                                attribute_name = target.id
+                                # attributes.append(f"{class_name}.{attribute_name}")
+                                attributes.append(attribute_name) #TODO: hack since classnames are often renamed
             elif isinstance(n, py_ast.FunctionDef):
                 functions.append(n.name)
             elif isinstance(n, py_ast.Import):
@@ -78,7 +104,8 @@ class Summarizer():
             "classes": classes,
             "functions": functions,
             "dependencies": dependencies,
-            "methods": methods
+            "methods": methods,
+            "attributes": attributes
         }
 
     def parse_js_file(self, file_path):

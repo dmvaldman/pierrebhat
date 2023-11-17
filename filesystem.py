@@ -1,6 +1,8 @@
 import os
 from summarizer import Summarizer
 
+# TODO: print only relative paths
+
 root_dir = 'repos/'
 
 class Filesystem():
@@ -326,7 +328,7 @@ function_specs = [
     },
     {
         "name": "get_filename_for_object",
-        "description": "Returns the filename for where a given class, method or function is defined.",
+        "description": "Returns the filename for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -341,7 +343,6 @@ function_specs = [
 ]
 
 if __name__ == '__main__':
-    directory = "nanoGPT"
+    directory = "Auto-GPT"
     fs = Filesystem(directory, create_meta=True)
-    fs.open()
-    print(fs.read())
+    print(fs.tree())
