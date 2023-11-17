@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import numpy as np
 import os
 from utils.utils import retry
@@ -19,7 +19,7 @@ MODEL_EMBED = 'text-embedding-ada-002'
 MODEL_COMPLETION = 'gpt-3.5-turbo-instruct'
 MODEL_COMPLETION_CHAT = "gpt-4-1106-preview"
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Helpers
 def embed(text):
@@ -28,13 +28,13 @@ def embed(text):
             text[i] = t.replace("\n", " ")
             if len(text[i]) > MAX_CONTENT_LENGTH_EMBED:
                 text[i] = text[i][0:MAX_CONTENT_LENGTH_EMBED]
-        embeddings = openai.Embedding.create(input=text, model=MODEL_EMBED)["data"]
+        embeddings = client.embeddings.create(input=text, model=MODEL_EMBED).data
         return np.array([np.array(embedding['embedding'], dtype=np.float32) for embedding in embeddings])
     else:
         text = text.replace("\n", " ")
         if len(text) > MAX_CONTENT_LENGTH_EMBED:
             text = text[0:MAX_CONTENT_LENGTH_EMBED]
-        return np.array(openai.Embedding.create(input=[text], model=MODEL_EMBED)["data"][0]["embedding"], dtype=np.float32)
+        return np.array(client.embeddings.create(input=[text], model=MODEL_EMBED).data[0].embedding, dtype=np.float32)
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
@@ -54,32 +54,33 @@ def complete(prompt, tokens_response=512):
         prompt = prompt[:first_half] + nonsequitor + prompt[-first_half:]
 
     try:
-        results = openai.Completion.create(
-            engine=MODEL_COMPLETION,
+        results = client.completions.create(
+            model=MODEL_COMPLETION,
             prompt=prompt,
             max_tokens=tokens_response,
             temperature=0.1
         )
-        return results['choices'][0]['text'].strip()
+        return results.choices[0].text.strip()
     except Exception as e:
         raise Exception(f"Couldn't get response from OpenAI API after 3 tries. Error:{e}")
 
 @retry(times=3, exceptions=(Exception))
 def complete_agent_chat(messages, functions):
     try:
-        results = openai.ChatCompletion.create(
+        results = client.chat.completions.create(
             model=MODEL_COMPLETION_CHAT,
             messages=messages,
             functions=functions,
             function_call="auto",
             temperature=0.1
         )
-        message = results['choices'][0]['message']
-        if message['content']:
-            return 'message', message['content']
-        elif message['function_call']:
-            arguments = json.loads(message['function_call']["arguments"])
-            function_name = message['function_call']['name']
+        message = results.choices[0].message
+        if message.content:
+            return 'message', message.content
+        elif message.tool_calls:
+            # TODO: return array of functions/arguments?
+            arguments = json.loads(message.tool_calls[0].function.arguments)
+            function_name = message.tool_calls[0].function.name
             return function_name, arguments
     except Exception as e:
         raise Exception(f"Couldn't get response from OpenAI API after 3 tries. Error:{e}")
