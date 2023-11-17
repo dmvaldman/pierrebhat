@@ -64,7 +64,7 @@ class Filesystem():
 
     def get_filename_for_object(self, name):
         if self.reverse_lookup is None or name not in self.reverse_lookup:
-            return None
+            return False
         else:
             return self.reverse_lookup[name]
 
@@ -328,7 +328,7 @@ function_specs = [
     },
     {
         "name": "get_filename_for_object",
-        "description": "Returns the filename for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed.",
+        "description": "Returns the filename for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed. If no filename is found, False will be returned.",
         "parameters": {
             "type": "object",
             "properties": {
