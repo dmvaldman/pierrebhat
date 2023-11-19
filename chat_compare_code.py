@@ -54,6 +54,7 @@ class ChatCompareCode():
 
         self.user_bot = ConversableAgent("user",
             system_message = ChatCompareCode.user_system_message,
+            llm_config=llm_config,
             is_termination_msg = ChatCompareCode.is_terminal,
             code_execution_config=False,
             max_consecutive_auto_reply=10,
