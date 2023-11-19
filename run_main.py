@@ -49,8 +49,7 @@ for repo_name, issues in issues_dataset.items():
         filenames = chat_find_files.filenames.result()
 
         # chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
-        chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type)
-
+        chat_write_code = GPTWriteCode(issue, filenames, fs)
         chat_write_code.initiate_chat(silent=False)
 
         new_files = chat_write_code.new_files.result()
