@@ -52,6 +52,10 @@ class Issue():
     def __str__(self):
         return f"Repo: {self.repo_name}\nIssue Title: {self.title}\nIssue Body: {self.body}\n"
 
+    def set_pr_info(self, pr_info):
+        self.pr = pr_info
+        self.changed_files = pr_info['changed_files']
+
     def filtered_changed_files(self):
         changed_files = self.changed_files
         actual_filenames = [file['filename'] for file in changed_files if file['status'] == 'modified']
@@ -77,6 +81,63 @@ class Issue():
             else:
                 raise Exception("Error getting file from GitHub")
         return actual_files
+
+    def fetch_pr_info(self):
+        def fetch_pr_info(repo, pr_num):
+            url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
+            response = requests.get(url)
+            return response.json()
+
+        def get_changed_files_from_pr(repo, pr_num):
+            url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}/files"
+            response = requests.get(url)
+            files = response.json()
+            files = [{'filename': file['filename'], 'status': file['status']} for file in files]
+            return files
+
+        # todo: validate another way of finding the PR by hitting https://github.com/repos/{repo}/issues/{issue_num}/linked_closing_reference?reference_location=REPO_ISSUES_INDEX
+        # todo: only support 1 label for now
+        url_timeline = f"https://api.github.com/repos/{self.repo_name}/issues/{self.num}/timeline"
+        params = {
+            "state": "closed",
+            "per_page": 100,
+            "page": 1
+        }
+
+        response = requests.get(url_timeline, params=params)
+        timeline_events = response.json()
+        pr_num = None
+        pr_info = None
+
+        # loop through timeline events and find the one with a pull request
+        for timeline_event in timeline_events:
+            if 'source' in timeline_event:
+                if 'issue' in timeline_event['source']:
+                    if 'pull_request' in timeline_event['source']['issue']:
+                        url_pull = timeline_event['source']['issue']['pull_request']['url']
+                        pr_num = int(url_pull.split('/')[-1])
+                        repo = '/'.join(url_pull.split('/')[-4:-2])
+                        pr_info = fetch_pr_info(repo, pr_num)
+
+        if pr_num is not None:
+            # convert into simpler representaiton {num, merge_commit_sha, base_sha, changed_files}
+            changed_files = get_changed_files_from_pr(repo, pr_num)
+            if not changed_files:
+                return None
+
+            # if none of the files have status "modified" also return None
+            if not any(file['status'] == 'modified' for file in changed_files):
+                return None
+
+            pr_info = {
+                'num': pr_info['number'],
+                'merge_commit_sha': pr_info['merge_commit_sha'],
+                'base_sha': pr_info['base']['sha'],
+                'changed_files': changed_files
+            }
+            return pr_info
+        else:
+            return None
 
 class ChatFindFiles():
     system_message_filesystem = """
@@ -164,6 +225,7 @@ class ChatFindFiles():
 
         self.user_bot = ConversableAgent("user",
             system_message = ChatFindFiles.system_message_user,
+            llm_config=llm_config,
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
             code_execution_config=False,
@@ -175,21 +237,20 @@ class ChatFindFiles():
         self.user_bot.initiate_chat(self.filesystem_bot, message=prompt, **kwargs)
 
 if __name__ == "__main__":
-    owner = "Significant-Gravitas"
-    name = "Auto-GPT"
+    owner = "roboflow"
+    name = "supervision"
     repo_name = f"{owner}/{name}"
 
     fs = Filesystem(name, create_meta=True)
 
-    issue_title = "The model: gpt-4 does not exist / fixing defaults in llm_utils.py"
+    issue_num = 464
+    issue_title = "Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame"
     issue_body = """
-    the defaults need to be adapted for people without access to GPT4 - or the corresponding functions won't work.
-    The default model for people without GPT4 access should be cfg.fast_llm_model and not cfg.smart_llm_model
+    Currently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.
 
-    It would probably make sense to check once during startup what model is available and then set up the default accordingly.
-    In general, GPT4 should only be a default setting once it is verified to be available.
+    Information about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.
     """
 
-    issue = Issue(issue_title, issue_body, repo_name)
+    issue = Issue(issue_title, issue_body, repo_name, num=issue_num)
     chat = ChatFindFiles(fs, issue)
     chat.initiate_chat()
