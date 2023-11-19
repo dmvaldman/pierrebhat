@@ -3,7 +3,7 @@ from filesystem import function_specs
 import concurrent.futures
 from collections import defaultdict
 import difflib
-
+import subprocess
 
 config_list = [{'model': 'gpt-4'}]
 # model = "gpt-4-0613"
@@ -115,13 +115,21 @@ def apply_patches(patches, snippet_type='diff'):
 
         new_files[filename] = new_content
 
-    for filename in filenames:
+    snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
+
+    return new_files, snippets
+
+def generate_snippets(original_files, new_files, snippet_type='diff'):
+    snippets = defaultdict(str)
+    for filename in original_files.keys():
         if snippet_type == 'diff':
             snippets[filename] = get_diff_from_patch(original_files[filename], new_files[filename])
         elif snippet_type == 'snippet':
             snippets[filename] = get_snippet_from_patch(original_files[filename], new_files[filename], context=16)
+        elif snippet_type == 'all':
+            snippets[filename] = new_files[filename]
 
-    return new_files, snippets
+    return snippets
 
 def apply_patch_to_file(filename, file_content, searchString, replaceString):
     if searchString == "":
@@ -168,6 +176,12 @@ def get_diff_from_patch(file_content_before, file_content_after):
     diff = difflib.unified_diff(before_lines, after_lines, fromfile='before', tofile='after', lineterm='')
     return '\n'.join(diff)
 
+def check_syntax(file_path):
+    result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
+    if result.stdout == '':
+        return None
+    return result.stdout
+
 class ChatWriteCode():
     system_message_filesystem = """
     You are an expert programmer. You are in control of a filesystem API with access to the codebase of a GitHub repository.
@@ -207,12 +221,34 @@ class ChatWriteCode():
 
     def add_callbacks(self, snippet_type='diff'):
         def onCheckCode(patches, tests=None):
-            _, snippets = apply_patches(patches, snippet_type=snippet_type)
+            try:
+                new_files, snippets = apply_patches(patches, snippet_type=snippet_type)
+            except Exception as e:
+                return str(e)
+
+            errors = 'Following errors found:\n\n'
+            has_errors = False
+            for filename, contents in new_files.items():
+                # create temporary file, flatten any directory structure in the name
+                temp_filename = f'temp/{"_".join(filename.split("/"))}'
+                with open(temp_filename, 'w') as f:
+                    f.write(contents)
+                syntax_errors = check_syntax(temp_filename)
+                if syntax_errors is not None:
+                    has_errors = True
+                    errors += syntax_errors + '\n\n'
+
             snippets_str = '\n'.join([f'Filename: {filename}:\n\n{snippet}\n\n' for filename, snippet in snippets.items()])
+
+            if has_errors:
+                return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
+
             if snippet_type == 'diff':
-                return f"Here is the diff reflecting your changes. Double check its correctness. Be sure to check for subtle whitespace errors. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+                return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
             elif snippet_type == 'snippet':
-                return f"Here are snippets reflecting your changes. Double check their correctness. Be sure to check for subtle whitespace errors. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+                return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            elif snippet_type == 'all':
+                return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
 
         def onSubmitCode(patches):
             new_files, _ = apply_patches(patches)
@@ -255,6 +291,7 @@ class ChatWriteCode():
         self.user_bot = ConversableAgent("user",
             system_message = ChatWriteCode.user_system_message,
             is_termination_msg = ChatWriteCode.is_terminal,
+            llm_config=llm_config,
             function_map = self.function_map,
             max_consecutive_auto_reply=10,
             human_input_mode="NEVER")
