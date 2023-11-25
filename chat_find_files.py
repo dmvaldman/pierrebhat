@@ -27,12 +27,19 @@ onFindFilesDef = {
 
 function_specs.append(onFindFilesDef)
 
-llm_config={
+llm_config_filesystem = {
     "timeout": 600,
     "seed": 42,
     "model": model,  # make sure the endpoint you use supports the model
     "temperature": 0,
     "functions": function_specs
+}
+
+llm_config_user = {
+    "timeout": 600,
+    "seed": 42,
+    "model": model,  # make sure the endpoint you use supports the model
+    "temperature": 0
 }
 
 
@@ -201,9 +208,9 @@ class ChatFindFiles():
 
         method_name = method_def['name']
         self.function_map[method_name] = onFindFiles
-        llm_config["functions"].append(method_def)
+        llm_config_filesystem["functions"].append(method_def)
 
-        self.filesystem_bot.llm_config.update(llm_config)
+        self.filesystem_bot.llm_config.update(llm_config_filesystem)
         self.user_bot.register_function(self.function_map)
 
     def generate_user_prompt(self, issue, fs):
@@ -216,16 +223,16 @@ class ChatFindFiles():
     def create_chatbots(self):
         self.filesystem_bot = ConversableAgent("filesystem",
             system_message = ChatFindFiles.system_message_filesystem,
-            llm_config=llm_config,
+            llm_config=llm_config_filesystem,
             code_execution_config=False,
             is_termination_msg = ChatFindFiles.is_terminal,
             max_consecutive_auto_reply=10,
             human_input_mode="NEVER"
         )
 
-        self.user_bot = ConversableAgent("user",
+        self.user_bot = ConversableAgent("user_find_files",
             system_message = ChatFindFiles.system_message_user,
-            llm_config=llm_config,
+            llm_config=llm_config_user,
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
             code_execution_config=False,

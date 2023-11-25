@@ -6,14 +6,22 @@ import difflib
 import subprocess
 
 config_list = [{'model': 'gpt-4'}]
-# model = "gpt-4-0613"
+max_consecutive_auto_reply = 20
 model = "gpt-4-1106-preview"
-llm_config={
+
+llm_config_filesystem={
     "timeout": 600,
     "seed": 42,
     "model": model,  # make sure the endpoint you use supports the model
     "temperature": 0,
     "functions": function_specs
+}
+
+llm_config_user={
+    "timeout": 600,
+    "seed": 42,
+    "model": model,  # make sure the endpoint you use supports the model
+    "temperature": 0
 }
 
 onCheckCodeDef = {
@@ -158,15 +166,20 @@ def get_snippet_from_patch(file_before, file_after, context=10):
         else:
             changed_line_indices_grouped[-1].append(group)
 
-    snippets = []
+    snippets_after = []
+    snippets_before = []
+    snippet_str = ''
     for group in changed_line_indices_grouped:
         start = max(0, min(group) - context)
         end = min(len(after_lines), max(group) + context + 1)
-        snippet = ''.join([line[2:] if line.startswith('+ ') or line.startswith('  ') else '' for line in diff[start:end]])
-        if snippet.strip():  # Ignore empty snippets
-            snippets.append(snippet)
+        snippet_after = ''.join([line[2:] if line.startswith('+ ') or line.startswith('  ') else '' for line in diff[start:end]])
+        snippet_before = ''.join([line[2:] if line.startswith('- ') or line.startswith('  ') else '' for line in diff[start:end]])
 
-        snippet_str = "# Code above left out as it's unchanged...\n\n" + "\n\n# Code above left out as it's unchanged...\n\n".join(snippets)
+        snippets_after.append(snippet_after)
+        snippets_before.append(snippet_before)
+
+    for snippet_before, snippet_after in zip(snippets_before, snippets_after):
+        snippet_str += "<<<START SNIPPET ORIGINAL>>>\n\n" + snippet_before + "\n\n<<<END SNIPPET ORIGINAL>>>\n\n" + "<<<START SNIPPET NEW>>>\n\n" + snippet_after + "\n\n<<<END SNIPPET NEW>>>\n\n"
 
     return snippet_str
 
@@ -263,9 +276,9 @@ class ChatWriteCode():
     def add_callback(self, method, method_def):
         method_name = method_def['name']
         self.function_map[method_name] = method
-        llm_config["functions"].append(method_def)
+        llm_config_filesystem["functions"].append(method_def)
 
-        self.filesystem_bot.llm_config.update(llm_config)
+        self.filesystem_bot.llm_config.update(llm_config_filesystem)
         self.user_bot.register_function(self.function_map)
 
     def generate_user_prompt(self, issue, filenames):
@@ -281,19 +294,19 @@ class ChatWriteCode():
     def create_chatbots(self):
         self.filesystem_bot = ConversableAgent("filesystem",
             system_message = ChatWriteCode.system_message_filesystem,
-            llm_config=llm_config,
+            llm_config=llm_config_filesystem,
             code_execution_config=False,
             is_termination_msg = ChatWriteCode.is_terminal,
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER"
         )
 
-        self.user_bot = ConversableAgent("user",
+        self.user_bot = ConversableAgent("user_write_code",
             system_message = ChatWriteCode.user_system_message,
             is_termination_msg = ChatWriteCode.is_terminal,
-            llm_config=llm_config,
+            llm_config=llm_config_user,
             function_map = self.function_map,
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER")
 
     def initiate_chat(self, **kwargs):

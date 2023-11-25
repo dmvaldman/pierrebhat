@@ -2,7 +2,14 @@ from autogen import ConversableAgent
 
 # model = "gpt-4-0613"
 model = "gpt-4-1106-preview"
-llm_config={
+llm_config_comparitor={
+    "timeout": 600,
+    "seed": 42,
+    "model": model,  # make sure the endpoint you use supports the model
+    "temperature": 0
+}
+
+llm_config_user={
     "timeout": 600,
     "seed": 42,
     "model": model,  # make sure the endpoint you use supports the model
@@ -45,16 +52,16 @@ class ChatCompareCode():
     def create_chatbots(self):
         self.compare_bot = ConversableAgent("comparitor",
             system_message = ChatCompareCode.comparitor_system_message,
-            llm_config=llm_config,
+            llm_config=llm_config_comparitor,
             code_execution_config=False,
             is_termination_msg = ChatCompareCode.is_terminal,
             max_consecutive_auto_reply=10,
             human_input_mode="NEVER"
         )
 
-        self.user_bot = ConversableAgent("user",
+        self.user_bot = ConversableAgent("user_compare_code",
             system_message = ChatCompareCode.user_system_message,
-            llm_config=llm_config,
+            llm_config=llm_config_user,
             is_termination_msg = ChatCompareCode.is_terminal,
             code_execution_config=False,
             max_consecutive_auto_reply=10,
