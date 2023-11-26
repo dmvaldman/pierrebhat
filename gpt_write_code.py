@@ -123,11 +123,16 @@ class GPTWriteCode():
             # check if contents are empty
             if file_contents.read() == b'':
                 continue
-            file_handler = client.files.create(
-                file=file_contents,
-                purpose='assistants'
-            )
-            file_handlers.append(file_handler.id)
+            try:
+                file_handler = client.files.create(
+                    file=file_contents,
+                    purpose='assistants'
+                )
+                file_handlers.append(file_handler.id)
+            except Exception as e:
+                # Can be an invalid extension
+                print(e)
+                continue
         return file_handlers
 
     def remove_files(self):

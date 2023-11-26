@@ -6,7 +6,7 @@ import difflib
 import subprocess
 
 config_list = [{'model': 'gpt-4'}]
-max_consecutive_auto_reply = 100
+max_consecutive_auto_reply = 50
 model = "gpt-4-1106-preview"
 
 llm_config_filesystem={

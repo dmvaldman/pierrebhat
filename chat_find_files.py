@@ -6,7 +6,7 @@ import requests
 
 # model = "gpt-4-0613"
 model = "gpt-4-1106-preview"
-max_consecutive_auto_reply = 100
+max_consecutive_auto_reply = 50
 
 onFindFilesDef = {
     "name": "submit_files",
@@ -150,13 +150,13 @@ class Issue():
 class ChatFindFiles():
     system_message_filesystem = """
     You are a software engineer in control of a filesystem API with access to the codebase of a GitHub repository. This API allows you to read summaries of files
-    and their contents. You are talking to another software engineer who is looking for some files. When the files are found, call `submit_files`.
-    Afterwards, respond with TERMINATE to end the chat.
+    and their contents. You are talking to another software engineer who is looking for some files. When the files are found, call `submit_files` with a list of the filenames.
+    Afterwards, respond with TERMINATE to end the chat, but only after calling `submit_files`.
     """
     system_message_user = """
     You are a software engineer working on a GitHub repository. You are professional and terse. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify to resolve the issue, which you can do by conversing with the filesystem API.
-    Once the files are found, the filesystem can submit them. Afterwards, respond with TERMINATE to end the chat
+    Once the files are found, the filesystem can submit them. Afterwards, respond with TERMINATE to end the chat, but only after submitting the files.
     """
     def __init__(self, filesystem, issue):
         self.fs = filesystem

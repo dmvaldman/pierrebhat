@@ -13,16 +13,192 @@
     "correct_patches": [
       {
         "filename": "supervision/supervision/detection/line_counter.py",
-        "searchString": "for xyxy, _, confidence, class_id, tracker_id in detections:",
-        "replaceString": "crossed = np.zeros(len(detections), dtype=bool)\n        for i, (xyxy, _, confidence, class_id, tracker_id) in enumerate(detections):"
+        "searchString": "for xyxy, _, confidence, class_id, tracker_id in detections:\n            # handle detections with no tracker_id\n            if tracker_id is None:\n                continue\n",
+        "replaceString": "crossed = []\n        for xyxy, _, confidence, class_id, tracker_id in detections:\n            # handle detections with no tracker_id\n            if tracker_id is None:\n                continue\n"
       },
       {
         "filename": "supervision/supervision/detection/line_counter.py",
-        "searchString": "else:\n                self.out_count += 1",
-        "replaceString": "else:\n                self.out_count += 1\n            crossed[i] = True\n        return crossed"
+        "searchString": "self.out_count += 1",
+        "replaceString": "self.out_count += 1\n            crossed.append(True)\n        return np.array(crossed, dtype=bool)\n"
+      }
+    ],
+    "correct_pr": true,
+    "correct_pr_reason": ""
+  },
+  {
+    "repo_name": "roboflow/supervision",
+    "issue_num": 439,
+    "actual_filenames": [
+      "supervision/draw/utils.py"
+    ],
+    "proposed_filenames": [
+      "supervision/draw/utils.py",
+      "CONTRIBUTING.md"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "supervision/supervision/draw/utils.py",
+        "searchString": "def draw_polygon(\n",
+        "replaceString": "\nfrom typing import Union\ndef draw_polygon(\n"
+      },
+      {
+        "filename": "supervision/supervision/draw/utils.py",
+        "searchString": "def draw_polygon(\n",
+        "replaceString": "\n\ndef draw_image(\n    scene: np.ndarray, \n    image: Union[str, np.ndarray],\n    opacity: float,\n    rect: Rect\n) -> np.ndarray:\n    ...# Image drawing implementation details\n\n\ndef draw_polygon(\n"
+      }
+    ],
+    "correct_pr": true,
+    "correct_pr_reason": ""
+  },
+  {
+    "repo_name": "roboflow/supervision",
+    "issue_num": 429,
+    "actual_filenames": [
+      "supervision/tracker/byte_tracker/core.py"
+    ],
+    "proposed_filenames": [
+      "supervision/tracker/byte_tracker/core.py"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "supervision/supervision/tracker/byte_tracker/core.py",
+        "searchString": "detections = Detections.empty()",
+        "replaceString": "detections = Detections.empty()\n        detections.tracker_id = np.array([], dtype=int)"
+      }
+    ],
+    "correct_pr": true,
+    "correct_pr_reason": ""
+  },
+  {
+    "repo_name": "roboflow/supervision",
+    "issue_num": 394,
+    "actual_filenames": [
+      "supervision/detection/core.py",
+      "supervision/detection/utils.py"
+    ],
+    "proposed_filenames": [
+      "supervision/detection/core.py"
+    ],
+    "correct_files": false,
+    "correct_patches": [
+      {
+        "filename": "supervision/supervision/detection/core.py",
+        "searchString": "    def from_roboflow(cls, roboflow_result: dict, class_list: List[str]) -> Detections:",
+        "replaceString": "    def from_roboflow(cls, roboflow_result: dict) -> Detections:"
+      },
+      {
+        "filename": "supervision/supervision/detection/core.py",
+        "searchString": "            class_list (List[str]): A list of class names\n                corresponding to the class IDs in the API result.",
+        "replaceString": ""
+      },
+      {
+        "filename": "supervision/supervision/detection/core.py",
+        "searchString": "            >>> class_list = [\"person\", \"car\", \"dog\"]\n\n            >>> detections = sv.Detections.from_roboflow(roboflow_result, class_list)",
+        "replaceString": "            >>> detections = sv.Detections.from_roboflow(roboflow_result)"
+      },
+      {
+        "filename": "supervision/supervision/detection/core.py",
+        "searchString": "        xyxy, confidence, class_id, masks = process_roboflow_result(\n            roboflow_result=roboflow_result, class_list=class_list\n        )",
+        "replaceString": "        xyxy, confidence, class_id, masks = process_roboflow_result(\n            roboflow_result=roboflow_result\n        )"
+      }
+    ],
+    "correct_pr": true,
+    "correct_pr_reason": ""
+  },
+  {
+    "repo_name": "crowdin/crowdin-api-client-python",
+    "issue_num": 135,
+    "actual_filenames": [
+      "crowdin_api/api_resources/string_translations/resource.py"
+    ],
+    "proposed_filenames": [
+      "crowdin_api/api_resources/string_translations/resource.py"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/string_translations/resource.py",
+        "searchString": "limit: Optional[int] = None,\n    ):\n        \"\"\"\n        List Translation Approvals",
+        "replaceString": "limit: Optional[int] = None,\n        labelIds: Optional[Iterable[int]] = None,\n        excludeLabelIds: Optional[Iterable[int]] = None,\n    ):\n        \"\"\"\n        List Translation Approvals"
+      },
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/string_translations/resource.py",
+        "searchString": "limit: Optional[int] = None,\n    ):\n        \"\"\"\n        List Translation Votes",
+        "replaceString": "limit: Optional[int] = None,\n        labelIds: Optional[Iterable[int]] = None,\n        excludeLabelIds: Optional[Iterable[int]] = None,\n    ):\n        \"\"\"\n        List Translation Votes"
       }
     ],
     "correct_pr": false,
-    "correct_pr_reason": "To determine if the two solutions are equivalent with respect to resolving the issue, we need to compare the changes made to the `LineZone.trigger` method, as this is the core of the issue described. The issue is that the `trigger` method should return a boolean `np.ndarray` indicating which detections have crossed the line in the current frame.\n\nLet's compare the relevant parts of the `trigger` method in both solutions:\n\nSolution 1:\n```python\ncrossed = np.zeros(len(detections), dtype=bool)\n...\ncrossed[i] = True\n...\nreturn crossed\n```\n\nSolution 2:\n```python\ncrossed = np.full(len(detections), False)\n...\ncrossed[i] = True\n...\nreturn crossed\n```\n\nBoth solutions initialize an array to keep track of which detections have crossed the line. Solution 1 uses `np.zeros` to create an array of `False` values, while Solution 2 uses `np.full` with `False` explicitly stated. This difference is purely stylistic and does not affect the functionality.\n\nBoth solutions iterate over the detections, perform the same checks, and update the `crossed` array in the same way by setting `crossed[i] = True` when a detection crosses the line.\n\nBoth solutions return the `crossed` array, which fulfills the requirement of the issue to return a boolean `np.ndarray` indicating which detections have crossed the line.\n\nThe rest of the code in both solutions is identical and pertains to the initialization of the `LineZone` class and the `LineZoneAnnotator` class, which are not directly related to the issue at hand.\n\nIn conclusion, both solutions are essentially equivalent with respect to resolving the issue. They both modify the `trigger` method to return the required boolean `np.ndarray` indicating which detections have crossed the line, which is the core requirement described in the issue. Any other differences are irrelevant to the resolution of the issue.\n\nTERMINATE"
+    "correct_pr_reason": "NO\n\nThe two solutions provided have a key difference in the `list_translation_approvals` and `list_translation_votes` methods regarding the `labelIds` and `excludeLabelIds` parameters.\n\nIn Solution 1, these parameters are expected to be of type `Optional[Iterable[int]]`, which suggests that the method should accept an iterable of integers (most likely a list of integers).\n\nIn Solution 2, these parameters are expected to be of type `Optional[str]`, which suggests that the method should accept a string. This could be a single string representing a list of IDs, which would need to be parsed differently than an iterable of integers.\n\nThis difference in parameter types means that the way these methods are called and the type of arguments they accept will differ, which could lead to different behaviors and potentially incorrect implementations if the API expects one type and receives another.\n\nTherefore, the solutions are not equivalent with respect to resolving the issue as they handle the new parameters `labelIds` and `excludeLabelIds` differently. The correct type should match the expected format of the Crowdin API, which should be checked against the API documentation or specifications."
+  },
+  {
+    "repo_name": "crowdin/crowdin-api-client-python",
+    "issue_num": 131,
+    "actual_filenames": [
+      "crowdin_api/api_resources/reports/resource.py"
+    ],
+    "proposed_filenames": [
+      "crowdin_api/api_resources/reports/resource.py"
+    ],
+    "correct_files": true,
+    "correct_patches": [
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/reports/resource.py",
+        "searchString": "config: Config,",
+        "replaceString": "config: Config,\n        is_public: Optional[bool] = None,"
+      },
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/reports/resource.py",
+        "searchString": "\"config\": config",
+        "replaceString": "\"config\": config,\n                \"isPublic\": is_public"
+      }
+    ],
+    "correct_pr": true,
+    "correct_pr_reason": ""
+  },
+  {
+    "repo_name": "crowdin/crowdin-api-client-python",
+    "issue_num": 123,
+    "actual_filenames": [
+      "README.md",
+      "crowdin_api/api_resources/abstract/resources.py",
+      "crowdin_api/api_resources/bundles/resource.py",
+      "crowdin_api/api_resources/dictionaries/resource.py",
+      "crowdin_api/api_resources/glossaries/resource.py",
+      "crowdin_api/api_resources/labels/resource.py",
+      "crowdin_api/api_resources/notifications/resource.py",
+      "crowdin_api/api_resources/projects/resource.py",
+      "crowdin_api/api_resources/reports/resource.py",
+      "crowdin_api/api_resources/screenshots/resource.py",
+      "crowdin_api/api_resources/source_files/resource.py",
+      "crowdin_api/api_resources/source_strings/resource.py",
+      "crowdin_api/api_resources/string_comments/resource.py",
+      "crowdin_api/api_resources/string_translations/resource.py",
+      "crowdin_api/api_resources/tasks/resource.py"
+    ],
+    "proposed_filenames": [
+      "crowdin_api/client.py"
+    ],
+    "correct_files": false,
+    "correct_patches": [
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/projects/resource.py",
+        "searchString": "class ProjectsResource(BaseResource):",
+        "replaceString": "class ProjectsResource(BaseResource):\n    def __init__(self, client=None):\n        self._client = client\n    "
+      },
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/api_resources/projects/resource.py",
+        "searchString": "def get_projects_path(self, projectId: Optional[int] = None):",
+        "replaceString": "def get_projects_path(self, projectId: Optional[int] = None):\n        if self._client is not None:\n            projectId = projectId or self._client.project_id"
+      },
+      {
+        "filename": "crowdin-api-client-python/crowdin_api/client.py",
+        "searchString": "self.EXTENDED_REQUEST_PARAMS = extended_request_params or self.EXTENDED_REQUEST_PARAMS",
+        "replaceString": "        self.EXTENDED_REQUEST_PARAMS = extended_request_params or self.EXTENDED_REQUEST_PARAMS\n        self.project_id = None"
+      }
+    ],
+    "correct_pr": false,
+    "correct_pr_reason": "NO\n\nThe issue described is about adding a `project_id` property to the client in the `crowdin-api-client-python` repository, so that it can be set once and used by functions without needing to pass `project_id` every time.\n\nSolution 1 modifies the `ProjectsResource` class and the `CrowdinClient` class to support a default `project_id` that can be set once and used across various methods. This directly addresses the issue by allowing the `project_id` to be set on the client instance and then used implicitly in subsequent API calls.\n\nSolution 2, however, is simply the README file for the `crowdin-api-client-python` repository. It provides documentation on how to install and use the client but does not include any code changes that would resolve the issue described. It does not modify any functionality or add the `project_id` property to the client.\n\nTherefore, the two solutions are not equivalent with respect to resolving the issue. Only Solution 1 addresses the issue by implementing the requested feature."
   }
 ]
