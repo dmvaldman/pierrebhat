@@ -76,7 +76,7 @@ for repo_name, issues in issues_dataset.items():
                     result['correct_pr_reason'] = ''
                 else:
                     result['correct_pr'] = False
-                    result['correct_pr_reason'] = chat_compare_code.user_bot.chat_messages[chat_compare_code.compare_bot][-2]['content']
+                    result['correct_pr_reason'] = chat_compare_code.user_bot.last_message()['content']
                 break
 
         results += chat_find_files.results
