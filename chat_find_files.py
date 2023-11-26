@@ -6,6 +6,7 @@ import requests
 
 # model = "gpt-4-0613"
 model = "gpt-4-1106-preview"
+max_consecutive_auto_reply = 30
 
 onFindFilesDef = {
     "name": "submit_files",
@@ -148,15 +149,14 @@ class Issue():
 
 class ChatFindFiles():
     system_message_filesystem = """
-    You are in control of a filesystem API with access to the codebase of a GitHub repository. This API allows you to read summaries of files
-    and their contents. You are being asked by an engineer who is working on solving a GitHub issue for this repository. You must satisfy all their requests
-    for information about the codebase. Upon given a list of files for a PR, call `submit_files`.
+    You are a software engineer in control of a filesystem API with access to the codebase of a GitHub repository. This API allows you to read summaries of files
+    and their contents. You are talking to another software engineer who is looking for some files. When the files are found, call `submit_files`.
+    Afterwards, respond with TERMINATE to end the chat.
     """
     system_message_user = """
     You are a software engineer working on a GitHub repository. You are professional and terse. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify to resolve the issue, which you can do by conversing with the filesystem API.
-    Provide these files by calling `submit_files` with the filenames as arguments. Once you have done so respond TERMINATE to end the chat, but
-    not before you've called `submit_files`!.
+    Once the files are found, the filesystem can submit them. Afterwards, respond with TERMINATE to end the chat
     """
     def __init__(self, filesystem, issue):
         self.fs = filesystem
@@ -226,7 +226,7 @@ class ChatFindFiles():
             llm_config=llm_config_filesystem,
             code_execution_config=False,
             is_termination_msg = ChatFindFiles.is_terminal,
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER"
         )
 
@@ -236,7 +236,7 @@ class ChatFindFiles():
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
             code_execution_config=False,
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER")
 
     def initiate_chat(self, **kwargs):

@@ -200,15 +200,14 @@ class ChatWriteCode():
     You are an expert programmer. You are in control of a filesystem API with access to the codebase of a GitHub repository.
     This API allows you to read summaries of files and their full contents. You can also lookup what filename any class/method/import comes from.
     You are being asked by an engineer who is working on solving a GitHub issue for this repository. You must satisfy all their requests
-    for information about the codebase. When creating a PR, first check its validaty prior to submitting. If the PR is correct, submit it.
-    Respond with TERMINATE to end the chat after submitting the PR.
+    for information about the codebase. When creating a PR, first check its validaty prior to submitting by calling `check_PR`. If the PR is correct,
+    submit it by calling `submit_PR`. Otherwise rewrite the patches and check again. Respond with TERMINATE to end the chat after submitting the PR.
     """
     user_system_message = """
     You are a software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     You are given a starting point for the relevant files needed to modify. You can communicate with the filesystem API to read these and other files.
-    Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. Be careful of subtle whitespace errors.
-    Once finished call the `check_PR` method to validate the patches. Errors may be returned from `check_PR` if the PR is not valid, in which case fix them and check the PR again.
-    If there are no errors, submit the patches by calling `submit_PR`. Respond with TERMINATE to end the chat after submitting the patches.
+    Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. You must first check the PR before submitting it.
+    Respond with TERMINATE to end the chat after successfully submitting the patches.
     """
     def __init__(self, issue, filenames, filesystem, snippet_type='diff'):
         self.issue = issue
@@ -305,6 +304,7 @@ class ChatWriteCode():
             system_message = ChatWriteCode.user_system_message,
             is_termination_msg = ChatWriteCode.is_terminal,
             llm_config=llm_config_user,
+            code_execution_config=False,
             function_map = self.function_map,
             max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER")

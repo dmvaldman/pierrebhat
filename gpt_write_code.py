@@ -93,7 +93,7 @@ class GPTWriteCode():
     If any errors are found, you must revise the patches and call `check_PR` until no errors are found.
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
     """
-    def __init__(self, issue, filenames, filesystem):
+    def __init__(self, issue, filenames, filesystem, snippet_type='snippet'):
         self.issue = issue
         self.filesystem = filesystem
         self.assistant = self.create_gpt()
@@ -103,7 +103,7 @@ class GPTWriteCode():
 
         self.new_files = concurrent.futures.Future()
         self.patches = concurrent.futures.Future()
-        self.check_passes = False
+        self.snippet_type = snippet_type
 
         self.function_map = {
             "get_summaries": self.filesystem.get_summaries,
@@ -120,6 +120,9 @@ class GPTWriteCode():
         for file in filenames:
             # TODO: move logic of where the file is elsewhere
             file_contents = open('repos/' + file, "rb")
+            # check if contents are empty
+            if file_contents.read() == b'':
+                continue
             file_handler = client.files.create(
                 file=file_contents,
                 purpose='assistants'
@@ -182,16 +185,16 @@ class GPTWriteCode():
 
     def onSubmitPR(self, patches):
         try:
-            new_files, snippets = apply_patches(patches, snippet_type='diff')
+            new_files, snippets = apply_patches(patches, snippet_type=self.snippet_type)
             self.new_files.set_result(new_files)
             self.patches.set_result(patches)
             return 'Patch successfully applied.'
         except Exception as e:
             return str(e)
 
-    def onCheckPR(self, patches, snippet_type='snippet'):
+    def onCheckPR(self, patches):
         try:
-            new_files, snippets = apply_patches(patches, snippet_type=snippet_type)
+            new_files, snippets = apply_patches(patches, snippet_type=self.snippet_type)
         except Exception as e:
             return str(e)
 
@@ -212,11 +215,11 @@ class GPTWriteCode():
         if has_errors:
             return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
 
-        if snippet_type == 'diff':
+        if self.snippet_type == 'diff':
             return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
-        elif snippet_type == 'snippet':
+        elif self.snippet_type == 'snippet':
             return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
-        elif snippet_type == 'all':
+        elif self.snippet_type == 'all':
             return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
 
     def initiate_chat(self, **kwargs):

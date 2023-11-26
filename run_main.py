@@ -21,6 +21,8 @@ def onAssessPR(issue, answer, patches, results):
     with open('data/test_results.json', 'w') as f:
         json.dump(results, f, indent=2)
 
+results = []
+
 for repo_name, issues in issues_dataset.items():
     if repo_name in ['wncc/UniTrain', 'espin086/GPT-Jobhunter', 'Clueless-Community/scrape-up', 'Ebazhanov/linkedin-skill-assessments-quizzes']:
         continue
@@ -28,10 +30,8 @@ for repo_name, issues in issues_dataset.items():
     repo = Repo(repo_name)
     repo.download()
     fs = Filesystem(repo.name, create_meta=True)
-    # snippet_type = 'diff'
+    # snippet_type = 'diff' #['all', 'diff', 'snippet']
     snippet_type = 'snippet'
-
-    results = []
 
     for issue in issues:
         sha = issue['pr']['base_sha']
@@ -48,8 +48,8 @@ for repo_name, issues in issues_dataset.items():
         chat_find_files.initiate_chat(silent=False)
         filenames = chat_find_files.filenames.result()
 
-        # chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
-        chat_write_code = GPTWriteCode(issue, filenames, fs)
+        chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
+        # chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type)
         chat_write_code.initiate_chat(silent=False)
 
         new_files = chat_write_code.new_files.result()
@@ -69,7 +69,7 @@ for repo_name, issues in issues_dataset.items():
                     result['correct_pr_reason'] = ''
                 else:
                     result['correct_pr'] = False
-                    result['correct_pr_reason'] = chat_compare_code.user_bot.last_message()['content']
+                    result['correct_pr_reason'] = chat_compare_code.user_bot.chat_messages[chat_compare_code.compare_bot][-2]['content']
                 break
 
         results += chat_find_files.results

@@ -96,7 +96,7 @@ class Summarizer():
                         dependencies.append(name.name)
             elif isinstance(n, py_ast.ImportFrom):
                 module = n.module
-                if module not in standard_lib and module.split('.')[0] not in installed_packages:
+                if module is not None and module not in standard_lib and module.split('.')[0] not in installed_packages:
                     for name in n.names:
                         dependencies.append(f"{module}.{name.name}")
 
