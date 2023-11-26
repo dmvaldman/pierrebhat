@@ -46,11 +46,18 @@ for repo_name, issues in issues_dataset.items():
 
         chat_find_files = ChatFindFiles(fs, issue)
         chat_find_files.initiate_chat(silent=False)
+
+        if not chat_find_files.filenames.done():
+            raise Exception('ChatFindFiles did not finish. Increase max_consecutive_auto_reply in chat')
+
         filenames = chat_find_files.filenames.result()
 
         chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
         # chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type)
         chat_write_code.initiate_chat(silent=False)
+
+        if not chat_write_code.new_files.done() or not chat_write_code.patches.done():
+            raise Exception('ChatWriteCode did not finish. Increase max_consecutive_auto_reply in chat')
 
         new_files = chat_write_code.new_files.result()
         patches = chat_write_code.patches.result()
