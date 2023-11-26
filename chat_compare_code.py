@@ -19,11 +19,11 @@ llm_config_user={
 class ChatCompareCode():
     user_system_message = """You are a programmer collaborating on a GitHub issue.
     Your task is to decide whether two solutions to the issue are essentially equivalent.
-    If the solutions are roughly equivalent respond YES, otherwise respond NO. To end the conversation, write TERMINATE.
+    If the solutions are roughly equivalent respond YES, otherwise respond NO and provide an explanation. To end the conversation, write TERMINATE.
     """
-    comparitor_system_message = """You are a proficient programmer.
+    comparitor_system_message = """You are a programmer collaborating on a GitHub issue.
     Your task is to decide whether two solutions to the issue are essentially equivalent.
-    First gather relavant information and explain your reasoning. To end the conversation, write TERMINATE.
+    If the solutions are roughly equivalent respond YES, otherwise respond NO and provide an explanation. To end the conversation, write TERMINATE.
     """
     def __init__(self, issue, new_files, actual_files):
         self.issue = issue

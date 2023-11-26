@@ -6,7 +6,7 @@ import requests
 
 # model = "gpt-4-0613"
 model = "gpt-4-1106-preview"
-max_consecutive_auto_reply = 30
+max_consecutive_auto_reply = 100
 
 onFindFilesDef = {
     "name": "submit_files",
