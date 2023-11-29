@@ -4,25 +4,14 @@ import concurrent.futures
 from collections import defaultdict
 import difflib
 import subprocess
+from utils.llm_config import llm_config
 
-config_list = [{'model': 'gpt-4'}]
 max_consecutive_auto_reply = 50
-model = "gpt-4-1106-preview"
 
-llm_config_filesystem={
-    "timeout": 600,
-    "seed": 42,
-    "model": model,  # make sure the endpoint you use supports the model
-    "temperature": 0,
-    "functions": function_specs
-}
+llm_config_filesystem = llm_config.copy()
+llm_config_user = llm_config.copy()
 
-llm_config_user={
-    "timeout": 600,
-    "seed": 42,
-    "model": model,  # make sure the endpoint you use supports the model
-    "temperature": 0
-}
+llm_config_filesystem["functions"] = function_specs
 
 onCheckCodeDef = {
     "name": "check_PR",

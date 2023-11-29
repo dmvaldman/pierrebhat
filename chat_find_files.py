@@ -3,9 +3,9 @@ from autogen import ConversableAgent
 from filesystem import Filesystem, function_specs
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
 import requests
+from utils.llm_config import llm_config
 
-# model = "gpt-4-0613"
-model = "gpt-4-1106-preview"
+
 max_consecutive_auto_reply = 50
 
 onFindFilesDef = {
@@ -28,21 +28,10 @@ onFindFilesDef = {
 
 function_specs.append(onFindFilesDef)
 
-llm_config_filesystem = {
-    "timeout": 600,
-    "seed": 42,
-    "model": model,  # make sure the endpoint you use supports the model
-    "temperature": 0,
-    "functions": function_specs
-}
+llm_config_filesystem = llm_config.copy()
+llm_config_user = llm_config.copy()
 
-llm_config_user = {
-    "timeout": 600,
-    "seed": 42,
-    "model": model,  # make sure the endpoint you use supports the model
-    "temperature": 0
-}
-
+llm_config_filesystem["functions"] = function_specs
 
 class Issue():
     def __init__(self, title, body, repo_name, num=None, pr=None):

@@ -5,9 +5,10 @@ import concurrent.futures
 import time
 import json
 import subprocess
+from utils.llm_config import llm_config
 
 
-client = OpenAI()
+client = OpenAI(api_key = llm_config['api_key'])
 
 onCheckPRDef = {
     "name": "check_PR",
