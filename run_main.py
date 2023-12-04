@@ -40,6 +40,13 @@ def onAssessPR(issue, answer, patches, results):
 
 def main(issue_dataset=None):
     results = []
+    response = {
+        "attempts": 0,
+        "correct": 0,
+        "config": config,
+        "results": results
+    }
+
     for repo_name, issues in issues_dataset.items():
         if repo_name in ['wncc/UniTrain', 'espin086/GPT-Jobhunter', 'Clueless-Community/scrape-up', 'Ebazhanov/linkedin-skill-assessments-quizzes']:
             continue
@@ -90,23 +97,29 @@ def main(issue_dataset=None):
             answer = chat_compare_code.user_bot.last_message()['content']
 
             # save results to file
-            for result in chat_find_files.results:
-                if result['repo_name'] == issue.repo_name and result['issue_num'] == issue.num:
-                    result['correct_patches'] = patches
-                    if answer == 'YES':
-                        result['correct_pr'] = True
-                        result['correct_pr_reason'] = ''
-                    else:
-                        result['correct_pr'] = False
-                        result['correct_pr_reason'] = chat_compare_code.user_bot.last_message()['content']
-                    break
+            if not chat_find_files.result.done():
+                print('ERROR: ChatFindFiles did not finish. Increase max_consecutive_auto_reply in chat')
+                continue
 
-            results += chat_find_files.results
+            response['attempts'] += 1
+            result = chat_find_files.result.result().copy()
+            result['correct_patches'] = patches
+
+            if answer == 'YES':
+                result['correct_pr'] = True
+                result['correct_pr_reason'] = ''
+                response['correct'] += 1
+            else:
+                result['correct_pr'] = False
+                result['correct_pr_reason'] = chat_compare_code.user_bot.last_message()['content']
+
+            results.append(result)
 
             # save results to file
             config_str = config_to_str(config)
             with open(f'data/{config_str}.json', 'w') as f:
-                json.dump(results, f, indent=2)
+                response['results'] = results
+                json.dump(response, f, indent=2)
 
     return results
 
