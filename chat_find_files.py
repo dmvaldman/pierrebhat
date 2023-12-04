@@ -157,7 +157,7 @@ class ChatFindFiles():
             "list_files": filesystem.tree
         }
 
-        self.results = []
+        self.result = concurrent.futures.Future()
         self.filenames = concurrent.futures.Future()
         self.create_chatbots()
         self.done_callback(onFindFilesDef)
@@ -190,7 +190,7 @@ class ChatFindFiles():
                 'correct_files': test_result
             }
 
-            self.results.append(result)
+            self.result.set_result(result)
 
             filenames = [repo_name + '/' + filename for filename in filenames]
             self.filenames.set_result(filenames)
@@ -204,7 +204,7 @@ class ChatFindFiles():
 
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
-        prompt = f"{str(issue)}\n\nHere is the directory structure.\n\n{fs.tree()}\nWhat files need to be changed to fix this issue? Navigate/read the codebase using the filesystem API to determine a list of files (in mardown format) that need modifying."
+        prompt = f"{str(issue)}\nHere is the directory structure:\n\n{fs.tree()}\nWhat files need to be changed to fix this issue? Navigate/read the codebase using the filesystem API to determine a list of files (in mardown format) that need modifying."
         if len(prompt) > MAX_CONTENT_LENGTH:
             prompt = prompt[:MAX_CONTENT_LENGTH] + '...'
         return prompt

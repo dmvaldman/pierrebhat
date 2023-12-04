@@ -118,9 +118,9 @@ class GPTWriteCode():
     def add_files(self, filenames):
         # create a file handler for each file
         file_handlers = []
-        for file in filenames:
+        for filename in filenames:
             # TODO: move logic of where the file is elsewhere
-            file_contents = open('repos/' + file, "rb")
+            file_contents = open('repos/' + filename, "rb")
             # check if contents are empty
             if file_contents.read() == b'':
                 continue
@@ -132,7 +132,7 @@ class GPTWriteCode():
                 file_handlers.append(file_handler.id)
             except Exception as e:
                 # Can be an invalid extension
-                print(e)
+                print(f'Filename: {filename}\n\nError: {e}')
                 continue
         return file_handlers
 
