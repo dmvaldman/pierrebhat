@@ -43,13 +43,15 @@ class Summary():
 class Summarizer():
     extensions = ('.js', '.jsx', '.py', '.json', '.html', '.css', '.scss', '.yml', '.yaml', '.ts', '.tsx', '.ipynb', '.c', '.cc', '.cpp', '.go', '.h', '.hpp', '.java', '.sol', '.sh', '.txt', '.md')
     directory_blacklist = ('build', 'dist', 'test', 'tests', 'log', 'logs', 'docker', 'node_modules', 'venv', 'env', 'assets', 'include', 'docs', 'examples')
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), root_dir)
     def __init__(self, repo_name):
         self.repo_name = repo_name
         self.overviews, self.reverse_lookup = self.generate_overview_for_directory(repo_name)
 
     def parse_python_file(self, file_path):
         # TODO: return array of filenames when there are collisions, and don't namespace by classname
-        with open(root_dir + file_path, 'r') as f:
+        path = os.path.join(Summarizer.base_path, file_path)
+        with open(path, 'r') as f:
             node = py_ast.parse(f.read())
 
         classes = []
@@ -109,7 +111,8 @@ class Summarizer():
         }
 
     def parse_js_file(self, file_path):
-        result = subprocess.run(["node", "utils/parse.js", root_dir + file_path], capture_output=True, text=True)
+        path = os.path.join(Summarizer.base_path, file_path)
+        result = subprocess.run(["node", "utils/parse.js", path], capture_output=True, text=True)
         if result.stderr:
             print(f"Error occurred while processing {file_path}:")
             print(result.stderr)
@@ -123,7 +126,8 @@ class Summarizer():
         counter = 0
         reverse_lookup = {} # map of class/method/import to filename
 
-        for root, _, files in os.walk(root_dir + self.repo_name):
+        path = os.path.join(Summarizer.base_path, self.repo_name)
+        for root, _, files in os.walk(path):
             # remove root_dir prefix
             root = ''.join(root.split(root_dir)[1:])
 
@@ -214,7 +218,8 @@ class Summarizer():
         description_prompt = 'A short summary in plain English of the above code is:'
         extension = file_path.split('.')[-1]
         try:
-            code = open(root_dir + file_path, 'r').read()
+            path = os.path.join(Summarizer.base_path, file_path)
+            code = open(path, 'r').read()
         except:
             print(f"Error reading file {file_path}")
             return None
@@ -246,7 +251,7 @@ class Summarizer():
 
         # generate
         description_prompt = f'Here is the README file for the repository {root_path}:\n'
-        description_prompt += f'\nFile: {readme_file} - {open(os.path.join(root_dir + root_path, readme_file), "r").read()}'
+        description_prompt += f'\nFile: {readme_file} - {open(os.path.join(Summarizer.base_path, root_path, readme_file), "r").read()}'
         description_prompt += '\n\nA short summary in plain English of what the repository is about is:'
         description = complete(description_prompt)
         return description

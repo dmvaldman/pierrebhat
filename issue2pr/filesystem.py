@@ -8,6 +8,7 @@ root_dir = 'repos/'
 class Filesystem():
     extensions = ('.js', '.jsx', '.py', '.json', '.html', '.css', '.scss', '.yml', '.yaml', '.ts', '.tsx', '.ipynb', '.c', '.cc', '.cpp', '.go', '.h', '.hpp', '.java', '.sol', '.sh', '.txt', '.md')
     directory_blacklist = ('build', 'dist', 'test', 'tests', 'log', 'logs', 'docker', 'node_modules', 'venv', 'env', 'assets', 'include', 'docs', 'examples')
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), root_dir)
     def __init__(self, curr_dir=None, meta=None, create_meta=False):
         self.current_folder = Folder(curr_dir)
         self.meta = meta
@@ -24,8 +25,10 @@ class Filesystem():
         curr_folder = Folder(curr_dir)
         self.current_folder = curr_folder
 
-        for curr_dir, folders, files in os.walk(root_dir + curr_dir, topdown=True):
-            # remove root_dir prefix
+        path = os.path.join(Filesystem.base_path, curr_dir)
+
+        for curr_dir, folders, files in os.walk(path, topdown=True):
+            # remove root_dir prefix using os.path
             curr_dir = ''.join(curr_dir.split(root_dir)[1:])
 
             if any([folder.startswith('.') for folder in curr_dir.split('/')]):
@@ -256,6 +259,7 @@ class File:
     def __init__(self, name, meta=None):
         self.name = name
         self.meta = meta
+        self.path = os.path.join(Filesystem.base_path, name)
 
     def set_metadata(self, meta):
         self.meta = meta
@@ -280,7 +284,7 @@ class File:
         return f'File: {self.name}: {self.meta}'
 
     def get_content(self):
-        return open(root_dir + self.name, 'r').read()
+        return open(self.path, 'r').read()
 
     def get_summary(self):
         return f'Summary for {self.name}\n{self.meta}'

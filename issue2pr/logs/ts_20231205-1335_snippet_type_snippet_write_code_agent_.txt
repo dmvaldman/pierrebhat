@@ -1,0 +1,831 @@
+Repo roboflow/supervision already exists
+Command executed successfully.
+
+user_find_files (to filesystem):
+
+Repo: roboflow/supervision
+Issue Title: Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame
+Issue Body: ### Description
+
+Currently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.
+
+Information about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.
+
+
+Here is the directory structure:
+
+supervision
+	supervision/supervision
+		supervision/supervision/classification
+			supervision/supervision/classification/__init__.py
+			supervision/supervision/classification/core.py
+		supervision/supervision/metrics
+			supervision/supervision/metrics/detection.py
+			supervision/supervision/metrics/__init__.py
+		supervision/supervision/dataset
+			supervision/supervision/dataset/formats
+				supervision/supervision/dataset/formats/coco.py
+				supervision/supervision/dataset/formats/__init__.py
+				supervision/supervision/dataset/formats/yolo.py
+				supervision/supervision/dataset/formats/pascal_voc.py
+			supervision/supervision/dataset/__init__.py
+			supervision/supervision/dataset/core.py
+			supervision/supervision/dataset/utils.py
+		supervision/supervision/annotators
+			supervision/supervision/annotators/__init__.py
+			supervision/supervision/annotators/core.py
+			supervision/supervision/annotators/utils.py
+			supervision/supervision/annotators/base.py
+		supervision/supervision/utils
+			supervision/supervision/utils/internal.py
+			supervision/supervision/utils/__init__.py
+			supervision/supervision/utils/file.py
+			supervision/supervision/utils/notebook.py
+			supervision/supervision/utils/video.py
+			supervision/supervision/utils/image.py
+		supervision/supervision/tracker
+			supervision/supervision/tracker/byte_tracker
+				supervision/supervision/tracker/byte_tracker/__init__.py
+				supervision/supervision/tracker/byte_tracker/core.py
+				supervision/supervision/tracker/byte_tracker/matching.py
+				supervision/supervision/tracker/byte_tracker/basetrack.py
+				supervision/supervision/tracker/byte_tracker/kalman_filter.py
+			supervision/supervision/tracker/__init__.py
+		supervision/supervision/geometry
+			supervision/supervision/geometry/__init__.py
+			supervision/supervision/geometry/core.py
+			supervision/supervision/geometry/utils.py
+		supervision/supervision/draw
+			supervision/supervision/draw/color.py
+			supervision/supervision/draw/__init__.py
+			supervision/supervision/draw/utils.py
+		supervision/supervision/detection
+			supervision/supervision/detection/tools
+				supervision/supervision/detection/tools/inference_slicer.py
+				supervision/supervision/detection/tools/__init__.py
+				supervision/supervision/detection/tools/polygon_zone.py
+			supervision/supervision/detection/line_counter.py
+			supervision/supervision/detection/__init__.py
+			supervision/supervision/detection/core.py
+			supervision/supervision/detection/annotate.py
+			supervision/supervision/detection/utils.py
+		supervision/supervision/__init__.py
+	supervision/CODE_OF_CONDUCT.md
+	supervision/LICENSE.md
+	supervision/mkdocs.yml
+	supervision/.pre-commit-config.yaml
+	supervision/demo.ipynb
+	supervision/README.md
+	supervision/CONTRIBUTING.md
+
+What files need to be changed to fix this issue? Navigate/read the codebase using the filesystem API to determine a list of files (in mardown format) that need modifying.
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments:
+{"name":"sv.LineZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+False
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments:
+{"name":"LineZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+supervision/supervision/detection/line_counter.py
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments:
+{"name":"PolygonZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+supervision/supervision/detection/tools/polygon_zone.py
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: submit_files *****
+Arguments:
+{"filenames":["supervision/supervision/detection/line_counter.py","supervision/supervision/detection/tools/polygon_zone.py"]}
+*************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION submit_files...
+user_find_files (to filesystem):
+
+***** Response from calling function "submit_files" *****
+None
+*********************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+TERMINATE
+
+--------------------------------------------------------------------------------
+Role: user
+Repo: roboflow/supervision
+Issue Title: Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame
+Issue Body: ### Description
+
+Currently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.
+
+Information about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.
+
+
+
+Here is a first pass of some of the files that need modifying. Check if modifying them resolves the issue and if so, provide a patch to each file that does so.
+
+- supervision/supervision/detection/line_counter.py
+- supervision/supervision/detection/tools/polygon_zone.py
+
+Navigate/read the codebase using the filesystem API to craft and submit a PR.
+****************
+Calling function get_content with params {'filename': 'supervision/supervision/detection/line_counter.py'}
+****************
+
+
+****************
+Response:
+
+from typing import Dict, Optional
+
+import cv2
+import numpy as np
+
+from supervision.detection.core import Detections
+from supervision.draw.color import Color
+from supervision.geometry.core import Point, Rect, Vector
+
+
+class LineZone:
+    """
+    Count the number of objects that cross a line.
+    """
+
+    def __init__(self, start: Point, end: Point):
+        """
+        Initialize a LineCounter object.
+
+        Attributes:
+            start (Point): The starting point of the line.
+            end (Point): The ending point of the line.
+
+        """
+        self.vector = Vector(start=start, end=end)
+        self.tracker_state: Dict[str, bool] = {}
+        self.in_count: int = 0
+        self.out_count: int = 0
+
+    def trigger(self, detections: Detections):
+        """
+        Update the in_count and out_count for the detections that cross the line.
+
+        Attributes:
+            detections (Detections): The detections for which to update the counts.
+
+        """
+        for xyxy, _, confidence, class_id, tracker_id in detections:
+            # handle detections with no tracker_id
+            if tracker_id is None:
+                continue
+
+            # we check if all four anchors of bbox are on the same side of vector
+            x1, y1, x2, y2 = xyxy
+            anchors = [
+                Point(x=x1, y=y1),
+                Point(x=x1, y=y2),
+                Point(x=x2, y=y1),
+                Point(x=x2, y=y2),
+            ]
+            triggers = [self.vector.is_in(point=anchor) for anchor in anchors]
+
+            # detection is partially in and partially out
+            if len(set(triggers)) == 2:
+                continue
+
+            tracker_state = triggers[0]
+            # handle new detection
+            if tracker_id not in self.tracker_state:
+                self.tracker_state[tracker_id] = tracker_state
+                continue
+
+            # handle detection on the same side of the line
+            if self.tracker_state.get(tracker_id) == tracker_state:
+                continue
+
+            self.tracker_state[tracker_id] = tracker_state
+            if tracker_state:
+                self.in_count += 1
+            else:
+                self.out_count += 1
+
+
+class LineZoneAnnotator:
+    def __init__(
+        self,
+        thickness: float = 2,
+        color: Color = Color.white(),
+        text_thickness: float = 2,
+        text_color: Color = Color.black(),
+        text_scale: float = 0.5,
+        text_offset: float = 1.5,
+        text_padding: int = 10,
+        custom_in_text: Optional[str] = None,
+        custom_out_text: Optional[str] = None,
+    ):
+        """
+        Initialize the LineCounterAnnotator object with default values.
+
+        Attributes:
+            thickness (float): The thickness of the line that will be drawn.
+            color (Color): The color of the line that will be drawn.
+            text_thickness (float): The thickness of the text that will be drawn.
+            text_color (Color): The color of the text that will be drawn.
+            text_scale (float): The scale of the text that will be drawn.
+            text_offset (float): The offset of the text that will be drawn.
+            text_padding (int): The padding of the text that will be drawn.
+
+        """
+        self.thickness: float = thickness
+        self.color: Color = color
+        self.text_thickness: float = text_thickness
+        self.text_color: Color = text_color
+        self.text_scale: float = text_scale
+        self.text_offset: float = text_offset
+        self.text_padding: int = text_padding
+        self.custom_in_text: str = custom_in_text
+        self.custom_out_text: str = custom_out_text
+
+    def annotate(self, frame: np.ndarray, line_counter: LineZone) -> np.ndarray:
+        """
+        Draws the line on the frame using the line_counter provided.
+
+        Attributes:
+            frame (np.ndarray): The image on which the line will be drawn.
+            line_counter (LineCounter): The line counter
+                that will be used to draw the line.
+
+        Returns:
+            np.ndarray: The image with the line drawn on it.
+
+        """
+        cv2.line(
+            frame,
+            line_counter.vector.start.as_xy_int_tuple(),
+            line_counter.vector.end.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            self.thickness,
+            lineType=cv2.LINE_AA,
+            shift=0,
+        )
+        cv2.circle(
+            frame,
+            line_counter.vector.start.as_xy_int_tuple(),
+            radius=5,
+            color=self.text_color.as_bgr(),
+            thickness=-1,
+            lineType=cv2.LINE_AA,
+        )
+        cv2.circle(
+            frame,
+            line_counter.vector.end.as_xy_int_tuple(),
+            radius=5,
+            color=self.text_color.as_bgr(),
+            thickness=-1,
+            lineType=cv2.LINE_AA,
+        )
+
+        in_text = (
+            f"{self.custom_in_text}: {line_counter.in_count}"
+            if self.custom_in_text is not None
+            else f"in: {line_counter.in_count}"
+        )
+        out_text = (
+            f"{self.custom_out_text}: {line_counter.out_count}"
+            if self.custom_out_text is not None
+            else f"out: {line_counter.out_count}"
+        )
+
+        (in_text_width, in_text_height), _ = cv2.getTextSize(
+            in_text, cv2.FONT_HERSHEY_SIMPLEX, self.text_scale, self.text_thickness
+        )
+        (out_text_width, out_text_height), _ = cv2.getTextSize(
+            out_text, cv2.FONT_HERSHEY_SIMPLEX, self.text_scale, self.text_thickness
+        )
+
+        in_text_x = int(
+            (line_counter.vector.end.x + line_counter.vector.start.x - in_text_width)
+            / 2
+        )
+        in_text_y = int(
+            (line_counter.vector.end.y + line_counter.vector.start.y + in_text_height)
+            / 2
+            - self.text_offset * in_text_height
+        )
+
+        out_text_x = int(
+            (line_counter.vector.end.x + line_counter.vector.start.x - out_text_width)
+            / 2
+        )
+        out_text_y = int(
+            (line_counter.vector.end.y + line_counter.vector.start.y + out_text_height)
+            / 2
+            + self.text_offset * out_text_height
+        )
+
+        in_text_background_rect = Rect(
+            x=in_text_x,
+            y=in_text_y - in_text_height,
+            width=in_text_width,
+            height=in_text_height,
+        ).pad(padding=self.text_padding)
+        out_text_background_rect = Rect(
+            x=out_text_x,
+            y=out_text_y - out_text_height,
+            width=out_text_width,
+            height=out_text_height,
+        ).pad(padding=self.text_padding)
+
+        cv2.rectangle(
+            frame,
+            in_text_background_rect.top_left.as_xy_int_tuple(),
+            in_text_background_rect.bottom_right.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            -1,
+        )
+        cv2.rectangle(
+            frame,
+            out_text_background_rect.top_left.as_xy_int_tuple(),
+            out_text_background_rect.bottom_right.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            -1,
+        )
+
+        cv2.putText(
+            frame,
+            in_text,
+            (in_text_x, in_text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            self.text_scale,
+            self.text_color.as_bgr(),
+            self.text_thickness,
+            cv2.LINE_AA,
+        )
+        cv2.putText(
+            frame,
+            out_text,
+            (out_text_x, out_text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            self.text_scale,
+            self.text_color.as_bgr(),
+            self.text_thickness,
+            cv2.LINE_AA,
+        )
+        return frame
+
+****************
+
+
+****************
+Calling function get_content with params {'filename': 'supervision/supervision/detection/tools/polygon_zone.py'}
+****************
+
+
+****************
+Response:
+
+from dataclasses import replace
+from typing import Optional, Tuple
+
+import cv2
+import numpy as np
+
+from supervision import Detections
+from supervision.detection.utils import clip_boxes, polygon_to_mask
+from supervision.draw.color import Color
+from supervision.draw.utils import draw_polygon, draw_text
+from supervision.geometry.core import Position
+from supervision.geometry.utils import get_polygon_center
+
+
+class PolygonZone:
+    """
+    A class for defining a polygon-shaped zone within a frame for detecting objects.
+
+    Attributes:
+        polygon (np.ndarray): A polygon represented by a numpy array of shape
+            `(N, 2)`, containing the `x`, `y` coordinates of the points.
+        frame_resolution_wh (Tuple[int, int]): The frame resolution (width, height)
+        triggering_position (Position): The position within the bounding
+            box that triggers the zone (default: Position.BOTTOM_CENTER)
+        current_count (int): The current count of detected objects within the zone
+        mask (np.ndarray): The 2D bool mask for the polygon zone
+    """
+
+    def __init__(
+        self,
+        polygon: np.ndarray,
+        frame_resolution_wh: Tuple[int, int],
+        triggering_position: Position = Position.BOTTOM_CENTER,
+    ):
+        self.polygon = polygon.astype(int)
+        self.frame_resolution_wh = frame_resolution_wh
+        self.triggering_position = triggering_position
+        self.current_count = 0
+
+        width, height = frame_resolution_wh
+        self.mask = polygon_to_mask(
+            polygon=polygon, resolution_wh=(width + 1, height + 1)
+        )
+
+    def trigger(self, detections: Detections) -> np.ndarray:
+        """
+        Determines if the detections are within the polygon zone.
+
+        Parameters:
+            detections (Detections): The detections
+                to be checked against the polygon zone
+
+        Returns:
+            np.ndarray: A boolean numpy array indicating
+                if each detection is within the polygon zone
+        """
+
+        clipped_xyxy = clip_boxes(
+            boxes_xyxy=detections.xyxy, frame_resolution_wh=self.frame_resolution_wh
+        )
+        clipped_detections = replace(detections, xyxy=clipped_xyxy)
+        clipped_anchors = np.ceil(
+            clipped_detections.get_anchor_coordinates(anchor=self.triggering_position)
+        ).astype(int)
+        is_in_zone = self.mask[clipped_anchors[:, 1], clipped_anchors[:, 0]]
+        self.current_count = int(np.sum(is_in_zone))
+        return is_in_zone.astype(bool)
+
+
+class PolygonZoneAnnotator:
+    """
+    A class for annotating a polygon-shaped zone within a
+        frame with a count of detected objects.
+
+    Attributes:
+        zone (PolygonZone): The polygon zone to be annotated
+        color (Color): The color to draw the polygon lines
+        thickness (int): The thickness of the polygon lines, default is 2
+        text_color (Color): The color of the text on the polygon, default is black
+        text_scale (float): The scale of the text on the polygon, default is 0.5
+        text_thickness (int): The thickness of the text on the polygon, default is 1
+        text_padding (int): The padding around the text on the polygon, default is 10
+        font (int): The font type for the text on the polygon,
+            default is cv2.FONT_HERSHEY_SIMPLEX
+        center (Tuple[int, int]): The center of the polygon for text placement
+    """
+
+    def __init__(
+        self,
+        zone: PolygonZone,
+        color: Color,
+        thickness: int = 2,
+        text_color: Color = Color.black(),
+        text_scale: float = 0.5,
+        text_thickness: int = 1,
+        text_padding: int = 10,
+    ):
+        self.zone = zone
+        self.color = color
+        self.thickness = thickness
+        self.text_color = text_color
+        self.text_scale = text_scale
+        self.text_thickness = text_thickness
+        self.text_padding = text_padding
+        self.font = cv2.FONT_HERSHEY_SIMPLEX
+        self.center = get_polygon_center(polygon=zone.polygon)
+
+    def annotate(self, scene: np.ndarray, label: Optional[str] = None) -> np.ndarray:
+        """
+        Annotates the polygon zone within a frame with a count of detected objects.
+
+        Parameters:
+            scene (np.ndarray): The image on which the polygon zone will be annotated
+            label (Optional[str]): An optional label for the count of detected objects
+                within the polygon zone (default: None)
+
+        Returns:
+            np.ndarray: The image with the polygon zone and count of detected objects
+        """
+        annotated_frame = draw_polygon(
+            scene=scene,
+            polygon=self.zone.polygon,
+            color=self.color,
+            thickness=self.thickness,
+        )
+
+        annotated_frame = draw_text(
+            scene=annotated_frame,
+            text=str(self.zone.current_count) if label is None else label,
+            text_anchor=self.center,
+            background_color=self.color,
+            text_color=self.text_color,
+            text_scale=self.text_scale,
+            text_thickness=self.text_thickness,
+            text_padding=self.text_padding,
+            text_font=self.font,
+        )
+
+        return annotated_frame
+
+****************
+
+
+****************
+Calling function get_filename_for_object with params {'name': 'sv.LineZone.trigger'}
+****************
+
+
+****************
+Response:
+
+False
+****************
+
+
+****************
+Calling function get_content with params {'filename': 'supervision/supervision/detection/line_counter.py'}
+****************
+
+
+****************
+Response:
+
+from typing import Dict, Optional
+
+import cv2
+import numpy as np
+
+from supervision.detection.core import Detections
+from supervision.draw.color import Color
+from supervision.geometry.core import Point, Rect, Vector
+
+
+class LineZone:
+    """
+    Count the number of objects that cross a line.
+    """
+
+    def __init__(self, start: Point, end: Point):
+        """
+        Initialize a LineCounter object.
+
+        Attributes:
+            start (Point): The starting point of the line.
+            end (Point): The ending point of the line.
+
+        """
+        self.vector = Vector(start=start, end=end)
+        self.tracker_state: Dict[str, bool] = {}
+        self.in_count: int = 0
+        self.out_count: int = 0
+
+    def trigger(self, detections: Detections):
+        """
+        Update the in_count and out_count for the detections that cross the line.
+
+        Attributes:
+            detections (Detections): The detections for which to update the counts.
+
+        """
+        for xyxy, _, confidence, class_id, tracker_id in detections:
+            # handle detections with no tracker_id
+            if tracker_id is None:
+                continue
+
+            # we check if all four anchors of bbox are on the same side of vector
+            x1, y1, x2, y2 = xyxy
+            anchors = [
+                Point(x=x1, y=y1),
+                Point(x=x1, y=y2),
+                Point(x=x2, y=y1),
+                Point(x=x2, y=y2),
+            ]
+            triggers = [self.vector.is_in(point=anchor) for anchor in anchors]
+
+            # detection is partially in and partially out
+            if len(set(triggers)) == 2:
+                continue
+
+            tracker_state = triggers[0]
+            # handle new detection
+            if tracker_id not in self.tracker_state:
+                self.tracker_state[tracker_id] = tracker_state
+                continue
+
+            # handle detection on the same side of the line
+            if self.tracker_state.get(tracker_id) == tracker_state:
+                continue
+
+            self.tracker_state[tracker_id] = tracker_state
+            if tracker_state:
+                self.in_count += 1
+            else:
+                self.out_count += 1
+
+
+class LineZoneAnnotator:
+    def __init__(
+        self,
+        thickness: float = 2,
+        color: Color = Color.white(),
+        text_thickness: float = 2,
+        text_color: Color = Color.black(),
+        text_scale: float = 0.5,
+        text_offset: float = 1.5,
+        text_padding: int = 10,
+        custom_in_text: Optional[str] = None,
+        custom_out_text: Optional[str] = None,
+    ):
+        """
+        Initialize the LineCounterAnnotator object with default values.
+
+        Attributes:
+            thickness (float): The thickness of the line that will be drawn.
+            color (Color): The color of the line that will be drawn.
+            text_thickness (float): The thickness of the text that will be drawn.
+            text_color (Color): The color of the text that will be drawn.
+            text_scale (float): The scale of the text that will be drawn.
+            text_offset (float): The offset of the text that will be drawn.
+            text_padding (int): The padding of the text that will be drawn.
+
+        """
+        self.thickness: float = thickness
+        self.color: Color = color
+        self.text_thickness: float = text_thickness
+        self.text_color: Color = text_color
+        self.text_scale: float = text_scale
+        self.text_offset: float = text_offset
+        self.text_padding: int = text_padding
+        self.custom_in_text: str = custom_in_text
+        self.custom_out_text: str = custom_out_text
+
+    def annotate(self, frame: np.ndarray, line_counter: LineZone) -> np.ndarray:
+        """
+        Draws the line on the frame using the line_counter provided.
+
+        Attributes:
+            frame (np.ndarray): The image on which the line will be drawn.
+            line_counter (LineCounter): The line counter
+                that will be used to draw the line.
+
+        Returns:
+            np.ndarray: The image with the line drawn on it.
+
+        """
+        cv2.line(
+            frame,
+            line_counter.vector.start.as_xy_int_tuple(),
+            line_counter.vector.end.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            self.thickness,
+            lineType=cv2.LINE_AA,
+            shift=0,
+        )
+        cv2.circle(
+            frame,
+            line_counter.vector.start.as_xy_int_tuple(),
+            radius=5,
+            color=self.text_color.as_bgr(),
+            thickness=-1,
+            lineType=cv2.LINE_AA,
+        )
+        cv2.circle(
+            frame,
+            line_counter.vector.end.as_xy_int_tuple(),
+            radius=5,
+            color=self.text_color.as_bgr(),
+            thickness=-1,
+            lineType=cv2.LINE_AA,
+        )
+
+        in_text = (
+            f"{self.custom_in_text}: {line_counter.in_count}"
+            if self.custom_in_text is not None
+            else f"in: {line_counter.in_count}"
+        )
+        out_text = (
+            f"{self.custom_out_text}: {line_counter.out_count}"
+            if self.custom_out_text is not None
+            else f"out: {line_counter.out_count}"
+        )
+
+        (in_text_width, in_text_height), _ = cv2.getTextSize(
+            in_text, cv2.FONT_HERSHEY_SIMPLEX, self.text_scale, self.text_thickness
+        )
+        (out_text_width, out_text_height), _ = cv2.getTextSize(
+            out_text, cv2.FONT_HERSHEY_SIMPLEX, self.text_scale, self.text_thickness
+        )
+
+        in_text_x = int(
+            (line_counter.vector.end.x + line_counter.vector.start.x - in_text_width)
+            / 2
+        )
+        in_text_y = int(
+            (line_counter.vector.end.y + line_counter.vector.start.y + in_text_height)
+            / 2
+            - self.text_offset * in_text_height
+        )
+
+        out_text_x = int(
+            (line_counter.vector.end.x + line_counter.vector.start.x - out_text_width)
+            / 2
+        )
+        out_text_y = int(
+            (line_counter.vector.end.y + line_counter.vector.start.y + out_text_height)
+            / 2
+            + self.text_offset * out_text_height
+        )
+
+        in_text_background_rect = Rect(
+            x=in_text_x,
+            y=in_text_y - in_text_height,
+            width=in_text_width,
+            height=in_text_height,
+        ).pad(padding=self.text_padding)
+        out_text_background_rect = Rect(
+            x=out_text_x,
+            y=out_text_y - out_text_height,
+            width=out_text_width,
+            height=out_text_height,
+        ).pad(padding=self.text_padding)
+
+        cv2.rectangle(
+            frame,
+            in_text_background_rect.top_left.as_xy_int_tuple(),
+            in_text_background_rect.bottom_right.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            -1,
+        )
+        cv2.rectangle(
+            frame,
+            out_text_background_rect.top_left.as_xy_int_tuple(),
+            out_text_background_rect.bottom_right.as_xy_int_tuple(),
+            self.color.as_bgr(),
+            -1,
+        )
+
+        cv2.putText(
+            frame,
+            in_text,
+            (in_text_x, in_text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            self.text_scale,
+            self.text_color.as_bgr(),
+            self.text_thickness,
+            cv2.LINE_AA,
+        )
+        cv2.putText(
+            frame,
+            out_text,
+            (out_text_x, out_text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            self.text_scale,
+            self.text_color.as_bgr(),
+            self.text_thickness,
+            cv2.LINE_AA,
+        )
+        return frame
+
+****************
+
+
+****************

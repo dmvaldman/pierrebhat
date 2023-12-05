@@ -6,9 +6,11 @@ import time
 import json
 import subprocess
 from utils.llm_config import llm_config
+import os
 
 
 client = OpenAI(api_key = llm_config['api_key'])
+repo_dir = 'repos/'
 
 onCheckPRDef = {
     "name": "check_PR",
@@ -84,6 +86,7 @@ def check_syntax(file_path):
     return result.stdout
 
 class GPTWriteCode():
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), repo_dir)
     user_system_message = """
     You are an expert programmer working on a GitHub repository. You have been assigned an issue to resolve.
     You are given a starting point with the relevant files needed to modify. You are also given access to a filesystem API to read these and other files.
@@ -120,7 +123,8 @@ class GPTWriteCode():
         file_handlers = []
         for filename in filenames:
             # TODO: move logic of where the file is elsewhere
-            file_contents = open('repos/' + filename, "rb")
+            path = os.path.join(GPTWriteCode.base_path, filename)
+            file_contents = open(path, "rb")
             # check if contents are empty
             if file_contents.read() == b'':
                 continue
@@ -329,7 +333,7 @@ class GPTWriteCode():
 
 
 if __name__ == "__main__":
-    from chat_find_files import Issue
+    from Issue2PR import Issue
     from filesystem import Filesystem
     import difflib
 

@@ -11,10 +11,10 @@ class Repo:
         [org, name] = repo_name.split('/')
         self.org = org
         self.name = name
-        self.repos_dir = repo_dir
 
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        self.local_path = os.path.join(curr_dir, repo_dir, name)
         self.remote_path = f'{org}/{name}'
-        self.local_path = f'{repo_dir}/{name}'
 
     def download(self):
         if not os.path.exists(self.local_path):

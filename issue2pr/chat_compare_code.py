@@ -1,5 +1,6 @@
 from autogen import ConversableAgent
 from utils.llm_config import llm_config
+import concurrent.futures
 
 
 llm_config_comparitor = llm_config.copy()
@@ -22,6 +23,9 @@ class ChatCompareCode():
         self.new_files = new_files
 
         self.create_chatbots()
+
+        self.result = concurrent.futures.Future()
+        self.reason = concurrent.futures.Future()
 
     @staticmethod
     def is_terminal(message):
@@ -60,3 +64,11 @@ class ChatCompareCode():
     def initiate_chat(self, **kwargs):
         user_prompt = self.generate_user_prompt(self.issue, self.new_files, self.actual_files)
         self.user_bot.initiate_chat(self.compare_bot, message=user_prompt, **kwargs)
+        answer = self.user_bot.last_message()['content']
+
+        self.result.set_result(answer == "YES")
+
+        if answer != "YES":
+            self.reason.set_result(answer)
+        else:
+            self.reason.set_result("")

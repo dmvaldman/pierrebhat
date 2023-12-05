@@ -1,0 +1,190 @@
+Repo roboflow/supervision already exists
+Command executed successfully.
+
+user_find_files (to filesystem):
+
+Repo: roboflow/supervision
+Issue Title: Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame
+Issue Body: ### Description
+
+Currently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.
+
+Information about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.
+
+
+Here is the directory structure:
+
+supervision
+	supervision/supervision
+		supervision/supervision/classification
+			supervision/supervision/classification/__init__.py
+			supervision/supervision/classification/core.py
+		supervision/supervision/metrics
+			supervision/supervision/metrics/detection.py
+			supervision/supervision/metrics/__init__.py
+		supervision/supervision/dataset
+			supervision/supervision/dataset/formats
+				supervision/supervision/dataset/formats/coco.py
+				supervision/supervision/dataset/formats/__init__.py
+				supervision/supervision/dataset/formats/yolo.py
+				supervision/supervision/dataset/formats/pascal_voc.py
+			supervision/supervision/dataset/__init__.py
+			supervision/supervision/dataset/core.py
+			supervision/supervision/dataset/utils.py
+		supervision/supervision/annotators
+			supervision/supervision/annotators/__init__.py
+			supervision/supervision/annotators/core.py
+			supervision/supervision/annotators/base.py
+		supervision/supervision/utils
+			supervision/supervision/utils/internal.py
+			supervision/supervision/utils/__init__.py
+			supervision/supervision/utils/file.py
+			supervision/supervision/utils/notebook.py
+			supervision/supervision/utils/video.py
+			supervision/supervision/utils/image.py
+		supervision/supervision/tracker
+			supervision/supervision/tracker/byte_tracker
+				supervision/supervision/tracker/byte_tracker/__init__.py
+				supervision/supervision/tracker/byte_tracker/core.py
+				supervision/supervision/tracker/byte_tracker/matching.py
+				supervision/supervision/tracker/byte_tracker/basetrack.py
+				supervision/supervision/tracker/byte_tracker/kalman_filter.py
+			supervision/supervision/tracker/__init__.py
+		supervision/supervision/geometry
+			supervision/supervision/geometry/__init__.py
+			supervision/supervision/geometry/core.py
+			supervision/supervision/geometry/utils.py
+		supervision/supervision/draw
+			supervision/supervision/draw/color.py
+			supervision/supervision/draw/__init__.py
+			supervision/supervision/draw/utils.py
+		supervision/supervision/detection
+			supervision/supervision/detection/tools
+				supervision/supervision/detection/tools/inference_slicer.py
+				supervision/supervision/detection/tools/__init__.py
+				supervision/supervision/detection/tools/polygon_zone.py
+			supervision/supervision/detection/line_counter.py
+			supervision/supervision/detection/__init__.py
+			supervision/supervision/detection/core.py
+			supervision/supervision/detection/annotate.py
+			supervision/supervision/detection/utils.py
+		supervision/supervision/__init__.py
+	supervision/CODE_OF_CONDUCT.md
+	supervision/LICENSE.md
+	supervision/mkdocs.yml
+	supervision/.pre-commit-config.yaml
+	supervision/demo.ipynb
+	supervision/README.md
+	supervision/CONTRIBUTING.md
+
+What files need to be changed to fix this issue? Navigate/read the codebase using the filesystem API to determine a list of files (in mardown format) that need modifying.
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments: 
+{"name":"sv.LineZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+False
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments: 
+{"name":"LineZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+supervision/supervision/detection/line_counter.py
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_filename_for_object *****
+Arguments: 
+{"name":"PolygonZone.trigger"}
+************************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_filename_for_object...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_filename_for_object" *****
+supervision/supervision/detection/tools/polygon_zone.py
+********************************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: get_summaries *****
+Arguments: 
+{"filenames":["supervision/supervision/detection/line_counter.py","supervision/supervision/detection/tools/polygon_zone.py"]}
+**************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION get_summaries...
+user_find_files (to filesystem):
+
+***** Response from calling function "get_summaries" *****
+Summary for supervision/supervision/detection/line_counter.py
+description: This code is responsible for counting the number of objects that cross a predefined line. It uses a `LineZone` class to keep track of the number of objects that have crossed the line from outside to inside and from inside to outside. The `trigger` method updates the counts based on the detections provided. The class also has attributes for the starting and ending points of the line, as well as the color and text properties for displaying the counts on an image.
+classes: ['LineZone', 'LineZoneAnnotator']
+functions: []
+dependencies: ['supervision.detection.core.Detections', 'supervision.draw.color.Color', 'supervision.geometry.core.Point', 'supervision.geometry.core.Rect', 'supervision.geometry.core.Vector']
+methods: ['LineZone.__init__', 'LineZone.trigger', 'LineZoneAnnotator.__init__', 'LineZoneAnnotator.annotate']
+attributes: ['LineZone.vector']
+
+
+Summary for supervision/supervision/detection/tools/polygon_zone.py
+description: This code defines a class called `PolygonZone` which is used to define a polygon-shaped zone within a frame for detecting objects. It has attributes such as the polygon coordinates, frame resolution, and triggering position. It also has a `trigger` method which determines if the detections are within the zone and updates the count accordingly. There is also an `annotate` method which annotates the polygon zone within a frame with the count of detected objects.
+classes: ['PolygonZone', 'PolygonZoneAnnotator']
+functions: []
+dependencies: ['supervision.Detections', 'supervision.detection.utils.clip_boxes', 'supervision.detection.utils.polygon_to_mask', 'supervision.draw.color.Color', 'supervision.draw.utils.draw_polygon', 'supervision.draw.utils.draw_text', 'supervision.geometry.core.Position', 'supervision.geometry.utils.get_polygon_center']
+methods: ['PolygonZone.__init__', 'PolygonZone.trigger', 'PolygonZoneAnnotator.__init__', 'PolygonZoneAnnotator.annotate']
+attributes: ['PolygonZone.polygon', 'PolygonZone.frame_resolution_wh', 'PolygonZone.triggering_position', 'PolygonZone.current_count', 'PolygonZone.mask', 'PolygonZone.current_count', 'PolygonZoneAnnotator.zone', 'PolygonZoneAnnotator.color', 'PolygonZoneAnnotator.thickness', 'PolygonZoneAnnotator.text_color', 'PolygonZoneAnnotator.text_scale', 'PolygonZoneAnnotator.text_thickness', 'PolygonZoneAnnotator.text_padding', 'PolygonZoneAnnotator.font', 'PolygonZoneAnnotator.center']
+
+
+
+**********************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+***** Suggested function Call: submit_files *****
+Arguments: 
+{"filenames":["supervision/supervision/detection/line_counter.py"]}
+*************************************************
+
+--------------------------------------------------------------------------------
+
+>>>>>>>> EXECUTING FUNCTION submit_files...
+user_find_files (to filesystem):
+
+***** Response from calling function "submit_files" *****
+None
+*********************************************************
+
+--------------------------------------------------------------------------------
+filesystem (to user_find_files):
+
+TERMINATE
+
+--------------------------------------------------------------------------------
