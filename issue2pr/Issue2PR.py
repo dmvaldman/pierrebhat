@@ -74,14 +74,17 @@ class Issue2PR:
         new_files = chat_write_code.new_files.result()
         patches = chat_write_code.patches.result()
 
-        return new_files, patches
+        pr = PR(issue, patches, filenames)
+
+        return pr
 
 
 class Issue():
-    def __init__(self, title, body, repo_name):
+    def __init__(self, title, body, repo_name, num=None):
         self.title = title
         self.body = body
         self.repo_name = repo_name
+        self.num = num
 
     @property
     def id(self):
@@ -93,13 +96,20 @@ class Issue():
     def __str__(self):
         return f"Repo: {self.repo_name}\nIssue Title: {self.title}\nIssue Body: {self.body}\n"
 
+    def to_json(self):
+        return {
+            "repo_name": self.repo_name,
+            "title": self.title,
+            "body": self.body,
+            "num": self.num
+        }
+
 
 
 class ResolvedIssue(Issue):
     def __init__(self, title, body, repo_name, num=None, pr=None):
-        super().__init__(title, body, repo_name)
+        super().__init__(title, body, repo_name, num=num)
         self.pr = pr
-        self.num = num
 
         if pr is not None:
             self.changed_files = pr['changed_files']
@@ -192,3 +202,18 @@ class ResolvedIssue(Issue):
             return pr_info
         else:
             return None
+
+
+class PR():
+    def __init__(self, issue, patches, files):
+        self.issue = issue
+        self.filenames = list(patches.keys())
+        self.patches = patches
+        self.files = files
+
+    def to_json(self):
+        return {
+            "filenames": self.filenames,
+            "patches": self.patches,
+            "files": self.files
+        }

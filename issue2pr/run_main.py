@@ -2,7 +2,7 @@ import json
 import time
 from contextlib import redirect_stdout
 from chat_compare_code import ChatCompareCode
-from Issue2PR import Issue2PR, Issue
+from Issue2PR import Issue2PR, Issue, ResolvedIssue
 
 def config_to_str(config):
     config_str = ''
@@ -10,9 +10,16 @@ def config_to_str(config):
         config_str += f'{key}_{val}_'
     return config_str
 
+def str_to_config(str):
+    keyvals = str.split('_')[1:-1]
+    config = {}
+    for index in range(len(keyvals, 2)):
+        key, val = keyvals[index], keyvals[index + 1]
+        config[key] = val
+    return config
+
 def main(issues_dataset=None, config=None, save=True):
-    patches_all = {}
-    new_files_all = {}
+    results = []
     issue2PR = Issue2PR(options=config)
 
     for repo_name, issues in issues_dataset.items():
@@ -29,22 +36,30 @@ def main(issues_dataset=None, config=None, save=True):
             issue = Issue2PR.create_issue(issue['title'], issue['body'], repo_name)
             issue2PR.set_issue(issue)
 
-            new_files, patches = issue2PR.resolve()
-            patches_all[issue.id] = patches
-            new_files_all[issue.id] = new_files
+            pr = issue2PR.resolve()
+
+            result = {
+                "issue": issue.to_json(),
+                "pr": pr.to_json()
+            }
+
+            results.append(result)
 
             # save results to file
             if save:
                 config_str = config_to_str(config)
-                with open(f'data/patches_{config_str}.json', 'w') as f:
-                    json.dump(patches_all, f, indent=2)
-                with open(f'data/files_{config_str}.json', 'w') as f:
-                    json.dump(new_files_all, f, indent=2)
+                with open(f'data/prs_{config_str}.json', 'w') as f:
+                    json.dump(results, f, indent=2)
 
-    return new_files_all
+    return results
 
-def test(issues_dataset, config):
-    results = []
+def test(config_str):
+    test_results = []
+
+    config = str_to_config(config_str)
+
+    with open(f'data/prs_{config_str}.json', 'w') as f:
+        pr_results = json.load(f)
 
     response = {
         "attempts": 0,
@@ -52,21 +67,14 @@ def test(issues_dataset, config):
         "config": config
     }
 
-    # load patches
-    config_str = config_to_str(config)
-    with open(f'data/files_{config_str}.json') as f:
-        new_files_all = json.load(f)
+    for pr_result in pr_results:
+        issue_data = pr_result['issue']
 
-    with open(f'data/patches_{config_str}.json') as f:
-        patches_all = json.load(f)
+        issue = ResolvedIssue(**issue_data)
+        pr_info = issue.fetch_pr_info()
+        issue.set_pr_info(pr_info)
 
-    for repo_name, issues in issues_dataset.items():
-        if repo_name in ['wncc/UniTrain', 'espin086/GPT-Jobhunter', 'Clueless-Community/scrape-up', 'Ebazhanov/linkedin-skill-assessments-quizzes']:
-            continue
-
-        issue = Issue(issue['title'], issue['body'], repo_name, num=issue['num'], pr=issue['pr'])
-        proposed_files = new_files_all[issue.id]
-        proposed_patches = patches_all[issue.id]
+        proposed_files = pr_result['pr']['files']
         actual_files = issue.get_changed_file_contents()
 
         proposed_filenames = list(proposed_files.keys())
@@ -78,28 +86,26 @@ def test(issues_dataset, config):
         is_solution_correct = chat_compare_code.result.result()
         reason = chat_compare_code.reason.result()
 
-        result = {
-            "repo_name": repo_name,
-            "issue_num": issue.num,
-            "actual_filenames": list(actual_files.keys()),
-            "proposed_filenames": list(proposed_files.keys()),
-            "correct_filenames": set(actual_filenames) <= set(proposed_filenames),
-            "correct_patches": proposed_patches,
-            "correct_pr": is_solution_correct,
-            "correct_pr_reason": reason
-        }
+        test_result = pr_result.copy()
 
-        results.append(result)
+        test_result['pr'].update({
+            "actual_filenames": list(actual_files.keys()),
+            "is_filenames_correct": set(actual_filenames) <= set(proposed_filenames),
+            "is_pr_correct": is_solution_correct,
+            "correct_pr_reason": reason
+        })
+
+        test_results.append(test_result)
 
         response['attempts'] += 1
         if is_solution_correct:
             response['correct'] += 1
 
-        response['results'] = results
+        response['results'] = pr_results
 
         # save results to file
-        with open(f'data/test_{config_str}.json', 'w') as f:
-            response['results'] = results
+        with open(f'data/prs_test_{config_str}.json', 'w') as f:
+            response['results'] = pr_results
             json.dump(response, f, indent=2)
 
 if __name__ == "__main__":
@@ -121,4 +127,8 @@ if __name__ == "__main__":
 
     with open(output_path, 'w') as file:
         with redirect_stdout(file):
-            results = main(issues_dataset, config)
+            pr_results = main(issues_dataset, config)
+
+    # test
+    config_str = config_to_str
+    test(config_str)
