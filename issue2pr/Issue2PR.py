@@ -78,17 +78,10 @@ class Issue2PR:
 
 
 class Issue():
-    def __init__(self, title, body, repo_name, num=None, pr=None):
+    def __init__(self, title, body, repo_name):
         self.title = title
         self.body = body
         self.repo_name = repo_name
-        self.pr = pr
-        self.num = num
-
-        if pr is not None:
-            self.changed_files = pr['changed_files']
-        else:
-            self.changed_files = None
 
     @property
     def id(self):
@@ -99,6 +92,19 @@ class Issue():
 
     def __str__(self):
         return f"Repo: {self.repo_name}\nIssue Title: {self.title}\nIssue Body: {self.body}\n"
+
+
+
+class ResolvedIssue(Issue):
+    def __init__(self, title, body, repo_name, num=None, pr=None):
+        super().__init__(title, body, repo_name)
+        self.pr = pr
+        self.num = num
+
+        if pr is not None:
+            self.changed_files = pr['changed_files']
+        else:
+            self.changed_files = None
 
     def set_pr_info(self, pr_info):
         self.pr = pr_info

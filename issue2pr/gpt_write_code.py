@@ -333,7 +333,7 @@ class GPTWriteCode():
 
 
 if __name__ == "__main__":
-    from Issue2PR import Issue
+    from Issue2PR import ResolvedIssue
     from filesystem import Filesystem
     import difflib
 
@@ -349,7 +349,7 @@ if __name__ == "__main__":
     Currently, [`sv.LineZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/line_counter.py#L30) updates `in_count` and `out_count` values but does not return information on which object crossed the line. Unlike [`sv.PolygonZone.trigger`](https://github.com/roboflow/supervision/blob/5b5e0eb88daec92643834b2284e750ad5a1c7dc6/supervision/detection/tools/polygon_zone.py#L45), which returns such information.
     Information about who has crossed the line is needed to update `in_count` and `out_count` and is already calculated in the `trigger` method but does not surface. Let's change that.
     """
-    issue = Issue(issue_title, issue_body, repo_name, num=issue_num)
+    issue = ResolvedIssue(issue_title, issue_body, repo_name, num=issue_num)
     filenames = ["supervision/supervision/detection/line_counter.py","supervision/supervision/detection/tools/polygon_zone.py"]
 
     code_writer = GPTWriteCode(issue, filenames, fs)
