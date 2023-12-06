@@ -5,6 +5,7 @@ import pkgutil
 import subprocess
 import json
 from openai_helpers.helpers import complete
+from collections import defaultdict
 
 standard_lib = list(sys.builtin_module_names)
 installed_packages = [pkg.name for pkg in pkgutil.iter_modules()]
@@ -13,15 +14,15 @@ root_dir = 'repos/'
 
 def add_overview_to_reverse_lookup(overview, file_path, reverse_lookup):
     for cls in overview["classes"]:
-        reverse_lookup[cls] = file_path
+        reverse_lookup[cls].add(file_path)
     for func in overview["functions"]:
-        reverse_lookup[func] = file_path
+        reverse_lookup[func].add(file_path)
     for method in overview["methods"]:
-        reverse_lookup[method] = file_path
+        reverse_lookup[method].add(file_path)
     for dependency in overview["dependencies"]:
-        reverse_lookup[dependency] = file_path
+        reverse_lookup[dependency].add(file_path)
     for attribute in overview["attributes"]:
-        reverse_lookup[attribute] = file_path
+        reverse_lookup[attribute].add(file_path)
     return reverse_lookup
 
 class Summary():
@@ -124,7 +125,7 @@ class Summarizer():
         overviews = {}
         descriptions = self.get_descriptions()
         counter = 0
-        reverse_lookup = {} # map of class/method/import to filename
+        reverse_lookup = defaultdict(set) # map of class/method/import to array of filenames
 
         path = os.path.join(Summarizer.base_path, self.repo_name)
         for root, _, files in os.walk(path):
