@@ -226,11 +226,11 @@ class GPTWriteCode():
             return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
 
         if self.snippet_type == 'diff':
-            return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here is the diff reflecting your changes. No syntax errors were found. Double check its correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
         elif self.snippet_type == 'snippet':
-            return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here are snippets reflecting your changes. No syntax errors were found. Double check their correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
         elif self.snippet_type == 'all':
-            return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here are the files reflecting your changes. No syntax errors were found. Double check their correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
 
     def initiate_chat(self, **kwargs):
         last_msg_id = None
