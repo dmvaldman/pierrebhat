@@ -1,9 +1,14 @@
 import os
+import difflib
 from summarizer import Summarizer
 
 # TODO: print only relative paths
 
 root_dir = 'repos/'
+
+def find_nearest(corpus, query, num_matches=3):
+    matches = difflib.get_close_matches(corpus, query, n=num_matches)
+    return matches
 
 class Filesystem():
     extensions = ('.js', '.jsx', '.py', '.json', '.html', '.css', '.scss', '.yml', '.yaml', '.ts', '.tsx', '.ipynb', '.c', '.cc', '.cpp', '.go', '.h', '.hpp', '.java', '.sol', '.sh', '.txt', '.md')
@@ -67,7 +72,9 @@ class Filesystem():
 
     def get_filename_for_object(self, name):
         if self.reverse_lookup is None or name not in self.reverse_lookup:
-            return []
+            keys = list(self.reverse_lookup.keys())
+            matches = find_nearest(keys, name, num_matches=3)
+            raise Exception(f'Could not find {name}. Did you mean any of {matches}?')
         else:
             return list(self.reverse_lookup[name])
 
@@ -131,17 +138,23 @@ class Filesystem():
     def get_content(self, filename):
         file = self.current_folder.find_file(filename)
         if file is None:
-            raise Exception(f'Could not find file {filename} in {self.current_folder.name}')
+            filenames = self.list_files()
+            matches = find_nearest(filenames, filename, n=1)
+            raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
         else:
             return file.get_content()
 
     def get_summary(self, filename):
+        # TODO: find nearest match
         if not filename.startswith(self.current_folder.name):
             raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean to start the path with {self.current_folder.name}?')
 
         file = self.current_folder.find_file(filename)
         if file is None:
-            raise Exception(f'Could not find file {filename} in {self.current_folder.name}')
+            # closest matches
+            filenames = self.list_files()
+            matches = find_nearest(filenames, filename, n=1)
+            raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
         else:
             return file.get_summary()
 
@@ -152,7 +165,9 @@ class Filesystem():
                 raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean to start the path with {self.current_folder.name}?')
             file = self.current_folder.find_file(filename)
             if file is None:
-                raise Exception(f'Could not find file {filename} in {self.current_folder.name}')
+                filenames = self.list_files()
+                matches = find_nearest(filenames, filename, n=1)
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
             else:
                 summaries_str += file.get_summary() + '\n\n'
         return summaries_str
@@ -251,6 +266,16 @@ class Folder:
             read_str += '\t' * indent + file.read(only_name=True) + '\n'
 
         return read_str
+
+    def list_files(self):
+        files = []
+
+        for folder in self.folders:
+            files += folder.list_files
+
+        files += self.files
+
+        return files
 
     def __str__(self):
         return f'Folder: {self.name}: {self.meta}\n'
