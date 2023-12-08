@@ -4,6 +4,6 @@ __pycache__
 .env
 .vscode
 .cache
-/temp
-/logs
-/data
+temp
+logs
+data
