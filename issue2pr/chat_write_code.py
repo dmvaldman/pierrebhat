@@ -5,8 +5,13 @@ from collections import defaultdict
 import difflib
 import subprocess
 from utils.llm_config import llm_config
+import os
 
 max_consecutive_auto_reply = 50
+
+repo_dir = "repos/"
+temp_dir = 'temp/'
+base_path = os.path.dirname(os.path.abspath(__file__))
 
 llm_config_filesystem = llm_config.copy()
 llm_config_user = llm_config.copy()
@@ -97,11 +102,12 @@ def apply_patches(patches, snippet_type='diff'):
     filenames = set([patch['filename'] for patch in patches])
     for filename in filenames:
         try:
-            with open('repos/' + filename, 'r') as f:
+            filepath = os.path.join(base_path, repo_dir, filename)
+            with open(filepath, 'r') as f:
                 file_content = f.read()
                 original_files[filename] = file_content
         except Exception as e:
-            print(f"Could not find file repo/{filename}: {e}")
+            print(f"Could not find file: {filepath}. {e}")
 
     new_files = original_files.copy()
 
@@ -117,7 +123,7 @@ def apply_patches(patches, snippet_type='diff'):
     return new_files, snippets
 
 def generate_snippets(original_files, new_files, snippet_type='diff'):
-    snippets = defaultdict(str)
+    snippets = {}
     for filename in original_files.keys():
         if snippet_type == 'diff':
             snippets[filename] = get_diff_from_patch(original_files[filename], new_files[filename])
@@ -231,10 +237,10 @@ class ChatWriteCode():
             has_errors = False
             for filename, contents in new_files.items():
                 # create temporary file, flatten any directory structure in the name
-                temp_filename = f'temp/{"_".join(filename.split("/"))}'
-                with open(temp_filename, 'w') as f:
+                temp_path = os.path.join(base_path, temp_dir, f'{"_".join(filename.split("/"))}')
+                with open(temp_path, 'w') as f:
                     f.write(contents)
-                syntax_errors = check_syntax(temp_filename)
+                syntax_errors = check_syntax(temp_path)
                 if syntax_errors is not None:
                     has_errors = True
                     errors += syntax_errors + '\n\n'
