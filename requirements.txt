@@ -13,3 +13,4 @@ tenacity
 plotly
 pandas
 esprima
+tiktoken
