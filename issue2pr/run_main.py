@@ -1,22 +1,8 @@
 import json
-import time
-from contextlib import redirect_stdout
 from chat_compare_code import ChatCompareCode
-from Issue2PR import Issue2PR, Issue, ResolvedIssue
+from Issue2PR import Issue2PR
+from issue import Issue, ResolvedIssue
 
-def config_to_str(config):
-    config_str = ''
-    for key, val in config.items():
-        config_str += f'{key}_{val}_'
-    return config_str
-
-def str_to_config(str):
-    keyvals = str.split('_')[1:-1]
-    config = {}
-    for index in range(len(keyvals, 2)):
-        key, val = keyvals[index], keyvals[index + 1]
-        config[key] = val
-    return config
 
 def main(issues_dataset=None, config=None, save=True):
     results = []
@@ -47,7 +33,7 @@ def main(issues_dataset=None, config=None, save=True):
 
             # save results to file
             if save:
-                config_str = config_to_str(config)
+                config_str = Issue2PR.config_to_str(config)
                 with open(f'data/prs_{config_str}.json', 'w') as f:
                     json.dump(results, f, indent=2)
 
@@ -56,7 +42,7 @@ def main(issues_dataset=None, config=None, save=True):
 def test(config_str):
     test_results = []
 
-    config = str_to_config(config_str)
+    config = Issue2PR.str_to_config(config_str)
 
     with open(f'data/prs_{config_str}.json', 'w') as f:
         pr_results = json.load(f)
@@ -112,23 +98,15 @@ if __name__ == "__main__":
     import os
 
     config = {
-        "ts": time.strftime("%Y%m%d-%H%M"),
         "snippet_type": "snippet",
-        "write_code": "agent"
+        "write_code": "agent",
     }
-
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
-    output_path = os.path.join(curr_dir, 'logs', config_to_str(config) + '.txt')
 
     with open(os.path.join('data', 'datasets', 'repo_issues.json')) as json_file:
         issues_dataset = json.load(json_file)
 
-    print("Outputting to", output_path)
-
-    with open(output_path, 'w') as file:
-        with redirect_stdout(file):
-            pr_results = main(issues_dataset, config)
+    pr_results = main(issues_dataset, config)
 
     # test
-    config_str = config_to_str
+    config_str = Issue2PR.config_to_str(config)
     test(config_str)
