@@ -7,8 +7,12 @@ from issue import Issue
 from repo import Repo
 import os
 import time
+import sys
+import tiktoken
+from utils.llm_config import model
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
+tokenizer = tiktoken.encoding_for_model(model)
 
 class Issue2PR:
     def __init__(self, repo=None, issue=None, options=None):
@@ -16,6 +20,9 @@ class Issue2PR:
         self.repo = None
         self.fs = None
         self.options = options
+
+        self.logfile_path = None
+        self.num_tokens = 0
 
         if issue is not None:
             self.set_issue(issue)
@@ -98,6 +105,16 @@ class Issue2PR:
 
         return pr
 
+    def calc_num_tokens(self):
+        if self.logfile_path is None:
+            raise Exception('ERROR: No logfile_path set. Call resolve(logging=True) first.')
+
+        sys.stdout.flush()
+        with open(self.logfile_path, 'r') as file:
+            num_tokens = len(tokenizer.encode(file.read()))
+
+        return num_tokens
+
     def resolve(self, logging=True):
         if logging:
             config_str = Issue2PR.config_to_str(self.options)
@@ -105,13 +122,15 @@ class Issue2PR:
             filename = f'{self.issue.repo_name}_{self.issue.title[:20]}_{timestamp}.txt'
             # replace spaces and slashes and with underscores
             filename = filename.replace(' ', '_').replace('/', '_')
-            output_path = os.path.join(curr_dir, 'logs', filename)
-            print("Logging to", output_path)
+            logfile_path = os.path.join(curr_dir, 'logs', filename)
+            print("Logging to", logfile_path)
+            self.logfile_path = logfile_path
 
-            with open(output_path, 'w') as file:
+            with open(logfile_path, 'w') as file:
                 with redirect_stdout(file):
                     print('Config: ', self.options, '\n---------\n')
                     pr = self._resolve()
+
         else:
             pr = self._resolve()
 

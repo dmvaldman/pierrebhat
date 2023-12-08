@@ -26,7 +26,10 @@ def main(issues_dataset=None, config=None, save=True):
 
             result = {
                 "issue": issue.to_json(),
-                "pr": pr.to_json()
+                "pr": pr.to_json(),
+                "config": config,
+                "log_file": issue2PR.logfile_path,
+                "num_tokens": issue2PR.calc_num_tokens()
             }
 
             results.append(result)
@@ -34,7 +37,9 @@ def main(issues_dataset=None, config=None, save=True):
             # save results to file
             if save:
                 config_str = Issue2PR.config_to_str(config)
-                with open(f'data/prs_{config_str}.json', 'w') as f:
+                # refactor files to be [{filename, content}, ...]
+                # add token content length
+                with open(f'issue2pr/data/{issue2PR.logfile_path}.json', 'w') as f:
                     json.dump(results, f, indent=2)
 
     return results
