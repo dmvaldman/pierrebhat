@@ -48,7 +48,7 @@ class Repo:
                 command,
                 cwd=self.local_path,
                 stdout=subprocess.PIPE,  # Capture the output
-                stderr=subprocess.PIPE,  # Capture the error output
+                stderr=subprocess.STDOUT,  # Capture the error output
                 text=True  # Output as string, not bytes
             )
 
