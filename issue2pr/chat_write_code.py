@@ -96,7 +96,7 @@ onSubmitCodeDef = {
 }
 
 def apply_patches(patches, snippet_type='diff'):
-    original_files = {}
+    original_files = []
     snippets = defaultdict(str)
     # get unique 'filename' keys in patches
     filenames = set([patch['filename'] for patch in patches])
@@ -105,18 +105,25 @@ def apply_patches(patches, snippet_type='diff'):
             filepath = os.path.join(base_path, repo_dir, filename)
             with open(filepath, 'r') as f:
                 file_content = f.read()
-                original_files[filename] = file_content
+                original_files.append({
+                    "filename": filename,
+                    "content": file_content
+                })
         except Exception as e:
             print(f"Could not find file: {filepath}. {e}")
 
-    new_files = original_files.copy()
+    new_files = []
 
-    for patch in patches:
+    for patch, original_file in zip(patches, original_files):
         filename = patch['filename']
-        content = new_files[filename]
+        content = original_file['content']
+
         new_content = apply_patch_to_file(filename, content, patch['searchString'], patch['replaceString'])
 
-        new_files[filename] = new_content
+        new_files.append({
+            "filename": filename,
+            "content": new_content
+        })
 
     snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
 
@@ -124,13 +131,16 @@ def apply_patches(patches, snippet_type='diff'):
 
 def generate_snippets(original_files, new_files, snippet_type='diff'):
     snippets = {}
-    for filename in original_files.keys():
+    for original_data, new_data in zip(original_files, new_files):
+        filename = original_data['filename']
+        content_original = original_data['content']
+        content_new = new_data['content']
         if snippet_type == 'diff':
-            snippets[filename] = get_diff_from_patch(original_files[filename], new_files[filename])
+            snippets[filename] = get_diff_from_patch(content_original, content_new)
         elif snippet_type == 'snippet':
-            snippets[filename] = get_snippet_from_patch(original_files[filename], new_files[filename], context=16)
+            snippets[filename] = get_snippet_from_patch(content_original, content_new, context=16)
         elif snippet_type == 'all':
-            snippets[filename] = new_files[filename]
+            snippets[filename] = content_new
 
     return snippets
 

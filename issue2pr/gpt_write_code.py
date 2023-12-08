@@ -228,7 +228,9 @@ class GPTWriteCode():
 
         errors = 'Following errors found:\n\n'
         has_errors = False
-        for filename, contents in new_files.items():
+        for new_file in new_files:
+            filename = new_file['filename']
+            contents = new_file['contents']
             # create temporary file, flatten any directory structure in the name
             temp_path = os.path.join(base_path, temp_dir, f'{"_".join(filename.split("/"))}')
             with open(temp_path, 'w') as f:
