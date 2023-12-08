@@ -1,10 +1,14 @@
-from repo import Repo
 from filesystem import Filesystem
 from chat_find_files import ChatFindFiles
 from chat_write_code import ChatWriteCode
 from gpt_write_code import GPTWriteCode
-import requests
-import hashlib
+from contextlib import redirect_stdout
+from issue import Issue
+from repo import Repo
+import os
+import time
+
+curr_dir = os.path.dirname(os.path.abspath(__file__))
 
 class Issue2PR:
     def __init__(self, repo=None, issue=None, options=None):
@@ -18,6 +22,24 @@ class Issue2PR:
 
         if repo is not None:
             self.set_repo(repo, download=True)
+
+    @staticmethod
+    def config_to_str(config):
+        # convert dict to str with underscores between key/val pairs
+        config_str = ''
+        for key, val in config.items():
+            config_str += f'_{key}_{val}'
+        config_str = config_str[1:]
+        return config_str
+
+    @staticmethod
+    def str_to_config(str):
+        keyvals = str.split('_')
+        config = {}
+        for index in range(len(keyvals, 2)):
+            key, val = keyvals[index], keyvals[index + 1]
+            config[key] = val
+        return config
 
     def set_repo(self, repo, download=True):
         self.repo = repo
@@ -42,11 +64,11 @@ class Issue2PR:
         pass
 
     @staticmethod
-    def create_issue(title, body, repo_name, num=None, pr=None):
-        issue = Issue(title, body, repo_name, num=num, pr=pr)
+    def create_issue(title, body, repo_name, num=None):
+        issue = Issue(title, body, repo_name, num=num)
         return issue
 
-    def resolve(self):
+    def _resolve(self):
         issue = self.issue
         fs = self.fs
         snippet_type = self.options['snippet_type']
@@ -55,8 +77,7 @@ class Issue2PR:
         chat_find_files.initiate_chat(silent=False)
 
         if not chat_find_files.filenames.done():
-            print('ERROR: ChatFindFiles did not finish. Increase max_consecutive_auto_reply in chat')
-            return False
+            raise Exception('ERROR: ChatFindFiles did not finish. Increase max_consecutive_auto_reply in chat')
 
         filenames = chat_find_files.filenames.result()
 
@@ -67,149 +88,41 @@ class Issue2PR:
 
         chat_write_code.initiate_chat(silent=False)
 
-        if not chat_write_code.new_files.done() or not chat_write_code.patches.done():
-            print('ERROR: ChatWriteCode did not finish. Increase max_consecutive_auto_reply in chat')
-            return False
+        if not chat_write_code.new_files.done():
+            raise Exception('ERROR: ChatWriteCode did not finish. Increase max_consecutive_auto_reply in chat')
 
         new_files = chat_write_code.new_files.result()
         patches = chat_write_code.patches.result()
 
-        pr = PR(issue, patches, filenames)
+        pr = PR(issue, patches, new_files)
 
         return pr
 
+    def resolve(self, logging=True):
+        if logging:
+            config_str = Issue2PR.config_to_str(self.options)
+            timestamp = time.strftime("%Y%m%d-%H%M")
+            filename = f'{self.issue.repo_name}_{self.issue.title[:20]}_{timestamp}.txt'
+            # replace spaces and slashes and with underscores
+            filename = filename.replace(' ', '_').replace('/', '_')
+            output_path = os.path.join(curr_dir, 'logs', filename)
+            print("Logging to", output_path)
 
-class Issue():
-    def __init__(self, title, body, repo_name, num=None):
-        self.title = title
-        self.body = body
-        self.repo_name = repo_name
-        self.num = num
-
-    @property
-    def id(self):
-        str = f"{self.repo_name}{self.title}{self.body}"
-        m = hashlib.sha256()
-        m.update(str.encode('utf-8'))
-        return f"{self.repo_name}_{m.hexdigest()}"
-
-    def __str__(self):
-        return f"Repo: {self.repo_name}\nIssue Title: {self.title}\nIssue Body: {self.body}\n"
-
-    def to_json(self):
-        return {
-            "repo_name": self.repo_name,
-            "title": self.title,
-            "body": self.body,
-            "num": self.num
-        }
-
-
-
-class ResolvedIssue(Issue):
-    def __init__(self, title, body, repo_name, num=None, pr=None):
-        super().__init__(title, body, repo_name, num=num)
-        self.pr = pr
-
-        if pr is not None:
-            self.changed_files = pr['changed_files']
+            with open(output_path, 'w') as file:
+                with redirect_stdout(file):
+                    print('Config: ', self.options, '\n---------\n')
+                    pr = self._resolve()
         else:
-            self.changed_files = None
+            pr = self._resolve()
 
-    def set_pr_info(self, pr_info):
-        self.pr = pr_info
-        self.changed_files = pr_info['changed_files']
-
-    def filtered_changed_files(self):
-        changed_files = self.changed_files
-        actual_filenames = [file['filename'] for file in changed_files if file['status'] == 'modified']
-
-        #filter filenames to match extensions in Filesystem.extensions
-        actual_filenames = [filename for filename in actual_filenames if filename.endswith(Filesystem.extensions)]
-
-        # filter filenames to remove any directories in Filesystem.directory_blacklist
-        actual_filenames = [filename for filename in actual_filenames if not any(directory in filename for directory in Filesystem.directory_blacklist)]
-
-        return actual_filenames
-
-    def get_changed_file_contents(self):
-        actual_files = {}
-        changed_filenames = self.filtered_changed_files()
-        repo_name = self.repo_name
-        sha = self.pr['merge_commit_sha']
-        for filename in changed_filenames:
-            url = f'https://raw.githubusercontent.com/{repo_name}/{sha}/{filename}'
-            response = requests.get(url)
-            if response.status_code == 200:
-                actual_files[filename] = response.text
-            else:
-                raise Exception("Error getting file from GitHub")
-        return actual_files
-
-    def fetch_pr_info(self):
-        def fetch_pr_info(repo, pr_num):
-            url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
-            response = requests.get(url)
-            return response.json()
-
-        def get_changed_files_from_pr(repo, pr_num):
-            url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}/files"
-            response = requests.get(url)
-            files = response.json()
-            files = [{'filename': file['filename'], 'status': file['status']} for file in files]
-            return files
-
-        # todo: validate another way of finding the PR by hitting https://github.com/repos/{repo}/issues/{issue_num}/linked_closing_reference?reference_location=REPO_ISSUES_INDEX
-        # todo: only support 1 label for now
-        url_timeline = f"https://api.github.com/repos/{self.repo_name}/issues/{self.num}/timeline"
-        params = {
-            "state": "closed",
-            "per_page": 100,
-            "page": 1
-        }
-
-        response = requests.get(url_timeline, params=params)
-        timeline_events = response.json()
-        pr_num = None
-        pr_info = None
-
-        # loop through timeline events and find the one with a pull request
-        for timeline_event in timeline_events:
-            if 'source' in timeline_event:
-                if 'issue' in timeline_event['source']:
-                    if 'pull_request' in timeline_event['source']['issue']:
-                        url_pull = timeline_event['source']['issue']['pull_request']['url']
-                        pr_num = int(url_pull.split('/')[-1])
-                        repo = '/'.join(url_pull.split('/')[-4:-2])
-                        pr_info = fetch_pr_info(repo, pr_num)
-
-        if pr_num is not None:
-            # convert into simpler representaiton {num, merge_commit_sha, base_sha, changed_files}
-            changed_files = get_changed_files_from_pr(repo, pr_num)
-            if not changed_files:
-                return None
-
-            # if none of the files have status "modified" also return None
-            if not any(file['status'] == 'modified' for file in changed_files):
-                return None
-
-            pr_info = {
-                'num': pr_info['number'],
-                'merge_commit_sha': pr_info['merge_commit_sha'],
-                'base_sha': pr_info['base']['sha'],
-                'changed_files': changed_files
-            }
-            return pr_info
-        else:
-            return None
-
+        return pr
 
 class PR():
     def __init__(self, issue, patches, files):
         self.issue = issue
-        self.filenames = list(patches.keys())
-        self.patches = patches
-        self.files = files
+        self.filenames = list(files.keys())
+        self.patches = patches # list of dicts {filename, before, after}
+        self.files = files # dict of {filename: contents}
 
     def to_json(self):
         return {
