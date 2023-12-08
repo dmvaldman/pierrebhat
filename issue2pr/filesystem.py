@@ -6,8 +6,8 @@ from summarizer import Summarizer
 
 root_dir = 'repos/'
 
-def find_nearest(corpus, query, num_matches=3):
-    matches = difflib.get_close_matches(corpus, query, n=num_matches)
+def find_nearest(corpus, query, num_matches=1):
+    matches = difflib.get_close_matches(query, corpus, n=num_matches)
     return matches
 
 class Filesystem():
@@ -71,10 +71,13 @@ class Filesystem():
                 folder.set_metadata(folder_meta)
 
     def get_filename_for_object(self, name):
-        if self.reverse_lookup is None or name not in self.reverse_lookup:
+        if not name in self.reverse_lookup:
             keys = list(self.reverse_lookup.keys())
-            matches = find_nearest(keys, name, num_matches=3)
-            raise Exception(f'Could not find {name}. Did you mean any of {matches}?')
+            matches = find_nearest(keys, name, num_matches=1)
+            if len(matches) == 0:
+                raise Exception(f'Could not find {name}.')
+            else:
+                raise Exception(f'Could not find {name}. Did you mean {matches[0]}?')
         else:
             return list(self.reverse_lookup[name])
 
@@ -86,6 +89,9 @@ class Filesystem():
 
     def tree(self):
         return self.current_folder.tree()
+
+    def list_files(self):
+        return self.current_folder.list_files()
 
     def read(self):
         read_str = ''
@@ -139,8 +145,12 @@ class Filesystem():
         file = self.current_folder.find_file(filename)
         if file is None:
             filenames = self.list_files()
-            matches = find_nearest(filenames, filename, n=1)
-            raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
+            matches = find_nearest(filenames, filename, num_matches=1)
+            if len(matches) == 0:
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}.')
+            else:
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
+
         else:
             return file.get_content()
 
@@ -153,8 +163,11 @@ class Filesystem():
         if file is None:
             # closest matches
             filenames = self.list_files()
-            matches = find_nearest(filenames, filename, n=1)
-            raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
+            matches = find_nearest(filenames, filename, num_matches=1)
+            if len(matches) == 0:
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}.')
+            else:
+                raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
         else:
             return file.get_summary()
 
@@ -166,8 +179,11 @@ class Filesystem():
             file = self.current_folder.find_file(filename)
             if file is None:
                 filenames = self.list_files()
-                matches = find_nearest(filenames, filename, n=1)
-                raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
+                matches = find_nearest(filenames, filename, num_matches=1)
+                if len(matches) == 0:
+                    raise Exception(f'Could not find file {filename} in {self.current_folder.name}.')
+                else:
+                    raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
             else:
                 summaries_str += file.get_summary() + '\n\n'
         return summaries_str
@@ -271,9 +287,9 @@ class Folder:
         files = []
 
         for folder in self.folders:
-            files += folder.list_files
+            files += folder.list_files()
 
-        files += self.files
+        files += [file.name for file in self.files]
 
         return files
 
@@ -375,3 +391,6 @@ if __name__ == '__main__':
     directory = "Auto-GPT"
     fs = Filesystem(directory, create_meta=True)
     print(fs.tree())
+
+    files = fs.list_files()
+    print(files)
