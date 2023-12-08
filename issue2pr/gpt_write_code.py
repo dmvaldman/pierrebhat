@@ -7,10 +7,14 @@ import json
 import subprocess
 from utils.llm_config import llm_config
 import os
-
+import sys
+import regex as re
 
 client = OpenAI(api_key = llm_config['api_key'])
+
 repo_dir = 'repos/'
+temp_dir = 'temp/'
+base_path = os.path.dirname(os.path.abspath(__file__))
 
 onCheckPRDef = {
     "name": "check_PR",
@@ -83,7 +87,21 @@ def check_syntax(file_path):
     result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
     if result.stdout == '':
         return None
-    return result.stdout
+    else:
+        response = ''
+        error_str = result.stdout
+        filename = '/'.join(file_path.split('/')[-1].split('_'))
+
+        for error_str in result.stdout.split('\n'):
+            [line_num, char_num, error] = error_str.split(':')[1:4]
+            error = error.strip()
+
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+                affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
+
+            response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
+        return response
 
 class GPTWriteCode():
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), repo_dir)
@@ -212,10 +230,10 @@ class GPTWriteCode():
         has_errors = False
         for filename, contents in new_files.items():
             # create temporary file, flatten any directory structure in the name
-            temp_filename = f'temp/{"_".join(filename.split("/"))}'
-            with open(temp_filename, 'w') as f:
+            temp_path = os.path.join(base_path, temp_dir, f'{"_".join(filename.split("/"))}')
+            with open(temp_path, 'w') as f:
                 f.write(contents)
-            syntax_errors = check_syntax(temp_filename)
+            syntax_errors = check_syntax(temp_path)
             if syntax_errors is not None:
                 has_errors = True
                 errors += syntax_errors + '\n\n'
@@ -254,7 +272,9 @@ class GPTWriteCode():
 
             # long poll the endpoint
             while True:
-                # print(run.status)
+                # print("STATUS:", run.status)
+                sys.stdout.flush()
+
                 messages = client.beta.threads.messages.list(thread_id=thread.id, after=last_msg_id)
                 for message in messages.data:
                     print_message(message)
@@ -281,7 +301,7 @@ class GPTWriteCode():
                                 # run the function
                                 function = self.function_map[name]
                                 try:
-                                    output = function(**params)
+                                    output = str(function(**params))
                                 except Exception as e:
                                     output = str(e)
 
@@ -333,7 +353,7 @@ class GPTWriteCode():
 
 
 if __name__ == "__main__":
-    from Issue2PR import ResolvedIssue
+    from issue import ResolvedIssue
     from filesystem import Filesystem
     import difflib
 
