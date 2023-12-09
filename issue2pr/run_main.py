@@ -2,14 +2,19 @@ import json
 from chat_compare_code import ChatCompareCode
 from Issue2PR import Issue2PR
 from issue import Issue, ResolvedIssue
+import os
 
 
-def main(issues_dataset=None, config=None, save=True):
+def main(issues_dataset=None, config=None, save=True, save_path=''):
     results = []
     issue2PR = Issue2PR(options=config)
 
     for repo_name, issues in issues_dataset.items():
         if repo_name in ['wncc/UniTrain', 'espin086/GPT-Jobhunter', 'Clueless-Community/scrape-up', 'Ebazhanov/linkedin-skill-assessments-quizzes']:
+            continue
+
+        # temp hack to only run one repo
+        if repo_name != 'roboflow/supervision':
             continue
 
         repo = Issue2PR.create_repo(repo_name)
@@ -19,7 +24,7 @@ def main(issues_dataset=None, config=None, save=True):
             sha = issue['pr']['base_sha']
             repo.checkout(sha)
 
-            issue = Issue2PR.create_issue(issue['title'], issue['body'], repo_name)
+            issue = Issue2PR.create_issue(issue['title'], issue['body'], repo_name, num=issue['num'])
             issue2PR.set_issue(issue)
 
             pr = issue2PR.resolve()
@@ -36,21 +41,16 @@ def main(issues_dataset=None, config=None, save=True):
 
             # save results to file
             if save:
-                config_str = Issue2PR.config_to_str(config)
-                # refactor files to be [{filename, content}, ...]
-                # add token content length
-                with open(f'issue2pr/data/{issue2PR.logfile_path}.json', 'w') as f:
+                with open(save_path, 'w') as f:
                     json.dump(results, f, indent=2)
 
     return results
 
-def test(config_str):
-    test_results = []
-
-    config = Issue2PR.str_to_config(config_str)
-
-    with open(f'data/prs_{config_str}.json', 'w') as f:
+def test(results_path):
+    with open(results_path, 'r') as f:
         pr_results = json.load(f)
+
+    test_results = []
 
     response = {
         "attempts": 0,
@@ -66,12 +66,13 @@ def test(config_str):
         issue.set_pr_info(pr_info)
 
         proposed_files = pr_result['pr']['files']
+        proposed_files_dict = {file['filename']: file['content'] for file in proposed_files}
         actual_files = issue.get_changed_file_contents()
 
-        proposed_filenames = list(proposed_files.keys())
+        proposed_filenames = list(proposed_files_dict.keys())
         actual_filenames = list(actual_files.keys())
 
-        chat_compare_code = ChatCompareCode(issue, proposed_files, actual_files)
+        chat_compare_code = ChatCompareCode(issue, proposed_files_dict, actual_files)
         chat_compare_code.initiate_chat(silent=False)
 
         is_solution_correct = chat_compare_code.result.result()
@@ -95,23 +96,24 @@ def test(config_str):
         response['results'] = pr_results
 
         # save results to file
-        with open(f'data/prs_test_{config_str}.json', 'w') as f:
+        # save_path is results_path with 'check_' post_pended
+        save_path = results_path.replace('.json', '_check.json')
+        with open(save_path, 'w') as f:
             response['results'] = pr_results
             json.dump(response, f, indent=2)
 
 if __name__ == "__main__":
-    import os
-
     config = {
         "snippet_type": "snippet",
         "write_code": "agent",
     }
 
-    with open(os.path.join('data', 'datasets', 'repo_issues.json')) as json_file:
+    dataset_path = os.path.join('data', 'datasets', 'repo_issues.json')
+    save_path = f'issue2pr/data/test.json'
+
+    with open(dataset_path) as json_file:
         issues_dataset = json.load(json_file)
 
-    pr_results = main(issues_dataset, config)
+    # pr_results = main(issues_dataset, config, save=True, save_path=save_path)
 
-    # test
-    config_str = Issue2PR.config_to_str(config)
-    test(config_str)
+    test(save_path)
