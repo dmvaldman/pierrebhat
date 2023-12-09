@@ -18,9 +18,9 @@ llm_config_user = llm_config.copy()
 
 llm_config_filesystem["functions"] = function_specs
 
-onCheckCodeDef = {
+onCheckPRDef = {
     "name": "check_PR",
-    "description": "Checks a PR for formatting and passing the tests.",
+    "description": "Checks a PR for formatting errors.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -44,28 +44,15 @@ onCheckCodeDef = {
                     }
                 },
                 "description": "An array of patches to be applied to the codebase"
-            },
-            "tests": {
-                "type": "object",
-                "properties": {
-                    "filename": {
-                        "type": "string",
-                        "description": "The filename of the test file"
-                    },
-                    "code": {
-                        "type": "string",
-                        "description": "The code of the test file"
-                    }
-                }
             }
         }
     },
     "required": ["patches"]
 }
 
-onSubmitCodeDef = {
+onSubmitPRDef = {
     "name": "submit_PR",
-    "description": "Submits a PR by applying patched to files.",
+    "description": "Submits a PR by applying patches to files. The patches encode a simple search and replace operation to modify existing files in the codebase where `searchString` is replaced with `replaceString`.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -198,7 +185,22 @@ def check_syntax(file_path):
     result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
     if result.stdout == '':
         return None
-    return result.stdout
+    else:
+        response = ''
+        error_str = result.stdout
+        filename = '/'.join(file_path.split('/')[-1].split('_'))
+
+        for error_str in result.stdout.split('\n'):
+            if error_str == '': continue
+            [line_num, char_num, error] = error_str.split(':')[1:4]
+            error = error.strip()
+
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+                affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
+
+            response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
+        return response
 
 class ChatWriteCode():
     system_message_filesystem = """
@@ -237,7 +239,7 @@ class ChatWriteCode():
         return 'TERMINATE' in message['content']
 
     def add_callbacks(self, snippet_type='diff'):
-        def onCheckCode(patches, tests=None):
+        def onCheckCode(patches):
             try:
                 new_files, snippets = apply_patches(patches, snippet_type=snippet_type)
             except Exception as e:
@@ -258,7 +260,7 @@ class ChatWriteCode():
             snippets_str = '\n'.join([f'Filename: {filename}:\n\n{snippet}\n\n' for filename, snippet in snippets.items()])
 
             if has_errors:
-                return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
+                return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nPlease create a new patch (starting from the original files) and check again."
 
             if snippet_type == 'diff':
                 return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
@@ -273,9 +275,8 @@ class ChatWriteCode():
             self.patches.set_result(patches)
             return 'TERMINATE'
 
-        self.add_callback(onCheckCode, onCheckCodeDef)
-        self.add_callback(onSubmitCode, onSubmitCodeDef)
-
+        self.add_callback(onCheckCode, onCheckPRDef)
+        self.add_callback(onSubmitCode, onSubmitPRDef)
 
     def add_callback(self, method, method_def):
         method_name = method_def['name']

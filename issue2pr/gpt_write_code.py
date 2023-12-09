@@ -1,107 +1,18 @@
 from filesystem import function_specs
 from openai import OpenAI
-from chat_write_code import apply_patches
+from chat_write_code import apply_patches, check_syntax, onCheckPRDef, onSubmitPRDef
 import concurrent.futures
 import time
 import json
-import subprocess
 from utils.llm_config import llm_config
 import os
 import sys
-import regex as re
 
 client = OpenAI(api_key = llm_config['api_key'])
 
 repo_dir = 'repos/'
 temp_dir = 'temp/'
 base_path = os.path.dirname(os.path.abspath(__file__))
-
-onCheckPRDef = {
-    "name": "check_PR",
-    "description": "Checks a PR for formatting errors.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "patches": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "filename": {
-                            "type": "string",
-                            "description": "The filename to be patched"
-                        },
-                        "searchString": {
-                            "type": "string",
-                            "description": "A string in the file to replace with replaceString. If empty, replaceString will be appended to the end of the file."
-                        },
-                        "replaceString": {
-                            "type": "string",
-                            "description": "The string to replace the searchString with. If empty, searchString will be removed from the file."
-                        }
-                    }
-                },
-                "description": "An array of patches to be applied to the codebase"
-            }
-        }
-    },
-    "required": ["patches"]
-}
-
-onSubmitPRDef = {
-    "name": "submit_PR",
-    "description": "Submits a PR by applying patches to files. The patches encode a simple search and replace operation to modify existing files in the codebase where `searchString` is replaced with `replaceString`.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "patches": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "filename": {
-                            "type": "string",
-                            "description": "The filename to be patched"
-                        },
-                        "searchString": {
-                            "type": "string",
-                            "description": "A string in the file to replace with replaceString. If empty, replaceString will be appended to the end of the file."
-                        },
-                        "replaceString": {
-                            "type": "string",
-                            "description": "The string to replace the searchString with. If empty, searchString will be removed from the file."
-                        }
-                    }
-                },
-                "description": "An array of patches to be applied to the codebase"
-            }
-        }
-    },
-    "required": ["patches"]
-}
-
-def print_message(message):
-    print(f'Role: {message.role}\n{message.content[0].text.value}')
-
-def check_syntax(file_path):
-    result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
-    if result.stdout == '':
-        return None
-    else:
-        response = ''
-        error_str = result.stdout
-        filename = '/'.join(file_path.split('/')[-1].split('_'))
-
-        for error_str in result.stdout.split('\n'):
-            [line_num, char_num, error] = error_str.split(':')[1:4]
-            error = error.strip()
-
-            with open(file_path, 'r') as f:
-                lines = f.readlines()
-                affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
-
-            response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
-        return response
 
 class GPTWriteCode():
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), repo_dir)
@@ -230,7 +141,7 @@ class GPTWriteCode():
         has_errors = False
         for new_file in new_files:
             filename = new_file['filename']
-            contents = new_file['contents']
+            contents = new_file['content']
             # create temporary file, flatten any directory structure in the name
             temp_path = os.path.join(base_path, temp_dir, f'{"_".join(filename.split("/"))}')
             with open(temp_path, 'w') as f:
@@ -246,14 +157,17 @@ class GPTWriteCode():
             return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
 
         if self.snippet_type == 'diff':
-            return f"Here is the diff reflecting your changes. No syntax errors were found. Double check its correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
         elif self.snippet_type == 'snippet':
-            return f"Here are snippets reflecting your changes. No syntax errors were found. Double check their correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
         elif self.snippet_type == 'all':
-            return f"Here are the files reflecting your changes. No syntax errors were found. Double check their correctness. If you're satifisfied with the changes proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct?"
+            return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
 
     def initiate_chat(self, **kwargs):
         last_msg_id = None
+
+        def print_message(message):
+            print(f'Role: {message.role}\n{message.content[0].text.value}')
 
         try:
             thread = client.beta.threads.create()

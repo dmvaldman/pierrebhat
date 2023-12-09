@@ -139,9 +139,9 @@ class Issue2PR:
 class PR():
     def __init__(self, issue, patches, files):
         self.issue = issue
-        self.filenames = list(files.keys())
+        self.filenames = [file['filename'] for file in files]
         self.patches = patches # list of dicts {filename, before, after}
-        self.files = files # dict of {filename: contents}
+        self.files = files # list of dicts {filename, before, after}
 
     def to_json(self):
         return {

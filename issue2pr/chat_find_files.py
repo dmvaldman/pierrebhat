@@ -5,7 +5,6 @@ from openai_helpers.helpers import MAX_CONTENT_LENGTH
 from utils.llm_config import llm_config
 
 
-
 max_consecutive_auto_reply = 50
 
 onFindFilesDef = {
