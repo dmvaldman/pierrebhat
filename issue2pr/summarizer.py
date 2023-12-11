@@ -6,6 +6,7 @@ import subprocess
 import json
 from openai_helpers.helpers import complete
 from collections import defaultdict
+from tqdm import tqdm
 
 standard_lib = list(sys.builtin_module_names)
 installed_packages = [pkg.name for pkg in pkgutil.iter_modules()]
@@ -128,7 +129,7 @@ class Summarizer():
         reverse_lookup = defaultdict(set) # map of class/method/import to array of filenames
 
         path = os.path.join(Summarizer.base_path, self.repo_name)
-        for root, _, files in os.walk(path):
+        for root, _, files in tqdm(os.walk(path)):
             # remove root_dir prefix
             root = ''.join(root.split(root_dir)[1:])
 

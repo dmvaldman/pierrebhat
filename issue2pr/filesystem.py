@@ -22,9 +22,11 @@ class Filesystem():
             self.init(curr_dir)
 
         if create_meta:
+            print('Creating metadata...')
             metadata = Summarizer(curr_dir)
             self.add_metadata(metadata)
             self.reverse_lookup = metadata.reverse_lookup
+            print('Finished creating metadata...')
 
     def init(self, curr_dir):
         curr_folder = Folder(curr_dir)

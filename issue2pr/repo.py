@@ -19,7 +19,7 @@ class Repo:
     def download(self):
         if not os.path.exists(self.local_path):
             # download using subprocess
-            command = ['git', 'clone', f'git@github.com:{self.remote_path}.git', self.local_path]
+            command = ['git', 'clone', f'https://github.com/{self.remote_path}.git', self.local_path]
             try:
                 result = subprocess.run(
                     command,
