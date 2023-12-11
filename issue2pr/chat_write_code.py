@@ -1,7 +1,6 @@
 from autogen import ConversableAgent
 from filesystem import function_specs
 import concurrent.futures
-from collections import defaultdict
 import difflib
 import subprocess
 from utils.llm_config import llm_config
@@ -82,39 +81,63 @@ onSubmitPRDef = {
     "required": ["patches"]
 }
 
+def replace_ignore_linebreaks(corpus, query, replaceString):
+    # Hack. Since GPT can produce a searchString with single linebreaks instead of multiple,
+    query_parts = query.split('\n')
+    start_index = -1
+    end_index = -1
+    current_index = 0
+
+    for part in query_parts:
+        # Find each part in the corpus, starting from the current index
+        part_index = corpus.find(part, current_index)
+
+        if start_index == -1:
+            start_index = part_index  # Record the start of the first part
+
+        # Update current_index to the end of the current part plus potential line breaks
+        current_index = part_index + len(part)
+        while current_index < len(corpus) and corpus[current_index] == '\n':
+            current_index += 1
+
+    end_index = current_index
+
+    # Replace the found section with the replaceString
+    return corpus[:start_index] + replaceString + corpus[end_index:]
+
 def apply_patches(patches, snippet_type='diff'):
-    original_files = []
-    snippets = defaultdict(str)
+    original_files = {}
+    new_files = {}
+
     # get unique 'filename' keys in patches
     filenames = set([patch['filename'] for patch in patches])
+
     for filename in filenames:
         try:
             filepath = os.path.join(base_path, repo_dir, filename)
             with open(filepath, 'r') as f:
                 file_content = f.read()
-                original_files.append({
-                    "filename": filename,
-                    "content": file_content
-                })
+                original_files[filename] = file_content
         except Exception as e:
             print(f"Could not find file: {filepath}. {e}")
 
-    new_files = []
-
-    for patch, original_file in zip(patches, original_files):
+    for patch in patches:
         filename = patch['filename']
-        content = original_file['content']
+        content = original_files[filename]
 
-        new_content = apply_patch_to_file(filename, content, patch['searchString'], patch['replaceString'])
+        try:
+            new_content = apply_patch_to_file(filename, content, patch['searchString'], patch['replaceString'])
+        except Exception as e:
+            print(f"Could not apply patch to file {filename}. {e}")
+        new_files[filename] = new_content
 
-        new_files.append({
-            "filename": filename,
-            "content": new_content
-        })
+    # TODO: clean this up
+    # convert dicts to lists
+    original_files = [{'filename': filename, 'content': content} for filename, content in original_files.items()]
+    new_files = [{'filename': filename, 'content': content} for filename, content in new_files.items()]
 
     snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
-
-    return new_files, snippets
+    return new_files, original_files, snippets
 
 def generate_snippets(original_files, new_files, snippet_type='diff'):
     snippets = {}
@@ -139,7 +162,11 @@ def apply_patch_to_file(filename, file_content, searchString, replaceString):
     if searchString in file_content:
         file_content_new = file_content.replace(searchString, replaceString)
     else:
-        raise Exception(f"Search string \"{searchString}\" not found in file {filename}.\nCheck the file contents and/or correct the search string.")
+        # Hack that allows search/replace when number of linebreaks don't match up
+        if searchString in file_content.replace('\n\n', '\n'):
+            file_content_new = replace_ignore_linebreaks(file_content, searchString, replaceString)
+        else:
+            raise Exception(f"Search string \"{searchString}\" not found in file {filename}. Check the file contents and/or correct the search string.")
 
     return file_content_new
 
@@ -228,6 +255,7 @@ class ChatWriteCode():
         self.filenames = filenames
         self.new_files = concurrent.futures.Future()
         self.patches = concurrent.futures.Future()
+        self.original_files = concurrent.futures.Future()
 
         self.create_chatbots()
         self.add_callbacks(snippet_type=snippet_type)
@@ -241,7 +269,7 @@ class ChatWriteCode():
     def add_callbacks(self, snippet_type='diff'):
         def onCheckCode(patches):
             try:
-                new_files, snippets = apply_patches(patches, snippet_type=snippet_type)
+                new_files, _, snippets = apply_patches(patches, snippet_type=snippet_type)
             except Exception as e:
                 return str(e)
 
@@ -263,16 +291,17 @@ class ChatWriteCode():
                 return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nPlease create a new patch (starting from the original files) and check again."
 
             if snippet_type == 'diff':
-                return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+                return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
             elif snippet_type == 'snippet':
-                return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+                return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
             elif snippet_type == 'all':
-                return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+                return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
 
         def onSubmitCode(patches):
-            new_files, _ = apply_patches(patches)
+            new_files, original_files, _ = apply_patches(patches)
             self.new_files.set_result(new_files)
             self.patches.set_result(patches)
+            self.original_files.set_result(original_files)
             return 'TERMINATE'
 
         self.add_callback(onCheckCode, onCheckPRDef)
