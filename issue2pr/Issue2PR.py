@@ -146,9 +146,9 @@ class Issue2PR:
 class PR():
     def __init__(self, issue, patches, original_files, new_files):
         self.issue = issue
-        self.filenames = [file['filename'] for file in new_files]
-        self.patches = patches # list of dicts {filename, before, after}
-        self.new_files = new_files # list of dicts {filename, before, after}
+        self.filenames = list(new_files.keys())
+        self.patches = patches
+        self.new_files = new_files
         self.original_files = original_files
 
         self.diff = self.create_multifile_diff(original_files, new_files)
@@ -168,8 +168,9 @@ class PR():
 
     def create_multifile_diff(self, orig_files, new_files):
         diffs = []
-        for orig_file, new_file in zip(orig_files, new_files):
-            diff = self.create_singlefile_diff(orig_file['filename'], orig_file['content'], new_file['filename'], new_file['content'])
+        zipped = {key: (orig_files[key], new_files[key]) for key in orig_files}
+        for filename, (orig_file, new_file) in zipped.items():
+            diff = self.create_singlefile_diff(filename, orig_file, filename, new_file)
             diffs.extend(diff + ['\n'])
 
         return diffs

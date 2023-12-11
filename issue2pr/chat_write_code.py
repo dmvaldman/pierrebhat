@@ -131,20 +131,14 @@ def apply_patches(patches, snippet_type='diff'):
             print(f"Could not apply patch to file {filename}. {e}")
         new_files[filename] = new_content
 
-    # TODO: clean this up
-    # convert dicts to lists
-    original_files = [{'filename': filename, 'content': content} for filename, content in original_files.items()]
-    new_files = [{'filename': filename, 'content': content} for filename, content in new_files.items()]
-
     snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
     return new_files, original_files, snippets
 
 def generate_snippets(original_files, new_files, snippet_type='diff'):
     snippets = {}
-    for original_data, new_data in zip(original_files, new_files):
-        filename = original_data['filename']
-        content_original = original_data['content']
-        content_new = new_data['content']
+    for filename in original_files.keys():
+        content_original = original_files[filename]
+        content_new = new_files[filename]
         if snippet_type == 'diff':
             snippets[filename] = get_diff_from_patch(content_original, content_new)
         elif snippet_type == 'snippet':
