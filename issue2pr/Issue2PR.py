@@ -10,6 +10,8 @@ import time
 import sys
 import tiktoken
 from utils.llm_config import model
+import difflib
+
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 tokenizer = tiktoken.encoding_for_model(model)
@@ -18,8 +20,9 @@ class Issue2PR:
     def __init__(self, repo=None, issue=None, options=None):
         self.issue = None
         self.repo = None
-        self.fs = None
         self.options = options
+
+        self.fs = None
 
         self.logfile_path = None
         self.num_tokens = 0
@@ -50,10 +53,13 @@ class Issue2PR:
 
     def set_repo(self, repo, download=True):
         self.repo = repo
-        self.fs = Filesystem(repo.name, create_meta=True)
 
         if download:
+            print(f'Downloading repo {repo.name}')
             self.repo.download()
+            print('Finished downloading repo')
+
+        self.fs = Filesystem(repo.name, create_meta=True)
 
     def set_issue(self, issue):
         self.issue = issue
@@ -84,7 +90,7 @@ class Issue2PR:
         chat_find_files.initiate_chat(silent=False)
 
         if not chat_find_files.filenames.done():
-            raise Exception('ERROR: ChatFindFiles did not finish. Increase max_consecutive_auto_reply in chat')
+            raise Exception(f'ERROR: ChatFindFiles did not finish. Check the logs at {self.logfile_path}.')
 
         filenames = chat_find_files.filenames.result()
 
@@ -96,12 +102,13 @@ class Issue2PR:
         chat_write_code.initiate_chat(silent=False)
 
         if not chat_write_code.new_files.done():
-            raise Exception('ERROR: ChatWriteCode did not finish. Increase max_consecutive_auto_reply in chat')
+            raise Exception(f'ERROR: ChatWriteCode did not finish. Check the logs at {self.logfile_path}.')
 
         new_files = chat_write_code.new_files.result()
+        original_files = chat_write_code.original_files.result()
         patches = chat_write_code.patches.result()
 
-        pr = PR(issue, patches, new_files)
+        pr = PR(issue, patches, original_files, new_files)
 
         return pr
 
@@ -137,15 +144,40 @@ class Issue2PR:
         return pr
 
 class PR():
-    def __init__(self, issue, patches, files):
+    def __init__(self, issue, patches, original_files, new_files):
         self.issue = issue
-        self.filenames = [file['filename'] for file in files]
+        self.filenames = [file['filename'] for file in new_files]
         self.patches = patches # list of dicts {filename, before, after}
-        self.files = files # list of dicts {filename, before, after}
+        self.new_files = new_files # list of dicts {filename, before, after}
+        self.original_files = original_files
+
+        self.diff = self.create_multifile_diff(original_files, new_files)
+        self.diff_str = ''.join(self.diff)
+
+    def create_singlefile_diff(self, orig_filename, orig_string, new_filename, new_string):
+        string1_lines = orig_string.splitlines(keepends=True)
+        string2_lines = new_string.splitlines(keepends=True)
+
+        diff = difflib.unified_diff(
+            string1_lines, string2_lines,
+            fromfile=orig_filename, tofile=new_filename,
+            lineterm=''
+        )
+
+        return list(diff)
+
+    def create_multifile_diff(self, orig_files, new_files):
+        diffs = []
+        for orig_file, new_file in zip(orig_files, new_files):
+            diff = self.create_singlefile_diff(orig_file['filename'], orig_file['content'], new_file['filename'], new_file['content'])
+            diffs.extend(diff + ['\n'])
+
+        return diffs
 
     def to_json(self):
         return {
             "filenames": self.filenames,
             "patches": self.patches,
-            "files": self.files
+            "diff": self.diff,
+            "new_files": self.new_files
         }

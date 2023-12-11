@@ -8,6 +8,7 @@ from utils.llm_config import llm_config
 import os
 import sys
 
+
 client = OpenAI(api_key = llm_config['api_key'])
 
 repo_dir = 'repos/'
@@ -36,6 +37,7 @@ class GPTWriteCode():
 
         self.new_files = concurrent.futures.Future()
         self.patches = concurrent.futures.Future()
+        self.original_files = concurrent.futures.Future()
         self.snippet_type = snippet_type
 
         self.function_map = {
@@ -43,8 +45,8 @@ class GPTWriteCode():
             "get_content": self.filesystem.get_content,
             "get_filename_for_object": self.filesystem.get_filename_for_object,
             "list_files": self.filesystem.tree,
-            "check_PR": self.onCheckPR,
-            "submit_PR": self.onSubmitPR,
+            "check_PR": self.on_check_pr,
+            "submit_PR": self.on_submit_pr,
         }
 
     def add_files(self, filenames):
@@ -122,18 +124,19 @@ class GPTWriteCode():
     def delete_gpt(self):
         client.beta.assistants.delete(self.assistant.id)
 
-    def onSubmitPR(self, patches):
+    def on_submit_pr(self, patches):
         try:
-            new_files, snippets = apply_patches(patches, snippet_type=self.snippet_type)
+            new_files, original_files, _ = apply_patches(patches, snippet_type=self.snippet_type)
             self.new_files.set_result(new_files)
             self.patches.set_result(patches)
+            self.original_files.set_result(original_files)
             return 'Patch successfully applied.'
         except Exception as e:
             return str(e)
 
-    def onCheckPR(self, patches):
+    def on_check_pr(self, patches):
         try:
-            new_files, snippets = apply_patches(patches, snippet_type=self.snippet_type)
+            new_files, _, snippets = apply_patches(patches, snippet_type=self.snippet_type)
         except Exception as e:
             return str(e)
 
@@ -155,13 +158,12 @@ class GPTWriteCode():
 
         if has_errors:
             return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
-
-        if self.snippet_type == 'diff':
-            return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+        elif self.snippet_type == 'diff':
+            return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
         elif self.snippet_type == 'snippet':
-            return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+            return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
         elif self.snippet_type == 'all':
-            return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s)."
+            return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
 
     def initiate_chat(self, **kwargs):
         last_msg_id = None
