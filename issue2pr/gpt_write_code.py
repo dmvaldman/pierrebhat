@@ -27,71 +27,93 @@ class GPTWriteCode():
     If any errors are found, you must revise the patches and call `check_PR` until no errors are found.
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
     """
-    def __init__(self, issue, filenames, filesystem, snippet_type='snippet'):
+    def __init__(self, issue, filenames, filesystem, snippet_type='snippet', get_content_type='context'):
         self.issue = issue
         self.filesystem = filesystem
+        self.file_handlers = []
+        self.assistant_file_handlers = []
+
         self.assistant = self.create_gpt()
-        self.file_handlers = self.add_files(filenames)
-        self.assistant_file_handlers = self.add_files_to_assistant(self.file_handlers)
         self.user_prompt = self.generate_user_prompt(issue, filenames)
+        self.create_files(filenames)
+        self.add_files_to_assistant(self.file_handlers)
 
         self.new_files = concurrent.futures.Future()
         self.patches = concurrent.futures.Future()
         self.original_files = concurrent.futures.Future()
         self.snippet_type = snippet_type
 
+        if get_content_type == 'file':
+            get_content_fn = self.get_content
+        elif get_content_type == 'context':
+            get_content_fn = self.filesystem.get_content
+
         self.function_map = {
             "get_summaries": self.filesystem.get_summaries,
-            "get_content": self.filesystem.get_content,
+            "get_content": get_content_fn,
             "get_filename_for_object": self.filesystem.get_filename_for_object,
             "list_files": self.filesystem.tree,
             "check_PR": self.on_check_pr,
             "submit_PR": self.on_submit_pr,
         }
 
-    def add_files(self, filenames):
-        # create a file handler for each file
-        file_handlers = []
-        for filename in filenames:
-            # TODO: move logic of where the file is elsewhere
-            path = os.path.join(GPTWriteCode.base_path, filename)
-            file_contents = open(path, "rb")
-            # check if contents are empty
-            if file_contents.read() == b'':
-                continue
-            try:
-                file_handler = client.files.create(
-                    file=file_contents,
-                    purpose='assistants'
-                )
-                file_handlers.append(file_handler.id)
-            except Exception as e:
-                # Can be an invalid extension
-                print(f'Filename: {filename}\n\nError: {e}')
-                continue
-        return file_handlers
+    def get_content(self, filename):
+        file_handle = self.create_file(filename)
+        self.add_file_to_assistance(file_handle.id)
 
-    def remove_files(self):
+    def create_files(self, filenames):
+        # create a file handler for each file
+        for filename in filenames:
+            self.create_file(filename)
+
+    def create_file(self, filename):
+        # TODO: move logic of where the file is elsewhere
+        path = os.path.join(GPTWriteCode.base_path, filename)
+        file_contents = open(path, "rb")
+        if file_contents.read() == b'':
+            # skip empty files
+            return None
+        try:
+            file_handler = client.files.create(
+                file=file_contents,
+                purpose='assistants'
+            )
+            self.file_handlers.append(file_handler.id)
+            return file_handler
+        except Exception as e:
+            # Can be an invalid extension
+            print(f'Filename: {filename}\n\nError: {e}')
+            return None
+
+    def delete_files(self):
         for file_id in self.file_handlers:
-            client.files.delete(file_id=file_id)
+            self.delete_file(file_id)
+
+    def delete_file(self, id):
+        client.files.delete(file_id=id)
+        self.file_handlers.remove(id)
 
     def add_files_to_assistant(self, file_ids):
-        assistant_file_handlers = []
         for file_id in file_ids:
-            assistant_file = client.beta.assistants.files.create(
-                assistant_id=self.assistant.id,
-                file_id=file_id
-            )
-            assistant_file_handlers.append(assistant_file.id)
-        return assistant_file_handlers
+            self.add_file_to_assistance(file_id)
+
+    def add_file_to_assistance(self, file_id):
+        assistant_file = client.beta.assistants.files.create(
+            assistant_id=self.assistant.id,
+            file_id=file_id
+        )
+        self.assistant_file_handlers.append(assistant_file.id)
 
     def remove_files_from_assistant(self):
-        for file_id in self.assistant_file_handlers:
-            client.beta.assistants.files.delete(
-                assistant_id=self.assistant.id,
-                file_id=file_id
-            )
-        self.assistant_file_handlers = []
+        for file_id in self.assistant_file_handlers.copy():
+            self.remove_file_from_assistant(file_id)
+
+    def remove_file_from_assistant(self, file_id):
+        client.beta.assistants.files.delete(
+            assistant_id=self.assistant.id,
+            file_id=file_id
+        )
+        self.assistant_file_handlers.remove(file_id)
 
     def generate_user_prompt(self, issue, filenames):
         files_str = '\n'.join([f'- {filename}' for filename in filenames])
@@ -99,10 +121,8 @@ class GPTWriteCode():
         return prompt
 
     def create_gpt(self):
+        # TODO: retrieve if already exists
         assistant_functions = {function_spec['name']:function_spec for function_spec in function_specs}
-
-        # TODO: only create when needed. Retrieve otherwise.
-
         assistant = client.beta.assistants.create(
             name="Python Developer",
             instructions=self.user_system_message,
@@ -264,7 +284,7 @@ class GPTWriteCode():
 
     def cleanup(self):
         self.remove_files_from_assistant()
-        self.remove_files()
+        self.delete_files()
         self.delete_gpt()
 
 
