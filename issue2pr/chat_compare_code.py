@@ -2,10 +2,8 @@ from autogen import ConversableAgent
 from utils.llm_config import llm_config
 import concurrent.futures
 
-
 llm_config_comparitor = llm_config.copy()
 llm_config_user = llm_config.copy()
-
 
 class ChatCompareCode():
     user_system_message = """You are a programmer collaborating on a GitHub issue.
@@ -66,7 +64,7 @@ class ChatCompareCode():
         self.user_bot.initiate_chat(self.compare_bot, message=user_prompt, **kwargs)
         answer = self.user_bot.last_message()['content']
 
-        self.result.set_result(answer == "YES")
+        self.result.set_result(answer.startswith("YES"))
 
         if answer != "YES":
             self.reason.set_result(answer)
