@@ -1,6 +1,7 @@
 import json
+from chat_write_code import SNIPPET_TYPE, GET_CONTENT_TYPE
 from chat_compare_code import ChatCompareCode
-from Issue2PR import Issue2PR
+from Issue2PR import Issue2PR, WRITE_CODE_TYPE
 from issue import Issue, ResolvedIssue
 import os
 
@@ -65,14 +66,13 @@ def test(results_path):
         pr_info = issue.fetch_pr_info()
         issue.set_pr_info(pr_info)
 
-        proposed_files = pr_result['pr']['files']
-        proposed_files_dict = {file['filename']: file['content'] for file in proposed_files}
+        proposed_files = pr_result['pr']['new_files']
         actual_files = issue.get_changed_file_contents()
 
-        proposed_filenames = list(proposed_files_dict.keys())
+        proposed_filenames = list(proposed_files.keys())
         actual_filenames = list(actual_files.keys())
 
-        chat_compare_code = ChatCompareCode(issue, proposed_files_dict, actual_files)
+        chat_compare_code = ChatCompareCode(issue, proposed_files, actual_files)
         chat_compare_code.initiate_chat(silent=False)
 
         is_solution_correct = chat_compare_code.result.result()
@@ -104,8 +104,9 @@ def test(results_path):
 
 if __name__ == "__main__":
     config = {
-        "snippet_type": "snippet",
-        "write_code": "agent",
+        "snippet_type": SNIPPET_TYPE.SNIPPET.value,
+        "get_content_type": GET_CONTENT_TYPE.CONTEXT.value,
+        "write_code": WRITE_CODE_TYPE.AGENT.value,
     }
 
     dataset_path = os.path.join('data', 'datasets', 'repo_issues.json')

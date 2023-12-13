@@ -1,6 +1,6 @@
 from filesystem import Filesystem
 from chat_find_files import ChatFindFiles
-from chat_write_code import ChatWriteCode
+from chat_write_code import ChatWriteCode, SNIPPET_TYPE, GET_CONTENT_TYPE
 from gpt_write_code import GPTWriteCode
 from contextlib import redirect_stdout
 from issue import Issue
@@ -11,7 +11,11 @@ import sys
 import tiktoken
 from utils.llm_config import model
 import difflib
+from enum import Enum, auto
 
+class WRITE_CODE_TYPE(Enum):
+    AGENT = auto()
+    AUTOGEN = auto()
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 tokenizer = tiktoken.encoding_for_model(model)
@@ -84,7 +88,10 @@ class Issue2PR:
     def _resolve(self):
         issue = self.issue
         fs = self.fs
-        snippet_type = self.options['snippet_type']
+
+        snippet_type = SNIPPET_TYPE(self.options['snippet_type'])
+        get_content_type = GET_CONTENT_TYPE(self.options['get_content_type'])
+        write_code_type = WRITE_CODE_TYPE(self.options['write_code'])
 
         chat_find_files = ChatFindFiles(fs, issue)
         chat_find_files.initiate_chat(silent=False)
@@ -94,9 +101,9 @@ class Issue2PR:
 
         filenames = chat_find_files.filenames.result()
 
-        if self.options['write_code'] == 'agent':
-            chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type)
-        elif self.options['write_code'] == 'autogen':
+        if write_code_type == WRITE_CODE_TYPE.AGENT:
+            chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type, get_content_type=get_content_type)
+        elif write_code_type == WRITE_CODE_TYPE.AUTOGEN:
             chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
 
         chat_write_code.initiate_chat(silent=False)
@@ -124,7 +131,6 @@ class Issue2PR:
 
     def resolve(self, logging=True):
         if logging:
-            config_str = Issue2PR.config_to_str(self.options)
             timestamp = time.strftime("%Y%m%d-%H%M")
             filename = f'{self.issue.repo_name}_{self.issue.title[:20]}_{timestamp}.txt'
             # replace spaces and slashes and with underscores

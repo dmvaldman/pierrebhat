@@ -1,6 +1,6 @@
 from filesystem import function_specs
 from openai import OpenAI
-from chat_write_code import apply_patches, check_syntax, onCheckPRDef, onSubmitPRDef
+from chat_write_code import apply_patches, check_syntax, onCheckPRDef, onSubmitPRDef, SNIPPET_TYPE, GET_CONTENT_TYPE
 import concurrent.futures
 import time
 import json
@@ -15,23 +15,27 @@ repo_dir = 'repos/'
 temp_dir = 'temp/'
 base_path = os.path.dirname(os.path.abspath(__file__))
 
+
 class GPTWriteCode():
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), repo_dir)
     user_system_message = """
     You are an expert programmer working on a GitHub repository. You have been assigned an issue to resolve.
-    You are given a starting point with the relevant files needed to modify. You are also given access to a filesystem API to read these and other files.
+    You are given a starting point with the best-guess relevant files needed to modify. You are also given access to a filesystem API to read these and other files.
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified.
-    The patches should be minimal and only modify the code necessary to resolve the issue.
+    The patches should only modify the code necessary to resolve the issue.
     Once finished call the `check_PR` method. This will validate the PR and return any errors if found,
     otherwise it will ask you to confirm the new files with patches applied, which you should still check for correctness.
     If any errors are found, you must revise the patches and call `check_PR` until no errors are found.
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
+    You must always submit a PR before ending the conversation.
     """
-    def __init__(self, issue, filenames, filesystem, snippet_type='snippet', get_content_type='context'):
+    def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.SNIPPET, get_content_type=GET_CONTENT_TYPE.FILE):
         self.issue = issue
         self.filesystem = filesystem
         self.file_handlers = []
         self.assistant_file_handlers = []
+        self.name = "Python Developer"
+        self.messages = []
 
         self.assistant = self.create_gpt()
         self.user_prompt = self.generate_user_prompt(issue, filenames)
@@ -43,9 +47,9 @@ class GPTWriteCode():
         self.original_files = concurrent.futures.Future()
         self.snippet_type = snippet_type
 
-        if get_content_type == 'file':
+        if get_content_type == GET_CONTENT_TYPE.FILE:
             get_content_fn = self.get_content
-        elif get_content_type == 'context':
+        elif get_content_type == GET_CONTENT_TYPE.CONTEXT:
             get_content_fn = self.filesystem.get_content
 
         self.function_map = {
@@ -58,8 +62,13 @@ class GPTWriteCode():
         }
 
     def get_content(self, filename):
-        file_handle = self.create_file(filename)
-        self.add_file_to_assistance(file_handle.id)
+        try:
+            self.filesystem.get_content(filename) # run this to potentially catch error
+            file_handle = self.create_file(filename)
+            self.add_file_to_assistance(file_handle.id)
+            return f"File uploaded to {self.name} GPT assistant."
+        except Exception as e:
+            return str(e)
 
     def create_files(self, filenames):
         # create a file handler for each file
@@ -124,7 +133,7 @@ class GPTWriteCode():
         # TODO: retrieve if already exists
         assistant_functions = {function_spec['name']:function_spec for function_spec in function_specs}
         assistant = client.beta.assistants.create(
-            name="Python Developer",
+            name=self.name,
             instructions=self.user_system_message,
             model="gpt-4-1106-preview",
             tools=[
@@ -176,18 +185,20 @@ class GPTWriteCode():
 
         if has_errors:
             return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
-        elif self.snippet_type == 'diff':
+        elif self.snippet_type == SNIPPET_TYPE.DIFF:
             return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
-        elif self.snippet_type == 'snippet':
+        elif self.snippet_type == SNIPPET_TYPE.SNIPPET:
             return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
-        elif self.snippet_type == 'all':
+        elif self.snippet_type == SNIPPET_TYPE.ALL:
             return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
 
     def initiate_chat(self, **kwargs):
         last_msg_id = None
 
         def print_message(message):
-            print(f'Role: {message.role}\n{message.content[0].text.value}')
+            message_str = f'Role: {message.role}\n{message.content[0].text.value}'
+            print(message_str)
+            self.messages.append(message_str)
 
         try:
             thread = client.beta.threads.create()
@@ -229,9 +240,9 @@ class GPTWriteCode():
                             name = tool_call.function.name
                             params = json.loads(tool_call.function.arguments)
 
-                            print('****************')
-                            print(f'Calling function {name} with params {params}')
-                            print('****************\n\n')
+                            msg_str = f'Calling function {name} with params {params}'
+                            print('*'*10 + '\n' + msg_str + '\n' + '*'*10 + '\n\n')
+                            self.messages.append(msg_str)
 
                             if name in self.function_map:
                                 # run the function
@@ -241,9 +252,12 @@ class GPTWriteCode():
                                 except Exception as e:
                                     output = str(e)
 
-                                print('****************')
-                                print(f'Response:\n\n{output}')
-                                print('****************\n\n')
+                                if output.startswith('Expecting value') or output.startswith('Unterminated string'):
+                                    print('hi')
+
+                                msg_str = f'Response:\n\n{output}'
+                                print('*'*10 + '\n' + msg_str + '\n' + '*'*10 + '\n\n')
+                                self.messages.append(msg_str)
 
                                 tool_outputs.append({
                                     'tool_call_id': tool_call.id,
@@ -259,7 +273,6 @@ class GPTWriteCode():
                                 tool_outputs=tool_outputs
                             )
                         except Exception as e:
-                            print(e)
                             raise Exception("Error submitting tool outputs")
 
                         time.sleep(0.5)

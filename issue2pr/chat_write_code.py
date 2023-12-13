@@ -5,6 +5,7 @@ import difflib
 import subprocess
 from utils.llm_config import llm_config
 import os
+from enum import Enum, auto
 
 max_consecutive_auto_reply = 50
 
@@ -16,6 +17,15 @@ llm_config_filesystem = llm_config.copy()
 llm_config_user = llm_config.copy()
 
 llm_config_filesystem["functions"] = function_specs
+
+class SNIPPET_TYPE(Enum):
+    DIFF = auto()
+    SNIPPET = auto()
+    ALL = auto()
+
+class GET_CONTENT_TYPE(Enum):
+    FILE = auto()
+    CONTEXT = auto()
 
 onCheckPRDef = {
     "name": "check_PR",
@@ -105,7 +115,7 @@ def replace_ignore_linebreaks(corpus, query, replaceString):
     # Replace the found section with the replaceString
     return corpus[:start_index] + replaceString + corpus[end_index:]
 
-def apply_patches(patches, snippet_type='diff'):
+def apply_patches(patches, snippet_type=SNIPPET_TYPE.DIFF):
     original_files = {}
     new_files = {}
 
@@ -119,7 +129,7 @@ def apply_patches(patches, snippet_type='diff'):
                 file_content = f.read()
                 original_files[filename] = file_content
         except Exception as e:
-            print(f"Could not find file: {filepath}. {e}")
+            raise Exception(f"Could not find file: {filepath}. {e}")
 
     for patch in patches:
         filename = patch['filename']
@@ -128,22 +138,22 @@ def apply_patches(patches, snippet_type='diff'):
         try:
             new_content = apply_patch_to_file(filename, content, patch['searchString'], patch['replaceString'])
         except Exception as e:
-            print(f"Could not apply patch to file {filename}. {e}")
-        new_files[filename] = new_content
+            raise Exception(f"Could not apply patch to file {filename}. {e}")
 
+    new_files[filename] = new_content
     snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
     return new_files, original_files, snippets
 
-def generate_snippets(original_files, new_files, snippet_type='diff'):
+def generate_snippets(original_files, new_files, snippet_type=SNIPPET_TYPE.DIFF):
     snippets = {}
     for filename in original_files.keys():
         content_original = original_files[filename]
         content_new = new_files[filename]
-        if snippet_type == 'diff':
+        if snippet_type == SNIPPET_TYPE.DIFF:
             snippets[filename] = get_diff_from_patch(content_original, content_new)
-        elif snippet_type == 'snippet':
+        elif snippet_type == SNIPPET_TYPE.SNIPPET:
             snippets[filename] = get_snippet_from_patch(content_original, content_new, context=16)
-        elif snippet_type == 'all':
+        elif snippet_type == SNIPPET_TYPE.ALL:
             snippets[filename] = content_new
 
     return snippets
@@ -237,7 +247,7 @@ class ChatWriteCode():
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. You must first check the PR before submitting it.
     Respond with TERMINATE to end the chat after successfully submitting the patches.
     """
-    def __init__(self, issue, filenames, filesystem, snippet_type='diff'):
+    def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.DIFF):
         self.issue = issue
         self.function_map = {
             "get_summaries": filesystem.get_summaries,
@@ -260,7 +270,7 @@ class ChatWriteCode():
             return False
         return 'TERMINATE' in message['content']
 
-    def add_callbacks(self, snippet_type='diff'):
+    def add_callbacks(self, snippet_type=SNIPPET_TYPE.DIFF):
         def onCheckCode(patches):
             try:
                 new_files, _, snippets = apply_patches(patches, snippet_type=snippet_type)
@@ -284,11 +294,11 @@ class ChatWriteCode():
             if has_errors:
                 return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nPlease create a new patch (starting from the original files) and check again."
 
-            if snippet_type == 'diff':
+            if snippet_type == SNIPPET_TYPE.DIFF:
                 return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
-            elif snippet_type == 'snippet':
+            elif snippet_type == SNIPPET_TYPE.SNIPPET:
                 return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
-            elif snippet_type == 'all':
+            elif snippet_type == SNIPPET_TYPE.ALL:
                 return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
 
         def onSubmitCode(patches):
