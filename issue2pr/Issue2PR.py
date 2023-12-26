@@ -81,8 +81,8 @@ class Issue2PR:
         pass
 
     @staticmethod
-    def create_issue(title, body, repo_name, num=None):
-        issue = Issue(title, body, repo_name, num=num)
+    def create_issue(*args, **kwargs):
+        issue = Issue(*args, **kwargs)
         return issue
 
     def _resolve(self):
@@ -143,7 +143,7 @@ class Issue2PR:
 
             with open(logfile_path, 'w') as file:
                 with redirect_stdout(file):
-                    print('Config: ', self.options)
+                    print('Config: ', self.options, '\n')
                     print(f'Issue Title: {self.issue.title}\nIssue Num: {self.issue.num}')
                     print('\n---------\n')
                     pr = self._resolve()
