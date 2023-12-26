@@ -39,7 +39,7 @@ class ChatCompareCode():
         actual_str = '\n\n'.join([f'Filename: {filename}\n\n{contents}' for filename, contents in actual_files.items()])
         prompt = f"""Here are two solutions written by two different people to fix this issue: {issue}.
         The solutions may differ on the surface, but we are only here to judge whether they resolve the issue, any other differences are irrelevant.
-        \n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n Do you think the first PR is equal or better than with respect to resolving the issue?
+        \n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n Do you think the first PR is roughly equivalent (or better) than the second with respect to resolving the issue?
         """
         return prompt
 
