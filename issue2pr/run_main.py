@@ -22,10 +22,13 @@ def main(issues_dataset=None, config=None, save=True, save_path=''):
         issue2PR.set_repo(repo)
 
         for issue in issues:
+            # if issue['num'] != 394:
+            #     continue
+
             sha = issue['pr']['base_sha']
             repo.checkout(sha)
 
-            issue = Issue2PR.create_issue(issue['title'], issue['body'], repo_name, num=issue['num'])
+            issue = Issue2PR.create_issue(issue['title'], issue['body'], repo_name, num=issue['num'], sha=sha)
             issue2PR.set_issue(issue)
 
             pr = issue2PR.resolve()
@@ -115,6 +118,6 @@ if __name__ == "__main__":
     with open(dataset_path) as json_file:
         issues_dataset = json.load(json_file)
 
-    # pr_results = main(issues_dataset, config, save=True, save_path=save_path)
+    pr_results = main(issues_dataset, config, save=True, save_path=save_path)
 
     test(save_path)

@@ -3,11 +3,12 @@ import requests
 from filesystem import Filesystem
 
 class Issue():
-    def __init__(self, title, body, repo_name, num=None):
+    def __init__(self, title, body, repo_name, num=None, sha=None):
         self.title = title
         self.body = body
         self.repo_name = repo_name
         self.num = num
+        self.sha = sha
 
     @property
     def id(self):
@@ -24,7 +25,8 @@ class Issue():
             "repo_name": self.repo_name,
             "title": self.title,
             "body": self.body,
-            "num": self.num
+            "num": self.num,
+            "sha": self.sha
         }
 
 
