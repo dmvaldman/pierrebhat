@@ -248,7 +248,6 @@ class GPTWriteCode():
                                 print('hi')
 
                             print('TOOL args', tool_call.function.arguments)
-
                             params = json.loads(tool_call.function.arguments)
 
                             msg_str = f'Calling function {name} with params {params}'
@@ -296,8 +295,15 @@ class GPTWriteCode():
                     break
                 elif run.status == "completed":
                     if not self.new_files.done():
-                        raise Exception("No patches or new files to submit")
-                    break
+                        # restart thread
+                        print('RESTARTING THREAD')
+                        run = client.beta.threads.runs.create(
+                            thread_id=thread.id,
+                            assistant_id=self.assistant.id
+                        )
+                        # raise Exception("No patches or new files to submit")
+                    else:
+                        break
                 elif run.status in ["queued", "in_progress"]:
                     time.sleep(0.5)
 
