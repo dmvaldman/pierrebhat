@@ -4,10 +4,10 @@ from chat_compare_code import ChatCompareCode
 from Issue2PR import Issue2PR, WRITE_CODE_TYPE
 from issue import Issue, ResolvedIssue
 import os
-
+import time
 
 def main(issues_dataset=None, config=None, save=True, save_path=''):
-    results = []
+    results = {}
     issue2PR = Issue2PR(options=config)
 
     for repo_name, issues in issues_dataset.items():
@@ -22,9 +22,6 @@ def main(issues_dataset=None, config=None, save=True, save_path=''):
         issue2PR.set_repo(repo)
 
         for issue in issues:
-            # if issue['num'] != 394:
-            #     continue
-
             sha = issue['pr']['base_sha']
             repo.checkout(sha)
 
@@ -41,12 +38,20 @@ def main(issues_dataset=None, config=None, save=True, save_path=''):
                 "num_tokens": issue2PR.calc_num_tokens()
             }
 
-            results.append(result)
+            key = f"{repo_name}_{issue.num}"
+            results[key] = result
 
-            # save results to file
+            # save results to file (load and update)
             if save:
+                # if save_path exists, update
+                if os.path.exists(save_path):
+                    with open(save_path, 'r') as f:
+                        saved_results = json.load(f)
+                else:
+                    saved_results = {}
+                saved_results.update(results)
                 with open(save_path, 'w') as f:
-                    json.dump(results, f, indent=2)
+                    json.dump(saved_results, f, indent=2)
 
     return results
 
@@ -54,7 +59,7 @@ def test(results_path):
     with open(results_path, 'r') as f:
         pr_results = json.load(f)
 
-    test_results = []
+    test_results = {}
 
     response = {
         "attempts": 0,
@@ -62,7 +67,7 @@ def test(results_path):
         "config": config
     }
 
-    for pr_result in pr_results:
+    for key, pr_result in pr_results.items():
         issue_data = pr_result['issue']
 
         issue = ResolvedIssue(**issue_data)
@@ -90,13 +95,13 @@ def test(results_path):
             "correct_pr_reason": reason
         })
 
-        test_results.append(test_result)
+        test_results[key] = test_result
 
         response['attempts'] += 1
         if is_solution_correct:
             response['correct'] += 1
 
-        response['results'] = pr_results
+        response['results'] = test_results
 
         # save results to file
         # save_path is results_path with 'check_' post_pended
@@ -113,11 +118,13 @@ if __name__ == "__main__":
     }
 
     dataset_path = os.path.join('data', 'datasets', 'repo_issues.json')
-    save_path = f'issue2pr/data/test.json'
+    date = time.strftime("%Y-%m-%d") # date in format 'YYYY-MM-DD'
+    config_str = '_'.join([f"{key}={value}" for key, value in config.items()])
+    save_path = f'issue2pr/data/{date}_{config_str}.json'
 
     with open(dataset_path) as json_file:
         issues_dataset = json.load(json_file)
 
-    pr_results = main(issues_dataset, config, save=True, save_path=save_path)
+    # pr_results = main(issues_dataset, config, save=True, save_path=save_path)
 
     test(save_path)
