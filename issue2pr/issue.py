@@ -1,6 +1,17 @@
 import hashlib
 import requests
 from filesystem import Filesystem
+import dotenv
+import os
+
+dotenv.load_dotenv()
+github_token = os.getenv('GITHUB_TOKEN')
+
+# add authentication headers
+headers = {
+    "Authorization": f"Bearer {github_token}",
+    "Accept": "application/vnd.github.v3+json"
+}
 
 class Issue():
     def __init__(self, title, body, repo_name, num=None, sha=None):
@@ -31,8 +42,8 @@ class Issue():
 
 
 class ResolvedIssue(Issue):
-    def __init__(self, title, body, repo_name, num=None, pr=None):
-        super().__init__(title, body, repo_name, num=num)
+    def __init__(self, title, body, repo_name, num=None, sha=None, pr=None):
+        super().__init__(title, body, repo_name, num=num, sha=sha)
         self.pr = pr
 
         if pr is not None:
@@ -63,7 +74,7 @@ class ResolvedIssue(Issue):
         sha = self.pr['merge_commit_sha']
         for filename in changed_filenames:
             url = f'https://raw.githubusercontent.com/{repo_name}/{sha}/{filename}'
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 actual_files[filename] = response.text
             else:
@@ -73,12 +84,12 @@ class ResolvedIssue(Issue):
     def fetch_pr_info(self):
         def fetch_pr_info(repo, pr_num):
             url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             return response.json()
 
         def get_changed_files_from_pr(repo, pr_num):
             url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}/files"
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             files = response.json()
             files = [{'filename': file['filename'], 'status': file['status']} for file in files]
             return files
@@ -92,7 +103,7 @@ class ResolvedIssue(Issue):
             "page": 1
         }
 
-        response = requests.get(url_timeline, params=params)
+        response = requests.get(url_timeline, params=params, headers=headers)
         timeline_events = response.json()
         pr_num = None
         pr_info = None
@@ -111,10 +122,6 @@ class ResolvedIssue(Issue):
             # convert into simpler representaiton {num, merge_commit_sha, base_sha, changed_files}
             changed_files = get_changed_files_from_pr(repo, pr_num)
             if not changed_files:
-                return None
-
-            # if none of the files have status "modified" also return None
-            if not any(file['status'] == 'modified' for file in changed_files):
                 return None
 
             pr_info = {
