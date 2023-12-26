@@ -96,10 +96,12 @@ class Issue2PR:
         chat_find_files = ChatFindFiles(fs, issue)
         chat_find_files.initiate_chat(silent=False)
 
-        if not chat_find_files.filenames.done():
+        if not chat_find_files.filenames['modify'].done():
             raise Exception(f'ERROR: ChatFindFiles did not finish. Check the logs at {self.logfile_path}.')
 
-        filenames = chat_find_files.filenames.result()
+        filenames = {}
+        for key, value in chat_find_files.filenames.items():
+            filenames[key] = value.result()
 
         if write_code_type == WRITE_CODE_TYPE.AGENT:
             chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type, get_content_type=get_content_type)
@@ -141,9 +143,10 @@ class Issue2PR:
 
             with open(logfile_path, 'w') as file:
                 with redirect_stdout(file):
-                    print('Config: ', self.options, '\n---------\n')
+                    print('Config: ', self.options)
+                    print(f'Issue Title: {self.issue.title}\nIssue Num: {self.issue.num}')
+                    print('\n---------\n')
                     pr = self._resolve()
-
         else:
             pr = self._resolve()
 
@@ -152,7 +155,6 @@ class Issue2PR:
 class PR():
     def __init__(self, issue, patches, original_files, new_files):
         self.issue = issue
-        self.filenames = list(new_files.keys())
         self.patches = patches
         self.new_files = new_files
         self.original_files = original_files
@@ -174,17 +176,35 @@ class PR():
 
     def create_multifile_diff(self, orig_files, new_files):
         diffs = []
-        zipped = {key: (orig_files[key], new_files[key]) for key in orig_files}
-        for filename, (orig_file, new_file) in zipped.items():
-            diff = self.create_singlefile_diff(filename, orig_file, filename, new_file)
+
+        filenames_mod = set(new_files.keys()) & set(orig_files.keys())
+        filenames_del = set(orig_files.keys()) - set(new_files.keys())
+        filenames_add = set(new_files.keys()) - set(orig_files.keys())
+
+        # files to modify
+        for filename_mod in filenames_mod:
+            orig_file = orig_files[filename_mod]
+            new_file = new_files[filename_mod]
+            diff = self.create_singlefile_diff(filename_mod, orig_file, filename_mod, new_file)
+            diffs.extend(diff + ['\n'])
+
+        # files to delete
+        for filename_del in filenames_del:
+            orig_file = orig_files[filename_del]
+            diff = self.create_singlefile_diff(filename_del, orig_file, filename_del, '')
+            diffs.extend(diff + ['\n'])
+
+        # files to add
+        for filename_add in filenames_add:
+            new_file = new_files[filename_add]
+            diff = self.create_singlefile_diff(filename_add, '', filename_add, new_file)
             diffs.extend(diff + ['\n'])
 
         return diffs
 
     def to_json(self):
         return {
-            "filenames": self.filenames,
             "patches": self.patches,
-            "diff": self.diff,
+            "diff": self.diff_str,
             "new_files": self.new_files
         }

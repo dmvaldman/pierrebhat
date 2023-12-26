@@ -154,7 +154,10 @@ class Filesystem():
                 raise Exception(f'Could not find file {filename} in {self.current_folder.name}. Did you mean {matches[0]}?')
 
         else:
-            return file.get_content()
+            content = file.get_content()
+            if content.strip() == '':
+                raise Exception(f'File {filename} is empty.')
+            return content
 
     def get_summary(self, filename):
         # TODO: find nearest match

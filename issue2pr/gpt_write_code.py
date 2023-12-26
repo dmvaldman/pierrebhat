@@ -18,8 +18,7 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 
 class GPTWriteCode():
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), repo_dir)
-    user_system_message = """
-    You are an expert programmer working on a GitHub repository. You have been assigned an issue to resolve.
+    user_system_message = """You are an expert programmer working on a GitHub repository. You have been assigned an issue to resolve.
     You are given a starting point with the best-guess relevant files needed to modify. You are also given access to a filesystem API to read these and other files.
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified.
     The patches should only modify the code necessary to resolve the issue.
@@ -27,7 +26,7 @@ class GPTWriteCode():
     otherwise it will ask you to confirm the new files with patches applied, which you should still check for correctness.
     If any errors are found, you must revise the patches and call `check_PR` until no errors are found.
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
-    You must always submit a PR before ending the conversation.
+    You must always submit a PR before terminating.
     """
     def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.SNIPPET, get_content_type=GET_CONTENT_TYPE.FILE):
         self.issue = issue
@@ -71,8 +70,7 @@ class GPTWriteCode():
             return str(e)
 
     def create_files(self, filenames):
-        # create a file handler for each file
-        for filename in filenames:
+        for filename in (filenames['modify'] + filenames['remove']):
             self.create_file(filename)
 
     def create_file(self, filename):
@@ -125,8 +123,16 @@ class GPTWriteCode():
         self.assistant_file_handlers.remove(file_id)
 
     def generate_user_prompt(self, issue, filenames):
-        files_str = '\n'.join([f'- {filename}' for filename in filenames])
-        prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying. Check if modifying them resolves the issue and if so, provide a patch to each file that does so.\n\n{files_str}\n\nNavigate/read the codebase using the filesystem API to craft and submit a PR."
+        files_str = ''
+        for action, paths in filenames.items():
+            files_str += f'Proposed files to {action}:\n\n'
+            if len(paths) == 0:
+                files_str += 'None\n'
+            else:
+                for path in paths:
+                    files_str += f'- {path}\n'
+            files_str += '\n'
+        prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing. Check if modifying them resolves the issue and if so, provide a patch to each file that does so.\n\n{files_str}\n\nNavigate/read the codebase using the filesystem API to craft and submit a PR."
         return prompt
 
     def create_gpt(self):
@@ -137,7 +143,6 @@ class GPTWriteCode():
             instructions=self.user_system_message,
             model="gpt-4-1106-preview",
             tools=[
-                {"type": "code_interpreter"},
                 {"type": "retrieval"},
                 {"type": "function", "function": assistant_functions['get_summaries']},
                 {"type": "function", "function": assistant_functions['get_content']},
@@ -161,15 +166,15 @@ class GPTWriteCode():
             self.original_files.set_result(original_files)
             return 'Patch successfully applied.'
         except Exception as e:
-            return str(e)
+            return f'Error submitting PR: {e}'
 
     def on_check_pr(self, patches):
         try:
             new_files, _, snippets = apply_patches(patches, snippet_type=self.snippet_type)
         except Exception as e:
-            return str(e)
+            return f'Error checking PR: {e}'
 
-        errors = 'Following errors found:\n\n'
+        errors = ''
         has_errors = False
         for filename, contents in new_files.items():
             # create temporary file, flatten any directory structure in the name
@@ -181,16 +186,16 @@ class GPTWriteCode():
                 has_errors = True
                 errors += syntax_errors + '\n\n'
 
-        snippets_str = '\n'.join([f'Filename: {filename}:\n\n{snippet}\n\n' for filename, snippet in snippets.items()])
+        snippets_str = '\n'.join([f'Filename: {filename}\n\n{snippet}\n\n' for filename, snippet in snippets.items()])
 
         if has_errors:
-            return f"Here are the snippets reflecting your changes\n\n{snippets_str}\n\nThe following errors were found:\n\n{errors}\n\nPlease correct the patches and check again."
+            return f"Here are the snippets reflecting your changes\n\n{snippets_str}\nThe following errors were found in the NEW snippet:\n\n{errors}Correct the patches (relative to the original files) and call `check_PR` again."
         elif self.snippet_type == SNIPPET_TYPE.DIFF:
-            return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
+            return f"Here is the diff reflecting your changes.\n\n{snippets_str}\n\nDoes this change resolve the issue? Unless you notice a glaring error, proceed to submitting the PR. If you do see a glaring error, explain what's wrong then generate and submit a corrected patch (relative to the original files)."
         elif self.snippet_type == SNIPPET_TYPE.SNIPPET:
-            return f"Here are snippets reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
+            return f"Here is the diff reflecting your changes.\n\n{snippets_str}\n\nDoes this change resolve the issue? Unless you notice a glaring error, proceed to submitting the PR. If you do see a glaring error, explain what's wrong then generate and submit a corrected patch (relative to the original files)."
         elif self.snippet_type == SNIPPET_TYPE.ALL:
-            return f"Here are the files reflecting your changes. Double check their correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
+            return f"Here is the diff reflecting your changes.\n\n{snippets_str}\n\nDoes this change resolve the issue? Unless you notice a glaring error, proceed to submitting the PR. If you do see a glaring error, explain what's wrong then generate and submit a corrected patch (relative to the original files)."
 
     def initiate_chat(self, **kwargs):
         last_msg_id = None
@@ -238,6 +243,12 @@ class GPTWriteCode():
                         tool_outputs = []
                         for tool_call in tool_calls:
                             name = tool_call.function.name
+
+                            if tool_call.function.arguments is None or tool_call.function.arguments == '':
+                                print('hi')
+
+                            print('TOOL args', tool_call.function.arguments)
+
                             params = json.loads(tool_call.function.arguments)
 
                             msg_str = f'Calling function {name} with params {params}'
@@ -252,7 +263,8 @@ class GPTWriteCode():
                                 except Exception as e:
                                     output = str(e)
 
-                                if output.startswith('Expecting value') or output.startswith('Unterminated string'):
+                                output = output.strip()
+                                if output.startswith("Error: FINISHED") or output.startswith("Unterminated") or output.startswith("'action'") or output.startswith('[Errno 2]') or output.startswith('Expecting value') or output.startswith('Unterminated string') or output.startswith('Expecting property name') or output.startswith('not enough'):
                                     print('hi')
 
                                 msg_str = f'Response:\n\n{output}'
@@ -280,7 +292,7 @@ class GPTWriteCode():
                         print(run.required_action, run.status)
 
                 elif run.status in ["cancelling", "cancelled", "failed", "expired"]:
-                    print(f"Run status is {run.status}. Exiting.")
+                    raise Exception(f"Run status is {run.status}. Exiting.")
                     break
                 elif run.status == "completed":
                     if not self.new_files.done():

@@ -27,6 +27,11 @@ class GET_CONTENT_TYPE(Enum):
     FILE = auto()
     CONTEXT = auto()
 
+class ACTION_TYPE(Enum):
+    MODIFY = auto()
+    ADD = auto()
+    REMOVE = auto()
+
 onCheckPRDef = {
     "name": "check_PR",
     "description": "Checks a PR for formatting errors.",
@@ -42,17 +47,21 @@ onCheckPRDef = {
                             "type": "string",
                             "description": "The filename to be patched"
                         },
+                        "action": {
+                            "type": "string",
+                            "description": "The action to be performed on the file. One of: 'add', 'modify', 'remove'"
+                        },
                         "searchString": {
                             "type": "string",
-                            "description": "A string in the file to replace with replaceString. If empty, replaceString will be appended to the end of the file."
+                            "description": "The unique string in the file to replace with `replaceString`. The searchString must be unique within the file contents. If it is an empty string, `replaceString` will be prepended to the file. If the action is 'add' or 'delete', searchString will be ignored."
                         },
                         "replaceString": {
                             "type": "string",
-                            "description": "The string to replace the searchString with. If empty, searchString will be removed from the file."
+                            "description": "The string to replace the `searchString` with. If the action is 'add', replaceString will be the file contents. If the action is 'delete', replaceString will be ignored."
                         }
                     }
                 },
-                "description": "An array of patches to be applied to the codebase"
+                "description": "An array of patches (formatted as search/replace strings) to be applied to the codebase. These strings will be interpreted literally and must be correctly formatted, otherwise the code will not compile."
             }
         }
     },
@@ -61,7 +70,7 @@ onCheckPRDef = {
 
 onSubmitPRDef = {
     "name": "submit_PR",
-    "description": "Submits a PR by applying patches to files. The patches encode a simple search and replace operation to modify existing files in the codebase where `searchString` is replaced with `replaceString`.",
+    "description": "Submits a PR by applying patches to files.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -74,13 +83,17 @@ onSubmitPRDef = {
                             "type": "string",
                             "description": "The filename to be patched"
                         },
+                        "action": {
+                            "type": "string",
+                            "description": "The action to be performed on the file. One of: 'add', 'modify', 'remove'"
+                        },
                         "searchString": {
                             "type": "string",
-                            "description": "A string in the file to replace with replaceString. If empty, replaceString will be appended to the end of the file."
+                            "description": "The unique string in the file to replace with `replaceString`. The searchString must be unique within the file contents. If it is an empty string, `replaceString` will be prepended to the file. If the action is 'add' or 'delete', searchString will be ignored."
                         },
                         "replaceString": {
                             "type": "string",
-                            "description": "The string to replace the searchString with. If empty, searchString will be removed from the file."
+                            "description": "The string to replace the `searchString` with. If the action is 'add', replaceString will be the file contents. If the action is 'delete', replaceString will be ignored."
                         }
                     }
                 },
@@ -119,10 +132,16 @@ def apply_patches(patches, snippet_type=SNIPPET_TYPE.DIFF):
     original_files = {}
     new_files = {}
 
-    # get unique 'filename' keys in patches
-    filenames = set([patch['filename'] for patch in patches])
+    # group patches by action
+    patches_grouped = {
+        'modify': [patch for patch in patches if patch['action'] == 'modify'],
+        'add': [patch for patch in patches if patch['action'] == 'add'],
+        'remove': [patch for patch in patches if patch['action'] == 'remove']
+    }
 
-    for filename in filenames:
+    # gather original filenames that need to be modified
+    filenames_modify = set([patch['filename'] for patch in patches_grouped['modify']])
+    for filename in filenames_modify:
         try:
             filepath = os.path.join(base_path, repo_dir, filename)
             with open(filepath, 'r') as f:
@@ -131,36 +150,69 @@ def apply_patches(patches, snippet_type=SNIPPET_TYPE.DIFF):
         except Exception as e:
             raise Exception(f"Could not find file: {filepath}. {e}")
 
-    for patch in patches:
+    # modify patches
+    # restructure modified patches as {filename: [patches]}
+    patches_mod_by_filename = {}
+    for patch in patches_grouped['modify']:
         filename = patch['filename']
+        if filename not in patches_mod_by_filename:
+            patches_mod_by_filename[filename] = []
+        patches_mod_by_filename[filename].append(patch)
+
+    for filename, patches in patches_mod_by_filename.items():
         content = original_files[filename]
+        for patch in patches:
+            try:
+                content = apply_patch_to_file(content, patch['searchString'], patch['replaceString'])
+            except Exception as e:
+                raise Exception(f"Could not apply patch to file {filename}. {e}")
+        new_files[filename] = content
 
-        try:
-            new_content = apply_patch_to_file(filename, content, patch['searchString'], patch['replaceString'])
-        except Exception as e:
-            raise Exception(f"Could not apply patch to file {filename}. {e}")
+    # add patches
+    for patch in patches_grouped['add']:
+        filename_add = patch['filename']
+        new_files[filename_add] = patch['replaceString']
 
-    new_files[filename] = new_content
+    # remove patches
+    for patch in patches_grouped['remove']:
+        filename_remove = patch['filename']
+        original_files[filename_remove] = ""
+
     snippets = generate_snippets(original_files, new_files, snippet_type=snippet_type)
+
     return new_files, original_files, snippets
 
 def generate_snippets(original_files, new_files, snippet_type=SNIPPET_TYPE.DIFF):
     snippets = {}
     for filename in original_files.keys():
         content_original = original_files[filename]
-        content_new = new_files[filename]
+        if filename in new_files:
+            content_new = new_files[filename]
+        else:
+            # file was deleted
+            content_new = ''
+
         if snippet_type == SNIPPET_TYPE.DIFF:
-            snippets[filename] = get_diff_from_patch(content_original, content_new)
+            snippet = get_diff_from_patch(content_original, content_new)
         elif snippet_type == SNIPPET_TYPE.SNIPPET:
-            snippets[filename] = get_snippet_from_patch(content_original, content_new, context=16)
+            snippet = get_snippet_from_patch(content_original, content_new, context=8)
         elif snippet_type == SNIPPET_TYPE.ALL:
-            snippets[filename] = content_new
+            snippet = content_new
+        else:
+            raise Exception(f"Invalid snippet type: {snippet_type}")
+
+        snippets[filename] = snippet
+
+    for filename in new_files.keys():
+        if filename not in original_files:
+            # file was added
+            snippets[filename] = new_files[filename]
 
     return snippets
 
-def apply_patch_to_file(filename, file_content, searchString, replaceString):
-    if searchString == "":
-        file_content_new = file_content + replaceString
+def apply_patch_to_file(file_content, searchString, replaceString):
+    if searchString.strip() == "":
+        file_content_new = replaceString + '\n' + file_content
         return file_content_new
 
     if searchString in file_content:
@@ -170,7 +222,7 @@ def apply_patch_to_file(filename, file_content, searchString, replaceString):
         if searchString in file_content.replace('\n\n', '\n'):
             file_content_new = replace_ignore_linebreaks(file_content, searchString, replaceString)
         else:
-            raise Exception(f"Search string \"{searchString}\" not found in file {filename}. Check the file contents and/or correct the search string.")
+            raise Exception(f"Search string \"{searchString}\" not found. Check the file contents and/or correct the search string.")
 
     return file_content_new
 
@@ -204,7 +256,7 @@ def get_snippet_from_patch(file_before, file_after, context=10):
     for snippet_before, snippet_after in zip(snippets_before, snippets_after):
         snippet_str += "<<<START SNIPPET ORIGINAL>>>\n\n" + snippet_before + "\n\n<<<END SNIPPET ORIGINAL>>>\n\n" + "<<<START SNIPPET NEW>>>\n\n" + snippet_after + "\n\n<<<END SNIPPET NEW>>>\n\n"
 
-    return snippet_str
+    return snippet_str.strip()
 
 def get_diff_from_patch(file_content_before, file_content_after):
     before_lines = file_content_before.splitlines()
@@ -214,23 +266,28 @@ def get_diff_from_patch(file_content_before, file_content_after):
 
 def check_syntax(file_path):
     result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
-    if result.stdout == '':
+    if result.stdout == '' and result.stderr == '':
         return None
     else:
         response = ''
-        error_str = result.stdout
+        if result.stderr != '':
+            error_str = result.stderr
+        else:
+            error_str = result.stdout
+
+        error_str = error_str.strip()
+
         filename = '/'.join(file_path.split('/')[-1].split('_'))
 
-        for error_str in result.stdout.split('\n'):
-            if error_str == '': continue
-            [line_num, char_num, error] = error_str.split(':')[1:4]
-            error = error.strip()
+        # TODO: are there multiple lines?
+        [line_num, char_num, error] = error_str.split(':')[1:4]
+        error = error.strip()
 
-            with open(file_path, 'r') as f:
-                lines = f.readlines()
-                affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+            affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
 
-            response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
+        response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
         return response
 
 class ChatWriteCode():
@@ -239,13 +296,14 @@ class ChatWriteCode():
     This API allows you to read summaries of files and their full contents. You can also lookup what filename any class/method/import comes from.
     You are being asked by an engineer who is working on solving a GitHub issue for this repository. You must satisfy all their requests
     for information about the codebase. When creating a PR, first check its validaty prior to submitting by calling `check_PR`. If the PR is correct,
-    submit it by calling `submit_PR`. Otherwise rewrite the patches and check again. Respond with TERMINATE to end the chat after submitting the PR.
+    submit it by calling `submit_PR`. Otherwise rewrite the patches and check again.
+    Respond with TERMINATE to end the chat, do not say TERMINATE for any other reason.
     """
     user_system_message = """
     You are a software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     You are given a starting point for the relevant files needed to modify. You can communicate with the filesystem API to read these and other files.
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. You must first check the PR before submitting it.
-    Respond with TERMINATE to end the chat after successfully submitting the patches.
+    Respond with TERMINATE to end the chat after successfully submitting the patches. Do not say TERMINATE for any other reason.
     """
     def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.DIFF):
         self.issue = issue
@@ -277,7 +335,7 @@ class ChatWriteCode():
             except Exception as e:
                 return str(e)
 
-            errors = 'Following errors found:\n\n'
+            errors = ''
             has_errors = False
             for filename, contents in new_files.items():
                 # create temporary file, flatten any directory structure in the name

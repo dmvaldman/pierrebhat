@@ -7,12 +7,14 @@ llm_config_user = llm_config.copy()
 
 class ChatCompareCode():
     user_system_message = """You are a programmer collaborating on a GitHub issue.
-    Your task is to decide whether two solutions to the issue are essentially equivalent.
-    If the solutions are roughly equivalent respond YES, otherwise respond NO and provide an explanation. To end the conversation, write TERMINATE.
+    Your task is to decide whether the first solution is essentially equal or better than the second solution.
+    If so, reply with `YES`, otherwise reply `NO` and provide an explanation.
+    To end the conversation, reply with `TERMINATE`.
     """
     comparitor_system_message = """You are a programmer collaborating on a GitHub issue.
-    Your task is to decide whether two solutions to the issue are essentially equivalent.
-    If the solutions are roughly equivalent respond YES, otherwise respond NO and provide an explanation. To end the conversation, write TERMINATE.
+    Your task is to decide whether the first solution is essentially equal or better than the second solution.
+    If so, reply with `YES`, otherwise reply `NO` and provide an explanation.
+    To end the conversation, reply with `TERMINATE`.
     """
     def __init__(self, issue, new_files, actual_files):
         self.issue = issue
@@ -37,7 +39,7 @@ class ChatCompareCode():
         actual_str = '\n\n'.join([f'Filename: {filename}\n\n{contents}' for filename, contents in actual_files.items()])
         prompt = f"""Here are two solutions written by two different people to fix this issue: {issue}.
         The solutions may differ on the surface, but we are only here to judge whether they resolve the issue, any other differences are irrelevant.
-        \n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n Do you think they are roughly equivalent with respect to resolving the issue?
+        \n\nSolution 1:\n{new_str}\n\nSolution 2:\n{actual_str}\n\n Do you think the first PR is equal or better than with respect to resolving the issue?
         """
         return prompt
 
