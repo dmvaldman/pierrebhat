@@ -1,7 +1,6 @@
 from filesystem import Filesystem
 from chat_find_files import ChatFindFiles
-from chat_write_code import ChatWriteCode, SNIPPET_TYPE, GET_CONTENT_TYPE
-from gpt_write_code import GPTWriteCode
+from chat_write_code import ChatWriteCode, GPTWriteCode, SNIPPET_TYPE
 from contextlib import redirect_stdout
 from issue import Issue
 from repo import Repo
@@ -90,7 +89,6 @@ class Issue2PR:
         fs = self.fs
 
         snippet_type = SNIPPET_TYPE(self.options['snippet_type'])
-        get_content_type = GET_CONTENT_TYPE(self.options['get_content_type'])
         write_code_type = WRITE_CODE_TYPE(self.options['write_code'])
         use_plan = self.options['use_plan']
 
@@ -111,10 +109,11 @@ class Issue2PR:
             plan = None
 
         if write_code_type == WRITE_CODE_TYPE.AGENT:
-            chat_write_code = GPTWriteCode(issue, filenames, fs, plan=plan, snippet_type=snippet_type, get_content_type=get_content_type)
+            chat_write_code_cls = GPTWriteCode
         elif write_code_type == WRITE_CODE_TYPE.AUTOGEN:
-            chat_write_code = ChatWriteCode(issue, filenames, fs, plan=plan, snippet_type=snippet_type)
+            chat_write_code_cls = ChatWriteCode
 
+        chat_write_code = chat_write_code_cls(issue, filenames, fs, plan=plan, snippet_type=snippet_type)
         chat_write_code.initiate_chat(silent=False)
 
         if not chat_write_code.new_files.done():
