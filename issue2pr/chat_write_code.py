@@ -264,7 +264,7 @@ def get_diff_from_patch(file_content_before, file_content_after):
     diff = difflib.unified_diff(before_lines, after_lines, fromfile='before', tofile='after', lineterm='')
     return '\n'.join(diff)
 
-def check_syntax(file_path):
+def check_syntax(file_path, margin=4):
     result = subprocess.run(["pyflakes", file_path], capture_output=True, text=True)
     if result.stdout == '' and result.stderr == '':
         return None
@@ -285,9 +285,11 @@ def check_syntax(file_path):
 
         with open(file_path, 'r') as f:
             lines = f.readlines()
-            affected_lines = ''.join(lines[int(line_num)-2: int(line_num)+1])
+            line_min = max(0, int(line_num) - margin)
+            line_max = min(len(lines), int(line_num) + margin)
+            affected_lines = ''.join(lines[line_min:line_max])
 
-        response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\nAffected Lines:\n{affected_lines}\n\n'
+        response += f'Error in file {filename}: Line {line_num}, Char {char_num}\nError: {error}\n\nAffected Lines:\n\n{affected_lines}\n'
         return response
 
 class ChatWriteCode():
@@ -305,8 +307,9 @@ class ChatWriteCode():
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. You must first check the PR before submitting it.
     Respond with TERMINATE to end the chat after successfully submitting the patches. Do not say TERMINATE for any other reason.
     """
-    def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.DIFF):
+    def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
         self.issue = issue
+        self.plan = plan
         self.function_map = {
             "get_summaries": filesystem.get_summaries,
             "get_content": filesystem.get_content,

@@ -92,8 +92,9 @@ class Issue2PR:
         snippet_type = SNIPPET_TYPE(self.options['snippet_type'])
         get_content_type = GET_CONTENT_TYPE(self.options['get_content_type'])
         write_code_type = WRITE_CODE_TYPE(self.options['write_code'])
+        use_plan = self.options['use_plan']
 
-        chat_find_files = ChatFindFiles(fs, issue)
+        chat_find_files = ChatFindFiles(fs, issue, use_plan)
         chat_find_files.initiate_chat(silent=False)
 
         if not chat_find_files.filenames['modify'].done():
@@ -103,10 +104,16 @@ class Issue2PR:
         for key, value in chat_find_files.filenames.items():
             filenames[key] = value.result()
 
+        if use_plan:
+            plan = chat_find_files.scratchpad.read_plan()
+            print('\n\nPLAN:', plan, '\n\n')
+        else:
+            plan = None
+
         if write_code_type == WRITE_CODE_TYPE.AGENT:
-            chat_write_code = GPTWriteCode(issue, filenames, fs, snippet_type=snippet_type, get_content_type=get_content_type)
+            chat_write_code = GPTWriteCode(issue, filenames, fs, plan=plan, snippet_type=snippet_type, get_content_type=get_content_type)
         elif write_code_type == WRITE_CODE_TYPE.AUTOGEN:
-            chat_write_code = ChatWriteCode(issue, filenames, fs, snippet_type=snippet_type)
+            chat_write_code = ChatWriteCode(issue, filenames, fs, plan=plan, snippet_type=snippet_type)
 
         chat_write_code.initiate_chat(silent=False)
 

@@ -1,9 +1,11 @@
 import concurrent.futures
-from autogen import ConversableAgent
+from autogen import ConversableAgent, GroupChat, GroupChatManager
 from filesystem import Filesystem, function_specs
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
 from utils.llm_config import llm_config
 from issue import Issue
+
+from planner import scratchpad, scratchpad_agent, planDef
 
 max_consecutive_auto_reply = 50
 
@@ -65,23 +67,35 @@ function_specs.append(on_find_mod_files_def)
 
 llm_config_filesystem = llm_config.copy()
 llm_config_user = llm_config.copy()
+llm_config_manager = llm_config.copy()
 
 llm_config_filesystem["functions"] = function_specs
 
-
 class ChatFindFiles():
-    system_message_filesystem = """You are a filesystem with access to the codebase of a GitHub repository. Your API allows you to read summaries of files
-    and their contents.
+    system_message_filesystem = """You are a filesystem with access to the codebase of a GitHub repository.
+    Your API allows you to read summaries of files and their contents.
     """
     system_message_user = """You are a senior software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify/add/remove to resolve the issue, which you can do by conversing with the filesystem API.
     You must call each of `submit_files_add`, `submit_files_modify`, and `submit_files_remove` with a list of filenames to add, modify, and remove, respectively.
     If no files should be added, modified, or removed, submit an empty list to the respective method.
-    Respond with TERMINATE to end the chat but only after calling each of these methods, do not say TERMINATE for any other reason.
+    Respond with the single word `TERMINATE` to end the chat but only after calling each of these methods, do not write TERMINATE for any other reason.
     """
-    def __init__(self, filesystem, issue):
+    system_message_user_plan = """You are a senior software engineer working on a GitHub repository. You have been assigned an issue to resolve.
+    Your task is to locate the files needed to modify/add/remove to resolve the issue, which you can do by conversing with the filesystem API.
+    Save any notes whenever you find relevant information for resolving the issue.
+    You must call each of `submit_files_add`, `submit_files_modify`, and `submit_files_remove` with a list of filenames to add, modify, and remove, respectively.
+    If no files should be added, modified, or removed, submit an empty list to the respective method.
+    Afterwards, write out and save a detailed step-by-step plan (in markdown format) of what code changes need to be made to resolve the issue. This plan will be used by another engineer to implement the PR.
+    The plan should include relevant information such as code snippets, psuedocode and references to filenames where appropriate.
+    The plan should NOT include steps to test/document code, the process of creating a PR, aligning stakeholders, or anything else outside the code modifacaitions themselves.
+    Respond with the single word `TERMINATE` to end the chat but only after calling each of these methods, do not write TERMINATE for any other reason.
+    """
+    def __init__(self, filesystem, issue, use_plan):
         self.fs = filesystem
         self.issue = issue
+        self.use_plan = use_plan
+
         self.function_map = {
             "get_summaries": filesystem.get_summaries,
             "get_content": filesystem.get_content,
@@ -102,6 +116,9 @@ class ChatFindFiles():
         self.create_chatbots()
         self.create_callbacks()
 
+        if use_plan:
+            self.scratchpad = scratchpad
+
     @staticmethod
     def is_terminal(message):
         if message['content'] is None:
@@ -109,30 +126,42 @@ class ChatFindFiles():
         return 'TERMINATE' in message['content']
 
     def create_callbacks(self):
-        repo_str = self.issue.repo_name.split('/')[1]
-
-        def process_filename(filename):
-            return filename
-            # return filename.replace(repo_str + '/', '', 1)
-
         def on_find_mod_files(filenames):
-            filenames = list(map(process_filename, filenames))
-            self.filenames_mod.set_result(filenames)
+            if not self.filenames_mod.done():
+                self.filenames_mod.set_result(filenames)
+            else:
+                if filenames == self.filenames_mod.result():
+                    raise Exception(f'Modified files already set to {filenames}. Ignoring.')
+                else:
+                    # take superset of filenames
+                    filenames_superset = set(filenames).union(set(self.filenames_mod.result()))
+                    self.filenames_mod = concurrent.futures.Future()
+                    self.filenames_mod.set_result(list(filenames_superset))
             return 'Success'
 
         def on_find_add_files(filenames):
-            filenames = list(map(process_filename, filenames))
             self.filenames_add.set_result(filenames)
             return 'Success'
 
         def on_find_rem_files(filenames):
-            filenames = list(map(process_filename, filenames))
             self.filenames_rem.set_result(filenames)
             return 'Success'
 
         self.add_callback(on_find_mod_files, on_find_mod_files_def)
         self.add_callback(on_find_add_files, on_find_add_files_def)
         self.add_callback(on_find_rem_files, on_find_rem_files_def)
+
+        if self.use_plan:
+            def on_take_note(plan):
+                scratchpad.take_note(plan)
+                return 'All Notes:\n\n' + scratchpad.read_notes()
+
+            def on_create_plan(plan):
+                scratchpad.create_plan(plan)
+                return 'Success'
+
+            self.add_callback(on_create_plan, planDef[0])
+            self.add_callback(on_take_note, planDef[1])
 
     def add_callback(self, method, method_def):
         method_name = method_def['name']
@@ -159,8 +188,13 @@ class ChatFindFiles():
             human_input_mode="NEVER"
         )
 
+        if self.use_plan:
+            system_message_user = ChatFindFiles.system_message_user_plan
+        else:
+            system_message_user = ChatFindFiles.system_message_user
+
         self.user_bot = ConversableAgent("user_find_files",
-            system_message = ChatFindFiles.system_message_user,
+            system_message = system_message_user,
             llm_config=llm_config_user,
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
@@ -171,6 +205,7 @@ class ChatFindFiles():
     def initiate_chat(self, **kwargs):
         prompt = self.generate_user_prompt(self.issue, self.fs)
         self.user_bot.initiate_chat(self.filesystem_bot, message=prompt, **kwargs)
+
 
 if __name__ == "__main__":
     owner = "roboflow"
@@ -187,5 +222,6 @@ if __name__ == "__main__":
     """
 
     issue = Issue(issue_title, issue_body, repo_name, num=issue_num)
-    chat = ChatFindFiles(fs, issue)
+    chat = ChatFindFiles(fs, issue, use_plan=True)
     chat.initiate_chat(silent=False)
+    print(scratchpad.read_plan())

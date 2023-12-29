@@ -28,16 +28,17 @@ class GPTWriteCode():
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
     You must always submit a PR before terminating.
     """
-    def __init__(self, issue, filenames, filesystem, snippet_type=SNIPPET_TYPE.SNIPPET, get_content_type=GET_CONTENT_TYPE.FILE):
+    def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.SNIPPET, get_content_type=GET_CONTENT_TYPE.FILE):
         self.issue = issue
         self.filesystem = filesystem
+        self.plan = plan
         self.file_handlers = []
         self.assistant_file_handlers = []
         self.name = "Python Developer"
         self.messages = []
 
         self.assistant = self.create_gpt()
-        self.user_prompt = self.generate_user_prompt(issue, filenames)
+        self.user_prompt = self.generate_user_prompt(issue, filenames, plan)
         self.create_files(filenames)
         self.add_files_to_assistant(self.file_handlers)
 
@@ -122,7 +123,7 @@ class GPTWriteCode():
         )
         self.assistant_file_handlers.remove(file_id)
 
-    def generate_user_prompt(self, issue, filenames):
+    def generate_user_prompt(self, issue, filenames, plan=None):
         files_str = ''
         for action, paths in filenames.items():
             files_str += f'Proposed files to {action}:\n\n'
@@ -132,7 +133,13 @@ class GPTWriteCode():
                 for path in paths:
                     files_str += f'- {path}\n'
             files_str += '\n'
-        prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing. Check if modifying them resolves the issue and if so, provide a patch to each file that does so.\n\n{files_str}\n\nNavigate/read the codebase using the filesystem API to craft and submit a PR."
+
+        if plan is None:
+            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so. Navigate/read the codebase using the filesystem API to craft and submit a PR."
+        else:
+            prompt_plan = "\n\nAnother engineer created this initial plan to resolve the issue:\n\n{plan}\n\n"
+            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so.{prompt_plan}Navigate/read the codebase using the filesystem API to craft and submit a PR."
+
         return prompt
 
     def create_gpt(self):
@@ -244,11 +251,10 @@ class GPTWriteCode():
                         for tool_call in tool_calls:
                             name = tool_call.function.name
 
-                            if tool_call.function.arguments is None or tool_call.function.arguments == '':
-                                print('hi')
-
-                            print('TOOL args', tool_call.function.arguments)
-                            params = json.loads(tool_call.function.arguments)
+                            try:
+                                params = json.loads(tool_call.function.arguments)
+                            except Exception as e:
+                                raise Exception(f"Error parsing arguments as JSON: {tool_call.function.arguments}")
 
                             msg_str = f'Calling function {name} with params {params}'
                             print('*'*10 + '\n' + msg_str + '\n' + '*'*10 + '\n\n')
@@ -292,7 +298,6 @@ class GPTWriteCode():
 
                 elif run.status in ["cancelling", "cancelled", "failed", "expired"]:
                     raise Exception(f"Run status is {run.status}. Exiting.")
-                    break
                 elif run.status == "completed":
                     if not self.new_files.done():
                         # restart thread

@@ -115,6 +115,7 @@ if __name__ == "__main__":
         "snippet_type": SNIPPET_TYPE.SNIPPET.value,
         "get_content_type": GET_CONTENT_TYPE.CONTEXT.value,
         "write_code": WRITE_CODE_TYPE.AGENT.value,
+        "use_plan": False
     }
 
     dataset_path = os.path.join('data', 'datasets', 'repo_issues.json')
@@ -125,6 +126,6 @@ if __name__ == "__main__":
     with open(dataset_path) as json_file:
         issues_dataset = json.load(json_file)
 
-    # pr_results = main(issues_dataset, config, save=True, save_path=save_path)
+    pr_results = main(issues_dataset, config, save=True, save_path=save_path)
 
     test(save_path)
