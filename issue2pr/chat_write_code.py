@@ -19,9 +19,6 @@ repo_dir = "repos/"
 temp_dir = 'temp/'
 base_path = os.path.dirname(os.path.abspath(__file__))
 
-llm_config_filesystem = llm_config.copy()
-llm_config_user = llm_config.copy()
-
 class SNIPPET_TYPE(Enum):
     DIFF = auto()
     SNIPPET = auto()
@@ -234,13 +231,13 @@ class WriteCode():
         self.user_prompt = self.generate_user_prompt(issue, filenames, plan=plan)
 
     def add_callbacks(self):
-        self.function_map['check_PR'] = self.on_check_pr
-        self.function_map['submit_PR'] = self.on_submit_pr
+        self.add_callback(self.on_check_pr, onCheckPRDef)
+        self.add_callback(self.on_submit_pr, onSubmitPRDef)
 
-        self.function_specs += [
-            onCheckPRDef,
-            onSubmitPRDef
-        ]
+    def add_callback(self, method, method_def):
+        method_name = method_def['name']
+        self.function_map[method_name] = method
+        self.function_specs.append(method_def)
 
     @staticmethod
     def is_terminal(message):
@@ -428,14 +425,18 @@ class ChatWriteCode(WriteCode):
     """
     def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
         super().__init__(issue, filenames, filesystem, plan=plan, snippet_type=snippet_type)
+
         self.create_chatbot()
 
     def create_chatbot(self):
-        llm_config_filesystem["functions"] = self.function_specs
+        self.llm_config_filesystem = llm_config.copy()
+        self.llm_config_user = llm_config.copy()
+
+        self.llm_config_filesystem["functions"] = self.function_specs
 
         self.filesystem_bot = ConversableAgent("filesystem",
             system_message = ChatWriteCode.system_message_filesystem,
-            llm_config=llm_config_filesystem,
+            llm_config=self.llm_config_filesystem,
             code_execution_config=False,
             is_termination_msg = ChatWriteCode.is_terminal,
             max_consecutive_auto_reply=max_consecutive_auto_reply,
@@ -445,7 +446,7 @@ class ChatWriteCode(WriteCode):
         self.user_bot = ConversableAgent("user_write_code",
             system_message = ChatWriteCode.user_system_message,
             is_termination_msg = ChatWriteCode.is_terminal,
-            llm_config=llm_config_user,
+            llm_config=self.llm_config_user,
             code_execution_config=False,
             function_map = self.function_map,
             max_consecutive_auto_reply=max_consecutive_auto_reply,

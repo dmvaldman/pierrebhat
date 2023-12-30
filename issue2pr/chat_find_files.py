@@ -1,11 +1,11 @@
 import concurrent.futures
-from autogen import ConversableAgent, GroupChat, GroupChatManager
+from autogen import ConversableAgent
 from filesystem import Filesystem, function_specs
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
 from utils.llm_config import llm_config
 from issue import Issue
 
-from planner import scratchpad, scratchpad_agent, planDef
+from planner import scratchpad, planDef
 
 max_consecutive_auto_reply = 50
 
@@ -63,14 +63,6 @@ on_find_rem_files_def = {
     }
 }
 
-function_specs.append(on_find_mod_files_def)
-
-llm_config_filesystem = llm_config.copy()
-llm_config_user = llm_config.copy()
-llm_config_manager = llm_config.copy()
-
-llm_config_filesystem["functions"] = function_specs
-
 class ChatFindFiles():
     system_message_filesystem = """You are a filesystem with access to the codebase of a GitHub repository.
     Your API allows you to read summaries of files and their contents.
@@ -113,8 +105,12 @@ class ChatFindFiles():
             "remove": self.filenames_rem
         }
 
-        self.create_chatbots()
+        self.llm_config_filesystem = llm_config.copy()
+        self.llm_config_user = llm_config.copy()
+        self.function_specs = function_specs.copy()
+
         self.create_callbacks()
+        self.create_chatbots()
 
         if use_plan:
             self.scratchpad = scratchpad
@@ -147,10 +143,6 @@ class ChatFindFiles():
             self.filenames_rem.set_result(filenames)
             return 'Success'
 
-        self.add_callback(on_find_mod_files, on_find_mod_files_def)
-        self.add_callback(on_find_add_files, on_find_add_files_def)
-        self.add_callback(on_find_rem_files, on_find_rem_files_def)
-
         if self.use_plan:
             def on_take_note(plan):
                 scratchpad.take_note(plan)
@@ -160,16 +152,23 @@ class ChatFindFiles():
                 scratchpad.create_plan(plan)
                 return 'Success'
 
+        self.add_callback(on_find_mod_files, on_find_mod_files_def)
+        self.add_callback(on_find_add_files, on_find_add_files_def)
+        self.add_callback(on_find_rem_files, on_find_rem_files_def)
+
+        if self.use_plan:
             self.add_callback(on_create_plan, planDef[0])
             self.add_callback(on_take_note, planDef[1])
 
-    def add_callback(self, method, method_def):
+    def add_callback(self, method, method_def, update_bot=False):
         method_name = method_def['name']
         self.function_map[method_name] = method
-        llm_config_filesystem["functions"].append(method_def)
+        self.function_specs.append(method_def)
 
-        self.filesystem_bot.llm_config.update(llm_config_filesystem)
-        self.user_bot.register_function(self.function_map)
+        if update_bot:
+            self.llm_config_filesystem['functions'] = self.function_specs
+            self.filesystem_bot.llm_config.update(self.llm_config_filesystem)
+            self.user_bot.register_function(self.function_map)
 
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
@@ -179,9 +178,11 @@ class ChatFindFiles():
         return prompt
 
     def create_chatbots(self):
+        self.llm_config_filesystem['functions'] = self.function_specs
+
         self.filesystem_bot = ConversableAgent("filesystem",
             system_message = ChatFindFiles.system_message_filesystem,
-            llm_config=llm_config_filesystem,
+            llm_config=self.llm_config_filesystem,
             code_execution_config=False,
             is_termination_msg = ChatFindFiles.is_terminal,
             max_consecutive_auto_reply=max_consecutive_auto_reply,
@@ -195,7 +196,7 @@ class ChatFindFiles():
 
         self.user_bot = ConversableAgent("user_find_files",
             system_message = system_message_user,
-            llm_config=llm_config_user,
+            llm_config=self.llm_config_user,
             is_termination_msg = ChatFindFiles.is_terminal,
             function_map = self.function_map,
             code_execution_config=False,
