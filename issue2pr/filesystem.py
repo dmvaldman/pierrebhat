@@ -335,62 +335,7 @@ class File:
     def get_summary(self):
         return f'Summary for {self.name}\n{self.meta}'
 
-function_specs = [
-    {
-        "name": "list_files",
-        "description": "Returns a prettified list of all files in the codebase",
-        "parameters": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-    {
-        "name": "get_summaries",
-        "description": "Returns high-level summaries (description, dependencies, classnames) for a given list of filenames",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "filenames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "description": "A filename"
-                    },
-                    "description": "An array of filenames to get summaries for"
-                }
-            }
-        },
-        "required": ["filenames"]
-    },
-    {
-        "name": "get_content",
-        "description": "Returns the content of a file",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "filename": {
-                    "type": "string",
-                    "description": "The filename to read"
-                }
-            }
-        },
-        "required": ["filename"]
-    },
-    {
-        "name": "get_filename_for_object",
-        "description": "Returns an array of filenames for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "The name of the class, method or function"
-                }
-            }
-        },
-        "required": ["name"]
-    }
-]
+
 
 if __name__ == '__main__':
     directory = "Auto-GPT"

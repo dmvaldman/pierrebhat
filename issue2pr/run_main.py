@@ -1,5 +1,5 @@
 import json
-from chat_write_code import SNIPPET_TYPE, GET_CONTENT_TYPE
+from chat_write_code import SNIPPET_TYPE
 from chat_compare_code import ChatCompareCode
 from Issue2PR import Issue2PR, WRITE_CODE_TYPE
 from issue import Issue, ResolvedIssue
@@ -113,7 +113,6 @@ def test(results_path):
 if __name__ == "__main__":
     config = {
         "snippet_type": SNIPPET_TYPE.SNIPPET.value,
-        "get_content_type": GET_CONTENT_TYPE.CONTEXT.value,
         "write_code": WRITE_CODE_TYPE.AGENT.value,
         "use_plan": False
     }
