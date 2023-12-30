@@ -2,71 +2,71 @@ from filesystem import Filesystem
 from utils.llm_config import llm_config
 from autogen import ConversableAgent
 
-max_consecutive_auto_reply = 50
-
-class Filesystem_Chat():
-    function_specs = [
-        {
-            "name": "list_files",
-            "description": "Returns a prettified list of all files in the codebase",
-            "parameters": {
-                "type": "object",
-                "properties": {}
+function_specs = [
+    {
+        "name": "list_files",
+        "description": "Returns a prettified list of all files in the codebase",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    },
+    {
+        "name": "get_summaries",
+        "description": "Returns high-level summaries (description, dependencies, classnames) for a given list of filenames",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filenames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "A filename"
+                    },
+                    "description": "An array of filenames to get summaries for"
+                }
             }
         },
-        {
-            "name": "get_summaries",
-            "description": "Returns high-level summaries (description, dependencies, classnames) for a given list of filenames",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filenames": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "description": "A filename"
-                        },
-                        "description": "An array of filenames to get summaries for"
-                    }
+        "required": ["filenames"]
+    },
+    {
+        "name": "get_content",
+        "description": "Returns the content of a file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "description": "The filename to read"
                 }
-            },
-            "required": ["filenames"]
+            }
         },
-        {
-            "name": "get_content",
-            "description": "Returns the content of a file",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filename": {
-                        "type": "string",
-                        "description": "The filename to read"
-                    }
+        "required": ["filename"]
+    },
+    {
+        "name": "get_filename_for_object",
+        "description": "Returns an array of filenames for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the class, method or function"
                 }
-            },
-            "required": ["filename"]
+            }
         },
-        {
-            "name": "get_filename_for_object",
-            "description": "Returns an array of filenames for where a given class or class method, class attribute or dependency is defined. Class methods should be namespaced to their class name e.g., `class_name.function_name` but class attributes shouldn't be as instances are often renamed.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the class, method or function"
-                    }
-                }
-            },
-            "required": ["name"]
-        }
-    ]
+        "required": ["name"]
+    }
+]
+
+class Filesystem_Chat():
     system_message = """You are a filesystem with access to the codebase of a GitHub repository.
     Your API allows you to read summaries of files and their contents.
     Reply with TERMINATE when the chat is complete.
     """
-    def __init__(self, directory, create_meta=True):
-        self.filesystem = Filesystem(directory, create_meta=create_meta)
+    max_consecutive_auto_reply = 50
+    def __init__(self, filesystem):
+        self.filesystem = filesystem
 
         self.function_map = {
             "get_summaries": self.filesystem.get_summaries,
@@ -76,7 +76,7 @@ class Filesystem_Chat():
         }
 
         self.llm_config = llm_config.copy()
-        self.llm_config['functions'] = self.function_specs
+        self.llm_config['functions'] = function_specs
 
         self.chatbot = self.create_chatbot()
 
@@ -92,7 +92,7 @@ class Filesystem_Chat():
             llm_config=self.llm_config,
             code_execution_config=False,
             is_termination_msg = Filesystem_Chat.is_terminal,
-            max_consecutive_auto_reply=max_consecutive_auto_reply,
+            max_consecutive_auto_reply=Filesystem_Chat.max_consecutive_auto_reply,
             human_input_mode="NEVER")
 
         return chatbot

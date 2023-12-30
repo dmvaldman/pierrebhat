@@ -1,11 +1,10 @@
 import concurrent.futures
-from autogen import ConversableAgent
-from filesystem import Filesystem, function_specs
+from autogen import ConversableAgent, GroupChat, GroupChatManager
+from filesystem_chat import Filesystem, Filesystem_Chat
+from scratchpad import Scratchpad_Chat
 from openai_helpers.helpers import MAX_CONTENT_LENGTH
 from utils.llm_config import llm_config
 from issue import Issue
-
-from planner import scratchpad, planDef
 
 max_consecutive_auto_reply = 50
 
@@ -64,9 +63,6 @@ on_find_rem_files_def = {
 }
 
 class ChatFindFiles():
-    system_message_filesystem = """You are a filesystem with access to the codebase of a GitHub repository.
-    Your API allows you to read summaries of files and their contents.
-    """
     system_message_user = """You are a senior software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify/add/remove to resolve the issue, which you can do by conversing with the filesystem API.
     You must call each of `submit_files_add`, `submit_files_modify`, and `submit_files_remove` with a list of filenames to add, modify, and remove, respectively.
@@ -83,17 +79,10 @@ class ChatFindFiles():
     The plan should NOT include steps to test/document code, the process of creating a PR, aligning stakeholders, or anything else outside the code modifacaitions themselves.
     Respond with the single word `TERMINATE` to end the chat but only after calling each of these methods, do not write TERMINATE for any other reason.
     """
-    def __init__(self, filesystem, issue, use_plan):
+    def __init__(self, filesystem, issue, use_plan=False):
         self.fs = filesystem
         self.issue = issue
         self.use_plan = use_plan
-
-        self.function_map = {
-            "get_summaries": filesystem.get_summaries,
-            "get_content": filesystem.get_content,
-            "get_filename_for_object": filesystem.get_filename_for_object,
-            "list_files": filesystem.tree
-        }
 
         self.filenames_mod = concurrent.futures.Future()
         self.filenames_add = concurrent.futures.Future()
@@ -105,15 +94,23 @@ class ChatFindFiles():
             "remove": self.filenames_rem
         }
 
-        self.llm_config_filesystem = llm_config.copy()
+        self.filesystem_chat = Filesystem_Chat(self.fs)
+        if use_plan: self.scratchpad_chat = Scratchpad_Chat()
+
+        # loop through all functions in filesystem_bot and add them to user_bot
+        self.function_map = {}
+        self.function_specs = []
+        self.function_map.update(self.filesystem_chat.function_map)
+
+        if use_plan:
+            self.function_map.update(self.scratchpad_chat.function_map)
+
+        self.llm_config_filesystem = self.filesystem_chat.llm_config.copy()
         self.llm_config_user = llm_config.copy()
-        self.function_specs = function_specs.copy()
+        if use_plan: self.llm_config_scratchpad = self.scratchpad_chat.llm_config.copy()
 
         self.create_callbacks()
         self.create_chatbots()
-
-        if use_plan:
-            self.scratchpad = scratchpad
 
     @staticmethod
     def is_terminal(message):
@@ -121,54 +118,44 @@ class ChatFindFiles():
             return False
         return 'TERMINATE' in message['content']
 
-    def create_callbacks(self):
-        def on_find_mod_files(filenames):
-            if not self.filenames_mod.done():
-                self.filenames_mod.set_result(filenames)
+    def on_find_mod_files(self, filenames):
+        if not self.filenames_mod.done():
+            self.filenames_mod.set_result(filenames)
+        else:
+            if filenames == self.filenames_mod.result():
+                raise Exception(f'Modified files already set to {filenames}. Ignoring.')
             else:
-                if filenames == self.filenames_mod.result():
-                    raise Exception(f'Modified files already set to {filenames}. Ignoring.')
-                else:
-                    # take superset of filenames
-                    filenames_superset = set(filenames).union(set(self.filenames_mod.result()))
-                    self.filenames_mod = concurrent.futures.Future()
-                    self.filenames_mod.set_result(list(filenames_superset))
-            return 'Success'
+                # take superset of filenames
+                filenames_superset = set(filenames).union(set(self.filenames_mod.result()))
+                self.filenames_mod = concurrent.futures.Future()
+                self.filenames_mod.set_result(list(filenames_superset))
+        return 'Success'
 
-        def on_find_add_files(filenames):
-            self.filenames_add.set_result(filenames)
-            return 'Success'
+    def on_find_add_files(self, filenames):
+        self.filenames_add.set_result(filenames)
+        return 'Success'
 
-        def on_find_rem_files(filenames):
-            self.filenames_rem.set_result(filenames)
-            return 'Success'
+    def on_find_rem_files(self, filenames):
+        self.filenames_rem.set_result(filenames)
+        return 'Success'
 
-        if self.use_plan:
-            def on_take_note(plan):
-                scratchpad.take_note(plan)
-                return 'All Notes:\n\n' + scratchpad.read_notes()
+    def on_take_note(self, plan):
+        self.scratchpad.take_note(plan)
+        return 'All Notes:\n\n' + self.scratchpad.read_notes()
 
-            def on_create_plan(plan):
-                scratchpad.create_plan(plan)
-                return 'Success'
+    def on_create_plan(self, plan):
+        self.scratchpad.create_plan(plan)
+        return 'Success'
 
-        self.add_callback(on_find_mod_files, on_find_mod_files_def)
-        self.add_callback(on_find_add_files, on_find_add_files_def)
-        self.add_callback(on_find_rem_files, on_find_rem_files_def)
+    def create_callbacks(self):
+        self.add_callback(self.on_find_mod_files, on_find_mod_files_def)
+        self.add_callback(self.on_find_add_files, on_find_add_files_def)
+        self.add_callback(self.on_find_rem_files, on_find_rem_files_def)
 
-        if self.use_plan:
-            self.add_callback(on_create_plan, planDef[0])
-            self.add_callback(on_take_note, planDef[1])
-
-    def add_callback(self, method, method_def, update_bot=False):
+    def add_callback(self, method, method_def):
         method_name = method_def['name']
         self.function_map[method_name] = method
         self.function_specs.append(method_def)
-
-        if update_bot:
-            self.llm_config_filesystem['functions'] = self.function_specs
-            self.filesystem_bot.llm_config.update(self.llm_config_filesystem)
-            self.user_bot.register_function(self.function_map)
 
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
@@ -178,16 +165,7 @@ class ChatFindFiles():
         return prompt
 
     def create_chatbots(self):
-        self.llm_config_filesystem['functions'] = self.function_specs
-
-        self.filesystem_bot = ConversableAgent("filesystem",
-            system_message = ChatFindFiles.system_message_filesystem,
-            llm_config=self.llm_config_filesystem,
-            code_execution_config=False,
-            is_termination_msg = ChatFindFiles.is_terminal,
-            max_consecutive_auto_reply=max_consecutive_auto_reply,
-            human_input_mode="NEVER"
-        )
+        self.llm_config_user['functions'] = self.function_specs
 
         if self.use_plan:
             system_message_user = ChatFindFiles.system_message_user_plan
@@ -203,12 +181,34 @@ class ChatFindFiles():
             max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER")
 
+        if self.use_plan:
+            agents = [
+                self.user_bot,
+                self.filesystem_chat.chatbot,
+                self.scratchpad_chat.chatbot
+            ]
+
+            group_chat = GroupChat(
+                agents=agents,
+                messages=[],
+                max_round=20,
+            )
+
+            self.manager = GroupChatManager(
+                groupchat=group_chat,
+                llm_config=llm_config.copy()
+            )
+
     def initiate_chat(self, **kwargs):
         prompt = self.generate_user_prompt(self.issue, self.fs)
-        self.user_bot.initiate_chat(self.filesystem_bot, message=prompt, **kwargs)
+        if self.use_plan:
+            self.user_bot.initiate_chat(self.manager, message=prompt, **kwargs)
+        else:
+            self.user_bot.initiate_chat(self.filesystem_chat, message=prompt, **kwargs)
 
 
 if __name__ == "__main__":
+    use_plan = True
     owner = "roboflow"
     name = "supervision"
     repo_name = f"{owner}/{name}"
@@ -223,6 +223,11 @@ if __name__ == "__main__":
     """
 
     issue = Issue(issue_title, issue_body, repo_name, num=issue_num)
-    chat = ChatFindFiles(fs, issue, use_plan=True)
-    chat.initiate_chat(silent=False)
-    print(scratchpad.read_plan())
+
+    chat = ChatFindFiles(fs, issue, use_plan=use_plan)
+
+    if use_plan:
+        chat.initiate_chat(silent=False)
+        print(chat.scratchpad_chat.scratchpad.read_plan())
+    else:
+        chat.initiate_chat(silent=False)
