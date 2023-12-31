@@ -1,6 +1,7 @@
 from openai import OpenAI
 from autogen import ConversableAgent
-from filesystem import function_specs
+from filesystem import Filesystem
+from filesystem_chat import Filesystem_Chat
 import concurrent.futures
 import difflib
 import subprocess
@@ -209,23 +210,20 @@ def get_diff_from_patch(file_content_before, file_content_after):
 
 
 class WriteCode():
-    def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
+    def __init__(self, issue, filenames, filesystem_chat, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
         self.issue = issue
         self.plan = plan
         self.filenames = filenames
         self.snippet_type = snippet_type
-
-        self.function_specs = function_specs.copy()
-        self.function_map = {
-            "get_summaries": filesystem.get_summaries,
-            "get_content": filesystem.get_content,
-            "get_filename_for_object": filesystem.get_filename_for_object,
-            "list_files": filesystem.tree
-        }
+        self.filesystem_chat = filesystem_chat
 
         self.new_files = concurrent.futures.Future()
         self.patches = concurrent.futures.Future()
         self.original_files = concurrent.futures.Future()
+
+        self.function_specs = []
+        self.function_map = {}
+        self.function_map.update(filesystem_chat.function_map)
 
         self.add_callbacks()
         self.user_prompt = self.generate_user_prompt(issue, filenames, plan=plan)
@@ -423,25 +421,13 @@ class ChatWriteCode(WriteCode):
     Your task is to write a PR for the issue. Do this by providing patches for each file that needs to be modified. You must first check the PR before submitting it.
     Respond with TERMINATE to end the chat after successfully submitting the patches. Do not say TERMINATE for any other reason.
     """
-    def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
-        super().__init__(issue, filenames, filesystem, plan=plan, snippet_type=snippet_type)
+    def __init__(self, issue, filenames, filesystem_chat, plan=None, snippet_type=SNIPPET_TYPE.DIFF):
+        super().__init__(issue, filenames, filesystem_chat, plan=plan, snippet_type=snippet_type)
 
         self.create_chatbot()
 
     def create_chatbot(self):
-        self.llm_config_filesystem = llm_config.copy()
         self.llm_config_user = llm_config.copy()
-
-        self.llm_config_filesystem["functions"] = self.function_specs
-
-        self.filesystem_bot = ConversableAgent("filesystem",
-            system_message = ChatWriteCode.system_message_filesystem,
-            llm_config=self.llm_config_filesystem,
-            code_execution_config=False,
-            is_termination_msg = ChatWriteCode.is_terminal,
-            max_consecutive_auto_reply=max_consecutive_auto_reply,
-            human_input_mode="NEVER"
-        )
 
         self.user_bot = ConversableAgent("user_write_code",
             system_message = ChatWriteCode.user_system_message,
@@ -453,7 +439,7 @@ class ChatWriteCode(WriteCode):
             human_input_mode="NEVER")
 
     def initiate_chat(self, **kwargs):
-        self.user_bot.initiate_chat(self.filesystem_bot, message=self.user_prompt, **kwargs)
+        self.user_bot.initiate_chat(self.filesystem_chat.chatbot, message=self.user_prompt, **kwargs)
 
 
 
@@ -470,12 +456,15 @@ class GPTWriteCode(WriteCode):
     If no errors are found and you are satisfied with the patches then call the `submit_PR` method to finalize the PR.
     You must always submit a PR before terminating.
     """
-    def __init__(self, issue, filenames, filesystem, plan=None, snippet_type=SNIPPET_TYPE.SNIPPET):
-        super().__init__(issue, filenames, filesystem, plan=plan, snippet_type=snippet_type)
+    def __init__(self, issue, filenames, filesystem_chat, plan=None, snippet_type=SNIPPET_TYPE.SNIPPET):
+        super().__init__(issue, filenames, filesystem_chat, plan=plan, snippet_type=snippet_type)
 
         self.file_handlers = []
         self.assistant_file_handlers = []
         self.messages = []
+
+        # Since there is only one agent, it needs all the function_specs
+        self.function_specs += filesystem_chat.function_specs
 
         self.assistant = self.create_chatbot(filenames)
 
@@ -682,6 +671,7 @@ if __name__ == "__main__":
     repo_name = f"{owner}/{name}"
 
     fs = Filesystem(name, create_meta=True)
+    fs_chat = Filesystem_Chat(fs)
 
     issue_num = 464
     issue_title = "Make `sv.LineZone.trigger` return bool `np.ndarray` informing which detections have crossed the line this frame"
@@ -696,8 +686,8 @@ if __name__ == "__main__":
         "remove": []
     }
 
-    # code_writer = GPTWriteCode(issue, filenames, fs)
-    code_writer = ChatWriteCode(issue, filenames, fs)
+    # code_writer = GPTWriteCode(issue, filenames, fs_chat)
+    code_writer = ChatWriteCode(issue, filenames, fs_chat)
     code_writer.initiate_chat()
 
     new_files = code_writer.new_files.result()

@@ -1,4 +1,4 @@
-from filesystem import Filesystem
+from filesystem import Filesystem, Filesystem_Chat
 from chat_find_files import ChatFindFiles
 from chat_write_code import ChatWriteCode, GPTWriteCode, SNIPPET_TYPE
 from contextlib import redirect_stdout
@@ -25,7 +25,7 @@ class Issue2PR:
         self.repo = None
         self.options = options
 
-        self.fs = None
+        self.filesystem = None
 
         self.logfile_path = None
         self.num_tokens = 0
@@ -62,7 +62,7 @@ class Issue2PR:
             self.repo.download()
             print('Finished downloading repo')
 
-        self.fs = Filesystem(repo.name, create_meta=True)
+        self.filesystem = Filesystem(repo.name, create_meta=True)
 
     def set_issue(self, issue):
         self.issue = issue
@@ -86,7 +86,8 @@ class Issue2PR:
 
     def _resolve(self):
         issue = self.issue
-        fs = self.fs
+        fs = self.filesystem
+        filesystem_chat = Filesystem_Chat(fs)
 
         snippet_type = SNIPPET_TYPE(self.options['snippet_type'])
         write_code_type = WRITE_CODE_TYPE(self.options['write_code'])
@@ -103,7 +104,7 @@ class Issue2PR:
             filenames[key] = value.result()
 
         if use_plan:
-            plan = chat_find_files.scratchpad.read_plan()
+            plan = chat_find_files.scratchpad_chat.scratchpad.read_plan()
             print('\n\nPLAN:', plan, '\n\n')
         else:
             plan = None
@@ -113,7 +114,7 @@ class Issue2PR:
         elif write_code_type == WRITE_CODE_TYPE.AUTOGEN:
             chat_write_code_cls = ChatWriteCode
 
-        chat_write_code = chat_write_code_cls(issue, filenames, fs, plan=plan, snippet_type=snippet_type)
+        chat_write_code = chat_write_code_cls(issue, filenames, filesystem_chat, plan=plan, snippet_type=snippet_type)
         chat_write_code.initiate_chat(silent=False)
 
         if not chat_write_code.new_files.done():

@@ -8,9 +8,11 @@ class Scratchpad():
 
     def take_note(self, note):
         self.notes.append(note)
+        return 'Success.'
 
     def save_plan(self, plan):
         self.plan = plan
+        return 'Success.'
 
     def read_plan(self):
         return self.plan
@@ -51,7 +53,10 @@ function_specs = [
 ]
 
 class Scratchpad_Chat():
-    system_message = """You are a scratchpad for longer-term planning and brainstorming."""
+    system_message = """You are a scratchpad for longer-term planning and brainstorming.
+    Your plan includes a step-by-step plan of relevant code changes.
+    You do not include any steps related to testing, documentation, git actions, or other non-code changes.
+    """
     max_consecutive_auto_reply = 50
     def __init__(self):
         self.scratchpad = Scratchpad()

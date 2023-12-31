@@ -192,11 +192,14 @@ class ChatFindFiles():
                 agents=agents,
                 messages=[],
                 max_round=20,
+                speaker_selection_method="auto"
             )
 
             self.manager = GroupChatManager(
+                name="chat_manager",
                 groupchat=group_chat,
-                llm_config=llm_config.copy()
+                human_input_mode="NEVER",
+                system_message="Group chat manager."
             )
 
     def initiate_chat(self, **kwargs):
@@ -204,11 +207,12 @@ class ChatFindFiles():
         if self.use_plan:
             self.user_bot.initiate_chat(self.manager, message=prompt, **kwargs)
         else:
-            self.user_bot.initiate_chat(self.filesystem_chat, message=prompt, **kwargs)
+            # self.filesystem_chat.initiate_chat(self.user_bot, message=prompt, **kwargs)
+            self.user_bot.initiate_chat(self.filesystem_chat.chatbot, message=prompt, **kwargs)
 
 
 if __name__ == "__main__":
-    use_plan = True
+    use_plan = False
     owner = "roboflow"
     name = "supervision"
     repo_name = f"{owner}/{name}"

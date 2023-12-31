@@ -60,8 +60,8 @@ function_specs = [
 ]
 
 class Filesystem_Chat():
-    system_message = """You are a filesystem with access to the codebase of a GitHub repository.
-    Your API allows you to read summaries of files and their contents.
+    system_message = """You are a senior software engineer with access to a filesystem to a codebase of a GitHub repository.
+    This allows you to read summaries of files and their contents and perform various lookups.
     Reply with TERMINATE when the chat is complete.
     """
     max_consecutive_auto_reply = 50
@@ -75,8 +75,11 @@ class Filesystem_Chat():
             "list_files": self.filesystem.tree
         }
 
+        # used for other chat bots
+        self.function_specs = function_specs.copy()
+
         self.llm_config = llm_config.copy()
-        self.llm_config['functions'] = function_specs
+        self.llm_config['functions'] = self.function_specs
 
         self.chatbot = self.create_chatbot()
 
@@ -97,11 +100,15 @@ class Filesystem_Chat():
 
         return chatbot
 
+    def initiate_chat(self, target, message='', **kwargs):
+        self.chatbot.initiate_chat(target, message=message, **kwargs)
+
 
 if __name__ == "__main__":
     owner = "roboflow"
     name = "supervision"
 
-    filesystem_chat = Filesystem_Chat(name)
+    filesystem = Filesystem(name, create_meta=True)
+    filesystem_chat = Filesystem_Chat(filesystem)
     reply = filesystem_chat.chatbot.receive("List all the files in the directory.", filesystem_chat.chatbot, True, silent=False)
     print(reply)
