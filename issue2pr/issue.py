@@ -105,6 +105,9 @@ class ResolvedIssue(Issue):
 
         response = requests.get(url_timeline, params=params, headers=headers)
         timeline_events = response.json()
+        if response.status_code != 200:
+            raise Exception(f"Error getting PR timeline from GitHub. Error: {response.status_code}: {response.text}")
+
         pr_num = None
         pr_info = None
 
