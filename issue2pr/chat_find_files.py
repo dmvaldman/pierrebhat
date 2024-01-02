@@ -6,11 +6,16 @@ from openai_helpers.helpers import MAX_CONTENT_LENGTH
 from utils.llm_config import llm_config
 from issue import Issue
 
+# Here we have three agents: user_bot, filesystem_chat, and scratchpad_chat.
+# The user has all the functions from the filesystem_chat and scratchpad_chat.
+# The filesystem knows about the user's functions but not the scratchpad's.
+
 max_consecutive_auto_reply = 50
+max_chat_round = 50
 
 on_find_mod_files_def = {
-    "name": "submit_files_modify",
-    "description": "Submits a list of files to be modified by the PR",
+    "name": "submit_filenames_modify",
+    "description": "Submits a list of filenames to be modified by the PR",
     "parameters": {
         "type": "object",
         "properties": {
@@ -22,13 +27,14 @@ on_find_mod_files_def = {
                 },
                 "description": "An array of filenames to modify"
             }
-        }
+        },
+        "required": ["filenames"]
     }
 }
 
 on_find_add_files_def = {
-    "name": "submit_files_add",
-    "description": "Submits a list of files to be added by a PR",
+    "name": "submit_filenames_add",
+    "description": "Submits a list of filenames to be added by the PR",
     "parameters": {
         "type": "object",
         "properties": {
@@ -40,13 +46,14 @@ on_find_add_files_def = {
                 },
                 "description": "An array of filenames to add"
             }
-        }
+        },
+        "required": ["filenames"]
     }
 }
 
 on_find_rem_files_def = {
-    "name": "submit_files_remove",
-    "description": "Submits a list of files to be removed by a PR",
+    "name": "submit_filenames_remove",
+    "description": "Submits a list of filenames to be removed by the PR",
     "parameters": {
         "type": "object",
         "properties": {
@@ -58,21 +65,22 @@ on_find_rem_files_def = {
                 },
                 "description": "An array of filenames to remove"
             }
-        }
+        },
+        "required": ["filenames"]
     }
 }
 
 class ChatFindFiles():
     system_message_user = """You are a senior software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify/add/remove to resolve the issue, which you can do by conversing with the filesystem API.
-    You must call each of `submit_files_add`, `submit_files_modify`, and `submit_files_remove` with a list of filenames to add, modify, and remove, respectively.
+    You must call each of `submit_filenames_add`, `submit_filenames_modify`, and `submit_filenames_remove` with a list of filenames to add, modify, and remove, respectively.
     If no files should be added, modified, or removed, submit an empty list to the respective method.
     Respond with the single word `TERMINATE` to end the chat but only after calling each of these methods, do not write TERMINATE for any other reason.
     """
     system_message_user_plan = """You are a senior software engineer working on a GitHub repository. You have been assigned an issue to resolve.
     Your task is to locate the files needed to modify/add/remove to resolve the issue, which you can do by conversing with the filesystem API.
     Save any notes whenever you find relevant information for resolving the issue.
-    You must call each of `submit_files_add`, `submit_files_modify`, and `submit_files_remove` with a list of filenames to add, modify, and remove, respectively.
+    You must call each of `submit_filenames_add`, `submit_filenames_modify`, and `submit_filenames_remove` with a list of filenames to add, modify, and remove, respectively.
     If no files should be added, modified, or removed, submit an empty list to the respective method.
     Afterwards, write out and save a detailed step-by-step plan (in markdown format) of what code changes need to be made to resolve the issue. This plan will be used by another engineer to implement the PR.
     The plan should include relevant information such as code snippets, psuedocode and references to filenames where appropriate.
@@ -98,18 +106,29 @@ class ChatFindFiles():
         if use_plan: self.scratchpad_chat = Scratchpad_Chat()
 
         # loop through all functions in filesystem_bot and add them to user_bot
-        self.function_map = {}
-        self.function_specs = []
-        self.function_map.update(self.filesystem_chat.function_map)
+        self.function_map = {
+            "submit_filenames_modify": self.on_find_mod_files,
+            "submit_filenames_add": self.on_find_add_files,
+            "submit_filenames_remove": self.on_find_rem_files
+        }
 
-        if use_plan:
-            self.function_map.update(self.scratchpad_chat.function_map)
+        self.function_specs = []
 
         self.llm_config_filesystem = self.filesystem_chat.llm_config.copy()
         self.llm_config_user = llm_config.copy()
-        if use_plan: self.llm_config_scratchpad = self.scratchpad_chat.llm_config.copy()
+        if use_plan:
+            self.llm_config_scratchpad = self.scratchpad_chat.llm_config.copy()
 
-        self.create_callbacks()
+        # self.function_map.update(self.filesystem_chat.function_map)
+        # self.create_callbacks()
+        # self.create_chatbots()
+
+        if use_plan:
+            agents = [self.filesystem_chat, self.scratchpad_chat]
+        else:
+            agents = [self.filesystem_chat]
+
+        self.setup_agents(agents)
         self.create_chatbots()
 
     @staticmethod
@@ -147,15 +166,13 @@ class ChatFindFiles():
         self.scratchpad.create_plan(plan)
         return 'Success'
 
-    def create_callbacks(self):
-        self.add_callback(self.on_find_mod_files, on_find_mod_files_def)
-        self.add_callback(self.on_find_add_files, on_find_add_files_def)
-        self.add_callback(self.on_find_rem_files, on_find_rem_files_def)
-
-    def add_callback(self, method, method_def):
-        method_name = method_def['name']
-        self.function_map[method_name] = method
-        self.function_specs.append(method_def)
+    def setup_agents(self, agents):
+        for agent in agents:
+            self.function_map.update(agent.function_map)
+            if agent == self.filesystem_chat:
+                agent.update_function_signature(on_find_mod_files_def, is_remove=False)
+                agent.update_function_signature(on_find_add_files_def, is_remove=False)
+                agent.update_function_signature(on_find_rem_files_def, is_remove=False)
 
     def generate_user_prompt(self, issue, fs):
         # TODO: better truncation
@@ -165,7 +182,8 @@ class ChatFindFiles():
         return prompt
 
     def create_chatbots(self):
-        self.llm_config_user['functions'] = self.function_specs
+        if len(self.function_specs) > 0:
+            self.llm_config_user['functions'] = self.function_specs
 
         if self.use_plan:
             system_message_user = ChatFindFiles.system_message_user_plan
@@ -191,7 +209,7 @@ class ChatFindFiles():
             group_chat = GroupChat(
                 agents=agents,
                 messages=[],
-                max_round=20,
+                max_round=max_chat_round,
                 speaker_selection_method="auto"
             )
 
@@ -207,7 +225,6 @@ class ChatFindFiles():
         if self.use_plan:
             self.user_bot.initiate_chat(self.manager, message=prompt, **kwargs)
         else:
-            # self.filesystem_chat.initiate_chat(self.user_bot, message=prompt, **kwargs)
             self.user_bot.initiate_chat(self.filesystem_chat.chatbot, message=prompt, **kwargs)
 
 

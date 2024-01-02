@@ -338,8 +338,8 @@ class WriteCode():
         if plan is None:
             prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so. Navigate/read the codebase using the filesystem API to craft and submit a PR."
         else:
-            prompt_plan = "\n\nAnother engineer created this initial plan to resolve the issue:\n\n{plan}\n\n"
-            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so.{prompt_plan}Navigate/read the codebase using the filesystem API to craft and submit a PR."
+            prompt_plan = f"Another engineer created this initial plan to resolve the issue:\n\n{plan}"
+            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\n{prompt_plan}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so. Navigate/read the codebase using the filesystem API to craft and submit a PR."
 
         return prompt
 
@@ -364,7 +364,7 @@ class WriteCode():
         snippets_str = '\n'.join([f'Filename: {filename}:\n\n{snippet}\n\n' for filename, snippet in snippets.items()])
 
         if has_errors:
-            return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nWhat do you think the issue is? Once you realize your error please create a new patch (starting from the original files) and check again."
+            return f"Here are the snippets reflecting your changes\n\n{snippets_str}. The following errors were found:\n\n{errors}\n\nWhat do you think the issue is? Once you realize your error please create a new patch (relative to the original files) and check again."
 
         if self.snippet_type == SNIPPET_TYPE.DIFF:
             return f"Here is the diff reflecting your changes. Double check its correctness. If the changes are correct proceed to submitting the PR, otherwise explain what's wrong then correct the patch and check it again.\n\n{snippets_str}\n\nDoes this look correct? If not, generate a new patch to be applied to the original file(s). If yes, submit the PR."
@@ -382,25 +382,6 @@ class WriteCode():
             return 'Patch successfully applied.'
         except Exception as e:
             return f'Error submitting PR: {e}'
-
-    def generate_user_prompt(self, issue, filenames, plan=None):
-        files_str = ''
-        for action, paths in filenames.items():
-            files_str += f'Proposed files to {action}:\n\n'
-            if len(paths) == 0:
-                files_str += 'None\n'
-            else:
-                for path in paths:
-                    files_str += f'- {path}\n'
-            files_str += '\n'
-
-        if plan is None:
-            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so. Navigate/read the codebase using the filesystem API to craft and submit a PR."
-        else:
-            prompt_plan = "\n\nAnother engineer created this initial plan to resolve the issue:\n\n{plan}\n\n"
-            prompt = f"{str(issue)}\n\nHere is a first pass of some of the files that need modifying/adding/removing.\n\n{files_str}\n\nCheck if modifying them resolves the issue and if so, provide a patch to each file that does so.{prompt_plan}Navigate/read the codebase using the filesystem API to craft and submit a PR."
-
-        return prompt
 
     def initiate_chat(self, **kwargs):
         pass
@@ -686,8 +667,8 @@ if __name__ == "__main__":
         "remove": []
     }
 
-    # code_writer = GPTWriteCode(issue, filenames, fs_chat)
-    code_writer = ChatWriteCode(issue, filenames, fs_chat)
+    code_writer = GPTWriteCode(issue, filenames, fs_chat)
+    # code_writer = ChatWriteCode(issue, filenames, fs_chat)
     code_writer.initiate_chat()
 
     new_files = code_writer.new_files.result()

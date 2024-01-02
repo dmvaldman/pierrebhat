@@ -100,6 +100,12 @@ class Filesystem_Chat():
 
         return chatbot
 
+    def update_function_signature(self, func_sig, is_remove=None):
+        self.chatbot.update_function_signature(func_sig, is_remove=is_remove)
+
+    def register_function(self, function_map):
+        self.chatbot.register_function(function_map)
+
     def initiate_chat(self, target, message='', **kwargs):
         self.chatbot.initiate_chat(target, message=message, **kwargs)
 

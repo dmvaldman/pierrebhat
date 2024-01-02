@@ -1,4 +1,5 @@
-from filesystem import Filesystem, Filesystem_Chat
+from filesystem import Filesystem
+from filesystem_chat import Filesystem_Chat
 from chat_find_files import ChatFindFiles
 from chat_write_code import ChatWriteCode, GPTWriteCode, SNIPPET_TYPE
 from contextlib import redirect_stdout

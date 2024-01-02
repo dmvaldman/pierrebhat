@@ -77,6 +77,12 @@ class Scratchpad_Chat():
             return False
         return 'TERMINATE' in message['content']
 
+    def update_function_signature(self, func_sig, is_remove=None):
+        self.chatbot.update_function_signature(func_sig, is_remove=is_remove)
+
+    def register_function(self, function_map):
+        self.chatbot.register_function(function_map)
+
     def create_chatbot(self):
         self.llm_config['functions'] = self.function_specs
 
@@ -88,5 +94,4 @@ class Scratchpad_Chat():
             max_consecutive_auto_reply=Scratchpad_Chat.max_consecutive_auto_reply,
             human_input_mode="NEVER"
         )
-
 
